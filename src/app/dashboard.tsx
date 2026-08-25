@@ -19,6 +19,17 @@ const statusLabels: Record<PageStatus, string> = {
   canceled: "Canceled",
 };
 
+const phaseDescriptions: Record<string, string> = {
+  "Phase 1":
+    "The complete first set of routes planned for production cutover through the reverse proxy.",
+  "Phase 2":
+    "The second cutover wave covering landing-page variants, industry pages, core product pages, glossary, and solutions routes.",
+  "Phase 3":
+    "Take over the center of the website: the homepage plus important navigation, product, company, trust, resource, and closely related route families.",
+  "Phase 4":
+    "Finish the remaining long tail: blog and CMS scope, partner microsites, specialized campaigns, secondary landing pages, older content, and routes with additional dependencies.",
+};
+
 function formatSnapshotTime(value: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     dateStyle: "medium",
@@ -220,6 +231,7 @@ export default function Dashboard({
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedPhase, setSelectedPhase] = useState("Phase 1");
   const [pollState, setPollState] = useState<"idle" | "checking" | "error">(
     "idle",
   );
@@ -300,11 +312,38 @@ export default function Dashboard({
         ticket.milestone.toLowerCase().includes(normalizedSearch);
       const matchesFilter =
         filter === "all" ||
-        (filter === "phase-one" && ticket.labels.includes("Phase 1")) ||
+        (filter.startsWith("phase:") &&
+          ticket.milestone === filter.slice("phase:".length)) ||
         ticket.status === filter;
       return matchesSearch && matchesFilter;
     });
   }, [filter, search, snapshot.hostingCutover.tickets]);
+
+  const phaseMilestones = useMemo(
+    () =>
+      snapshot.hostingCutover.milestones.filter((milestone) =>
+        /^Phase \d+$/.test(milestone.name),
+      ),
+    [snapshot.hostingCutover.milestones],
+  );
+
+  const selectedPhaseMilestone =
+    phaseMilestones.find((milestone) => milestone.name === selectedPhase) ??
+    phaseMilestones[0];
+  const selectedPhaseName = selectedPhaseMilestone?.name ?? selectedPhase;
+  const selectedMilestoneTickets = snapshot.hostingCutover.tickets.filter(
+    (ticket) => ticket.milestone === selectedPhaseName,
+  );
+  const selectedPhaseTickets =
+    snapshot.source === "fallback" && selectedPhaseName === "Phase 1"
+      ? snapshot.hostingCutover.phaseOne
+      : selectedMilestoneTickets;
+  const selectedPhaseRolloutTotal = selectedPhaseMilestone
+    ? selectedPhaseMilestone.total - selectedPhaseMilestone.canceled
+    : selectedPhaseTickets.filter((ticket) => ticket.status !== "canceled").length;
+  const selectedPhaseDone = selectedPhaseMilestone
+    ? selectedPhaseMilestone.done
+    : selectedPhaseTickets.filter((ticket) => ticket.status === "done").length;
 
   const changeTab = (next: "migration" | "cutover") => {
     setTab(next);
@@ -357,7 +396,7 @@ export default function Dashboard({
               <>
                 <a href="#recap">Recap</a>
                 <a href="#cutover-progress">Progress</a>
-                <a href="#phase-one">Phase 1</a>
+                <a href="#rollout-phases">Phases</a>
                 <a href="#cutover-tickets">All tickets</a>
               </>
             )}
@@ -876,28 +915,44 @@ export default function Dashboard({
               </div>
             </section>
 
-            <section id="phase-one" className="section section-tinted">
+            <section id="rollout-phases" className="section section-tinted">
               <div className="shell">
                 <div className="section-head">
                   <div>
-                    <span className="section-kicker">First rollout cohort</span>
-                    <h2>Phase 1</h2>
+                    <span className="section-kicker">Rollout cohort</span>
+                    <h2>{selectedPhaseName}</h2>
                     <p>
-                      The complete first set of routes planned for production
-                      cutover through the reverse proxy.
+                      {phaseDescriptions[selectedPhaseName] ??
+                        `Routes assigned to the ${selectedPhaseName} hosting cutover milestone.`}
                     </p>
                   </div>
                   <span className="result-count">
-                    {snapshot.hostingCutover.phaseOne.filter(
-                      (ticket) => ticket.status === "done",
-                    ).length} of {snapshot.hostingCutover.phaseOne.length} complete
+                    {selectedPhaseDone} of {selectedPhaseRolloutTotal} complete
                   </span>
                 </div>
 
-                <div className="phase-one-list">
-                  {snapshot.hostingCutover.phaseOne.map((ticket) => (
+                <div
+                  className="phase-tabs"
+                  role="group"
+                  aria-label="Select rollout phase"
+                >
+                  {phaseMilestones.map((milestone) => (
+                    <button
+                      className="filter"
+                      type="button"
+                      aria-pressed={selectedPhaseName === milestone.name}
+                      key={milestone.id}
+                      onClick={() => setSelectedPhase(milestone.name)}
+                    >
+                      {milestone.name}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="phase-list">
+                  {selectedPhaseTickets.map((ticket) => (
                     <a
-                      className="phase-one-row"
+                      className="phase-row"
                       href={ticket.ticketUrl}
                       key={ticket.ticket}
                       target="_blank"
@@ -953,7 +1008,10 @@ export default function Dashboard({
                     >
                       {[
                         ["all", "All"],
-                        ["phase-one", "Phase 1"],
+                        ...phaseMilestones.map(
+                          (milestone) =>
+                            [`phase:${milestone.name}`, milestone.name] as const,
+                        ),
                         ["active", "Active"],
                         ["backlog", "Backlog"],
                         ["done", "Done"],

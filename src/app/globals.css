@@ -974,14 +974,21 @@ button {
   color: var(--danger);
 }
 
-.phase-one-list {
+.phase-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.phase-list {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg);
 }
 
-.phase-one-row {
+.phase-row {
   display: grid;
   grid-template-columns: 110px minmax(260px, 1.25fr) minmax(210px, 0.8fr) 74px 16px;
   align-items: center;
@@ -992,15 +999,15 @@ button {
   transition: background-color 180ms ease;
 }
 
-.phase-one-row + .phase-one-row {
+.phase-row + .phase-row {
   border-top: 1px solid var(--line);
 }
 
-.phase-one-row:hover {
+.phase-row:hover {
   background: var(--surface);
 }
 
-.phase-one-row code {
+.phase-row code {
   overflow: hidden;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 12px;
@@ -1008,7 +1015,7 @@ button {
   white-space: nowrap;
 }
 
-.phase-one-row > span:not(.status):not(.external) {
+.phase-row > span:not(.status):not(.external) {
   overflow: hidden;
   color: var(--muted);
   font-size: 12px;
@@ -1016,7 +1023,7 @@ button {
   white-space: nowrap;
 }
 
-.phase-one-row > strong {
+.phase-row > strong {
   color: var(--accent);
   font-size: 12px;
 }
@@ -1359,11 +1366,11 @@ footer {
     display: none;
   }
 
-  .phase-one-row {
+  .phase-row {
     grid-template-columns: 100px minmax(220px, 1fr) 74px 16px;
   }
 
-  .phase-one-row > span:not(.status):not(.external) {
+  .phase-row > span:not(.status):not(.external) {
     display: none;
   }
 
@@ -1612,12 +1619,12 @@ footer {
     text-align: right;
   }
 
-  .phase-one-row {
+  .phase-row {
     grid-template-columns: 94px minmax(0, 1fr) 58px;
     gap: 10px;
   }
 
-  .phase-one-row > .external {
+  .phase-row > .external {
     display: none;
   }
 
