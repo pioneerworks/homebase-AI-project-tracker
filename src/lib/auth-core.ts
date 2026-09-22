@@ -2,8 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 
 import { errors, jwtVerify, SignJWT } from "jose";
 
-const sessionIssuer = "homebase-migration-progress";
-const sessionAudience = "homebase-migration-progress-dashboard";
+const sessionIssuer = "homebase-AI-project-tracker";
+const sessionAudience = "homebase-AI-project-tracker-dashboard";
 
 export type SessionUser = {
   sub: string;
