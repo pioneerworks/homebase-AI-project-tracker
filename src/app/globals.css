@@ -2034,6 +2034,58 @@ footer {
   line-height: 1.55;
 }
 
+.update-body {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.update-body p {
+  margin: 0 0 12px;
+}
+
+.update-body p:last-child {
+  margin-bottom: 0;
+}
+
+.update-body h3 {
+  margin: 18px 0 8px;
+  font-size: 13px;
+  font-weight: 720;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.update-body h3:first-child {
+  margin-top: 0;
+}
+
+.update-body ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.update-body li {
+  margin: 6px 0;
+}
+
+.update-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.update-body a:hover {
+  text-decoration: underline;
+}
+
+.update-body code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 .issue-row {
   display: flex;
   justify-content: space-between;
