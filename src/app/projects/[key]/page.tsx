@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/oidc-session";
 import { trackerProject, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,94 @@ export async function generateStaticParams() {
   return TRACKER_PROJECTS.map((p) => ({ key: p.key }));
 }
 
-function firstParagraph(body: string): string {
-  const text = body
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith("#") && !l.startsWith("!") && !l.startsWith("<!--"))[0];
-  // strip simple markdown emphasis so raw asterisks don't show
-  return (text ?? body.slice(0, 240)).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/`/g, "");
+/** Render **bold** spans and `code` spans inside plain text. */
+function renderEmphasis(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const pattern = /\*\*([^*]+)\*\*|`([^`]+)`/g;
+  let last = 0;
+  let index = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text))) {
+    if (match.index > last) nodes.push(text.slice(last, match.index));
+    if (match[1] !== undefined) {
+      nodes.push(<strong key={`${keyPrefix}-b${index}`}>{match[1]}</strong>);
+    } else {
+      nodes.push(<code key={`${keyPrefix}-c${index}`}>{match[2]}</code>);
+    }
+    last = match.index + match[0].length;
+    index++;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
+/** Render [label](url) links plus bold/code spans inside plain text. */
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const linkPattern = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+  let last = 0;
+  let index = 0;
+  let match: RegExpExecArray | null;
+  while ((match = linkPattern.exec(text))) {
+    if (match.index > last) {
+      nodes.push(...renderEmphasis(text.slice(last, match.index), `${keyPrefix}-t${index}`));
+    }
+    nodes.push(
+      <a key={`${keyPrefix}-l${index}`} href={match[2]} target="_blank" rel="noreferrer">
+        {match[1].replace(/\*\*/g, "")}
+      </a>,
+    );
+    last = match.index + match[0].length;
+    index++;
+  }
+  if (last < text.length) {
+    nodes.push(...renderEmphasis(text.slice(last), `${keyPrefix}-t${index}`));
+  }
+  return nodes;
+}
+
+/**
+ * Render the full project-update body: headings, bullet lists, and
+ * paragraphs with links, bold, and inline code. Images and comments are
+ * dropped; everything else Linear puts in the body is shown.
+ */
+function UpdateBody({ body }: { body: string }) {
+  const blocks: ReactNode[] = [];
+  let bullets: ReactNode[] = [];
+  let blockIndex = 0;
+
+  const flushBullets = () => {
+    if (bullets.length) {
+      blocks.push(<ul key={`ul-${blockIndex++}`}>{bullets}</ul>);
+      bullets = [];
+    }
+  };
+
+  body.split("\n").forEach((rawLine, lineIndex) => {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("<!--")) {
+      flushBullets();
+      return;
+    }
+    if (line.startsWith("![")) return; // images: Linear attachment URLs are auth-gated
+    const key = `b${blockIndex}-l${lineIndex}`;
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      flushBullets();
+      blocks.push(<h3 key={key}>{renderInline(heading[2], key)}</h3>);
+      return;
+    }
+    const bullet = line.match(/^(?:[-*]|\d+[.)])\s+(.+)$/);
+    if (bullet) {
+      bullets.push(<li key={key}>{renderInline(bullet[1], key)}</li>);
+      return;
+    }
+    flushBullets();
+    blocks.push(<p key={key}>{renderInline(line, key)}</p>);
+  });
+  flushBullets();
+
+  return <div className="update-body">{blocks}</div>;
 }
 
 export default async function ProjectPage({
@@ -121,7 +203,7 @@ export default async function ProjectPage({
                   )}
                 </div>
                 <div className="recap-card">
-                  <p className="recap-paragraph">{firstParagraph(latest.body)}</p>
+                  <UpdateBody body={latest.body} />
                 </div>
               </section>
             )}
