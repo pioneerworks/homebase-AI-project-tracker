@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Area,
   Bar,
@@ -12,8 +13,10 @@ import {
   YAxis,
 } from "recharts";
 
-import type { MergeDay } from "@/lib/merges";
-import type { SignupDay } from "@/lib/mock-signups";
+import type { MergeDay, MergedPr } from "@/lib/merges";
+import type { SignupDay } from "@/lib/signup-data";
+
+const REPO = "marketing-site-payload";
 
 export type ImpactPoint = {
   date: string;
@@ -22,14 +25,18 @@ export type ImpactPoint = {
   merges: number | null;
 };
 
-export type ImpactSeries = {
-  points: ImpactPoint[];
-  mergesSample: { label: string; day: MergeDay[] };
-};
-
 const dayLabel = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "short",
     month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
+const longDayLabel = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
     day: "numeric",
     timeZone: "UTC",
   });
@@ -45,7 +52,7 @@ function ImpactTooltip({
 }: {
   active?: boolean;
   payload?: TooltipEntry[];
-  sampleNote: string;
+  sampleNote?: string;
 }) {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload as ImpactPoint | undefined;
@@ -69,6 +76,7 @@ function ImpactTooltip({
         <div className="impact-tooltip-row">
           <span className="impact-dot impact-dot-merges" /> PRs merged:{" "}
           <strong>{point.merges}</strong>
+          <span className="impact-tooltip-hint">click for details</span>
         </div>
       )}
       {sampleNote && <div className="impact-tooltip-note">{sampleNote}</div>}
@@ -76,13 +84,50 @@ function ImpactTooltip({
   );
 }
 
+function PrRow({ pr }: { pr: MergedPr }) {
+  const ticket = pr.title.match(/\b([A-Z]{3,7}-\d+)\b/)?.[1];
+  return (
+    <li className="pr-row">
+      <a
+        className="pr-row-link"
+        href={`https://github.com/pioneerworks/${REPO}/pull/${pr.number}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span className="pr-row-number">#{pr.number}</span>
+        <span className="pr-row-title">{pr.title}</span>
+      </a>
+      <span className="pr-row-meta">
+        {ticket && <span className="pr-row-ticket">{ticket}</span>}
+        {pr.labels.slice(0, 2).map((label) => (
+          <span key={label} className="pr-row-label">
+            {label}
+          </span>
+        ))}
+        <span className="pr-row-author">{pr.author ?? "unknown"}</span>
+      </span>
+    </li>
+  );
+}
+
 export default function ImpactChart({
   points,
+  mergeDays,
   sampleNote,
 }: {
   points: ImpactPoint[];
+  mergeDays: MergeDay[];
   sampleNote?: string;
 }) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
+  const selectedPoint = points.find((p) => p.date === selectedDate) ?? null;
+
+  const handleBarClick = (data: { payload?: ImpactPoint }) => {
+    const date = data?.payload?.date;
+    if (date) setSelectedDate((current) => (current === date ? null : date));
+  };
+
   return (
     <div className="impact-chart">
       <ResponsiveContainer width="100%" height={340}>
@@ -94,7 +139,7 @@ export default function ImpactChart({
             tick={{ fontSize: 11, fill: "var(--muted)" }}
             tickLine={false}
             axisLine={{ stroke: "var(--chart-grid)" }}
-            minTickGap={28}
+            minTickGap={36}
           />
           <YAxis yAxisId="signups" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
           <YAxis
@@ -106,7 +151,7 @@ export default function ImpactChart({
             axisLine={false}
             width={52}
           />
-          <Tooltip content={<ImpactTooltip sampleNote={sampleNote ?? ""} />} />
+          <Tooltip content={<ImpactTooltip sampleNote={sampleNote} />} />
           <Bar
             yAxisId="signups"
             dataKey="merges"
@@ -116,6 +161,8 @@ export default function ImpactChart({
             radius={[2, 2, 0, 0]}
             barSize={9}
             isAnimationActive={false}
+            onClick={handleBarClick}
+            cursor="pointer"
           />
           <Area
             yAxisId="signups"
@@ -137,22 +184,65 @@ export default function ImpactChart({
             stroke="var(--warning)"
             strokeWidth={2}
             dot={false}
-            connectNulls
+            connectNulls={false}
             isAnimationActive={false}
           />
         </ComposedChart>
       </ResponsiveContainer>
+
       <div className="impact-legend">
         <span className="impact-legend-item">
           <span className="impact-dot impact-dot-signups" /> Signups
         </span>
         <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-rate" /> Signup rate (conversion)
+          <span className="impact-dot impact-dot-rate" /> Signup rate (signups ÷ traffic)
         </span>
         <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-merges" /> PRs merged (marketing-site-payload)
+          <span className="impact-dot impact-dot-merges" /> PRs merged ({REPO}) — click a bar
+          to inspect
         </span>
       </div>
+
+      {selectedDate && (
+        <div className="impact-drilldown">
+          <div className="impact-drilldown-head">
+            <div>
+              <span className="impact-drilldown-title">
+                {longDayLabel(selectedDate)}
+                {selectedPoint?.signups != null && (
+                  <span className="impact-drilldown-sub">
+                    {" "}
+                    · {selectedPoint.signups} signups
+                    {selectedPoint.rate != null && ` · ${pct(selectedPoint.rate)} rate`}
+                  </span>
+                )}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="impact-drilldown-close"
+              aria-label="Close PR details"
+              onClick={() => setSelectedDate(null)}
+            >
+              ✕
+            </button>
+          </div>
+          {selectedDay && selectedDay.prs.length > 0 ? (
+            <>
+              <p className="impact-drilldown-count">
+                {selectedDay.prs.length} PR{selectedDay.prs.length > 1 ? "s" : ""} merged
+              </p>
+              <ul className="pr-list">
+                {selectedDay.prs.map((pr) => (
+                  <PrRow key={pr.number} pr={pr} />
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="impact-drilldown-count">No PRs merged that day.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,8 @@
  *
  * Placeholder wiring: when the OMNI_* env vars are set (IT is delivering the
  * API key), this queries Omni's REST API server-side and returns real signup
- * + conversion data. Until then it returns the deterministic sample series.
+ * + conversion data. Until then it returns the captured Omni export
+ * (real data snapshot in src/data/signup-history.json).
  *
  * Env vars needed to go live:
  *  - OMNI_API_KEY         personal access token or org API key
@@ -14,10 +15,10 @@
  *  - OMNI_SIGNUPS_COUNT_FIELD  e.g. "signups.count"
  *  - OMNI_SIGNUPS_RATE_FIELD   conversion rate field, e.g. "signups.conversion_rate"
  */
-import { sampleSignups, type SignupDay } from "@/lib/mock-signups";
+import { capturedSignups, type SignupDay } from "@/lib/signup-data";
 
 export type SignupSeries = {
-  source: "omni" | "sample";
+  source: "omni" | "export";
   days: SignupDay[];
 };
 
@@ -38,29 +39,34 @@ export function mapOmniRows(
   const countIdx = columns.indexOf(fieldMap.count);
   const rateIdx = columns.indexOf(fieldMap.rate);
 
-  return rows
-    .map((row) => {
-      if (Array.isArray(row)) {
-        return {
-          date: String(row[dateIdx] ?? "").slice(0, 10),
-          signups: Number(row[countIdx] ?? 0),
-          rate: Number(row[rateIdx] ?? 0),
-        };
-      }
-      if (row && typeof row === "object") {
-        const record = row as Record<string, unknown>;
-        return {
-          date: String(record[fieldMap.date] ?? "").slice(0, 10),
-          signups: Number(record[fieldMap.count] ?? 0),
-          rate: Number(record[fieldMap.rate] ?? 0),
-        };
-      }
-      return null;
+  const mapped: (SignupDay | null)[] = rows.map((row) => {
+    if (Array.isArray(row)) {
+      return {
+        date: String(row[dateIdx] ?? "").slice(0, 10),
+        signups: Number(row[countIdx] ?? 0),
+        traffic: 0,
+        rate: Number(row[rateIdx] ?? 0),
+      };
+    }
+    if (row && typeof row === "object") {
+      const record = row as Record<string, unknown>;
+      return {
+        date: String(record[fieldMap.date] ?? "").slice(0, 10),
+        signups: Number(record[fieldMap.count] ?? 0),
+        traffic: 0,
+        rate: Number(record[fieldMap.rate] ?? 0),
+      };
+    }
+    return null;
+  });
+
+  return mapped
+    .filter((d): d is SignupDay => {
+      if (!d) return false;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d.date)) return false;
+      if (!Number.isFinite(d.signups)) return false;
+      return true;
     })
-    .filter(
-      (d): d is SignupDay =>
-        Boolean(d) && /^\d{4}-\d{2}-\d{2}$/.test(d!.date) && Number.isFinite(d!.signups),
-    )
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -82,7 +88,7 @@ export async function getSignupSeries(
   env: Record<string, string | undefined> = process.env,
 ): Promise<SignupSeries> {
   if (!omniConfigured(env)) {
-    return { source: "sample", days: sampleSignups() };
+    return { source: "export", days: capturedSignups() };
   }
 
   const fields = [
@@ -132,9 +138,9 @@ export async function getSignupSeries(
     return { source: "omni", days };
   } catch (error) {
     console.error(
-      "Omni signup fetch failed, falling back to sample data:",
+      "Omni signup fetch failed, falling back to captured export:",
       error instanceof Error ? error.message : error,
     );
-    return { source: "sample", days: sampleSignups() };
+    return { source: "export", days: capturedSignups() };
   }
 }

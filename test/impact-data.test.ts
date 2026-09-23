@@ -8,7 +8,7 @@ import {
   type MergedPr,
 } from "../src/lib/merges";
 import { mapOmniRows, omniConfigured } from "../src/lib/omni";
-import { sampleSignups } from "../src/lib/mock-signups";
+import { signupHistory } from "../src/lib/signup-data";
 
 const pr = (over: Partial<MergedPr> = {}): MergedPr => ({
   number: 1,
@@ -45,16 +45,22 @@ test("isChore filters housekeeping merges", () => {
   assert.equal(isChore(pr({ title: "feat: AIA-100 new section" })), false);
 });
 
-test("sample signup series is deterministic and well-formed", () => {
-  const a = sampleSignups();
-  const b = sampleSignups();
-  assert.equal(a.length, b.length);
-  assert.deepEqual(a[0], b[0]);
-  assert.equal(a.length, 71);
-  for (const day of a) {
+test("captured signup history is well-formed and rate = signups/traffic", () => {
+  assert.ok(signupHistory.length > 150, "expected a substantial history");
+  const dates = signupHistory.map((d) => d.date);
+  assert.deepEqual(dates, [...dates].sort(), "dates must be sorted");
+  for (const day of signupHistory) {
     assert.match(day.date, /^\d{4}-\d{2}-\d{2}$/);
-    assert.ok(day.signups > 0);
-    assert.ok(day.rate > 0 && day.rate < 1);
+    assert.ok(day.signups > 0, day.date + " should have signups");
+    if (day.traffic > 0) {
+      // derived traffic must reproduce the rate within rounding tolerance
+      assert.ok(
+        Math.abs(day.rate! - day.signups / day.traffic) < 0.001,
+        day.date + " rate mismatch",
+      );
+    } else {
+      assert.equal(day.rate, null);
+    }
   }
 });
 
@@ -65,7 +71,7 @@ test("mapOmniRows supports object and column-array rows", () => {
     rate: "signups.rate",
   };
   const fromObjects = mapOmniRows(
-    fieldMap ? Object.values(fieldMap) : [],
+    ["signups.day", "signups.count", "signups.rate"],
     [
       { "signups.day": "2026-09-01T00:00:00Z", "signups.count": 12, "signups.rate": 0.03 },
       { "signups.day": "bad", "signups.count": 5, "signups.rate": 0.03 },
@@ -73,7 +79,7 @@ test("mapOmniRows supports object and column-array rows", () => {
     fieldMap,
   );
   assert.deepEqual(fromObjects, [
-    { date: "2026-09-01", signups: 12, rate: 0.03 },
+    { date: "2026-09-01", signups: 12, traffic: 0, rate: 0.03 },
   ]);
 
   const fromArrays = mapOmniRows(
@@ -82,7 +88,7 @@ test("mapOmniRows supports object and column-array rows", () => {
     fieldMap,
   );
   assert.deepEqual(fromArrays, [
-    { date: "2026-09-02", signups: 30, rate: 0.041 },
+    { date: "2026-09-02", signups: 30, traffic: 0, rate: 0.041 },
   ]);
 });
 

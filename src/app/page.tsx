@@ -1,8 +1,7 @@
 import AppShell from "@/components/app-shell";
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import { getMergeDays, mergeStats } from "@/lib/merges";
-import { getSignupSeries } from "@/lib/omni";
-import { getSessionUser } from "@/lib/oidc-session";
+import { getSignupSeries } from "@/lib/omni";import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
 
@@ -28,10 +27,6 @@ export default async function OverviewPage() {
   }));
 
   const stats = mergeStats(mergeDayList);
-  const sampleNote =
-    signupSeries.source === "sample"
-      ? "Signup figures are sample data until the Omni connection is live"
-      : undefined;
   const last7 = points.slice(-7);
   const prev7 = points.slice(-14, -7);
   const avg = (rows: ImpactPoint[]) =>
@@ -90,10 +85,13 @@ export default async function OverviewPage() {
           <div className="section-head">
             <h2>Shipped work vs signups</h2>
           </div>
-          <ImpactChart points={points} sampleNote={sampleNote} />
+          <ImpactChart points={points} mergeDays={mergeDayList} />
           <p className="section-note">
-            Bars show merged PRs per day. Signup figures are{" "}
-            <strong>sample data</strong> — connect Omni to see the real series.
+            Bars show merged PRs per day from {MERGE_REPO} (
+            {mergeSource === "github" ? "live from GitHub" : "seeded snapshot"}
+            ) — click a bar to see exactly which PRs merged that day. Signups
+            and traffic are real data (Omni export); signup rate = signups ÷
+            traffic.
           </p>
         </section>
 
