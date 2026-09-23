@@ -169,8 +169,10 @@ export async function getSignupSeries(
     if (!days.length) throw new Error("Omni query returned no usable rows");
     return { source: "omni", days };
   } catch (error) {
-    console.error(
-      "Omni signup fetch failed, falling back to captured export:",
+    // Known-benign case: projects without legacy raw data files 404 here.
+    // Log quietly — console.error trips the Next dev error overlay.
+    console.log(
+      "[impact] Amplitude funnel unavailable, using captured export:",
       error instanceof Error ? error.message : error,
     );
     return { source: "export", days: capturedSignups() };
