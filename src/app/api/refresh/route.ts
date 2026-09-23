@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { refreshSnapshot } from "@/lib/linear";
 import { SNAPSHOT_TAG } from "@/lib/projects";
+import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
   }
 
   revalidateTag(SNAPSHOT_TAG, { expire: 0 });
+  for (const project of TRACKER_PROJECTS) {
+    revalidateTag(`linear-project-${project.linearSlugId}`, { expire: 0 });
+  }
   try {
     const snapshot = await refreshSnapshot();
 

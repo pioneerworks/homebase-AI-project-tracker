@@ -1,0 +1,5298 @@
+[
+{
+"number": 1,
+"title": "Align Node types, drop unused Geist Mono, fix default body font",
+"mergedAt": "2026-07-15T20:45:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 2,
+"title": "Restructure into pnpm workspaces",
+"mergedAt": "2026-07-15T22:09:48Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 3,
+"title": "Consolidate tsconfig, wire Storybook styling, tidy repo config",
+"mergedAt": "2026-07-15T23:18:16Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 6,
+"title": "Drop machine-specific paths, purge flags skill, adopt Prettier",
+"mergedAt": "2026-07-16T02:35:45Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 5,
+"title": "Introduce Payload 3.86.0",
+"mergedAt": "2026-07-16T04:08:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 7,
+"title": "M1b: SEO baseline and media policy",
+"mergedAt": "2026-07-16T05:08:13Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 9,
+"title": "Add Prettier CI gate and refresh stale docs",
+"mergedAt": "2026-07-16T06:14:21Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 14,
+"title": "Add site-wide WebSite/Organization JSON-LD",
+"mergedAt": "2026-07-16T06:55:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 8,
+"title": "Add /customers on Payload: collections, migrations, components, routes, live preview",
+"mergedAt": "2026-07-16T07:06:57Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 11,
+"title": "Add tools/seo: fetch-only SEO parity backbone (extract, diff gate, sitemap diff, LHCI skeleton)",
+"mergedAt": "2026-07-16T08:08:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 12,
+"title": "Add HTML to Lexical fidelity PoC for the blog migration",
+"mergedAt": "2026-07-16T08:12:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 13,
+"title": "Add the 301 redirect build and validate machine",
+"mergedAt": "2026-07-16T08:27:32Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 15,
+"title": "Add the image migration pipeline",
+"mergedAt": "2026-07-16T08:30:42Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 10,
+"title": "Rebuild the joinhomebase.com home and pricing pages on a shared UI shell",
+"mergedAt": "2026-07-16T09:17:13Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 17,
+"title": "Serve media reads from public Blob URLs",
+"mergedAt": "2026-07-16T16:43:31Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 16,
+"title": "Pre-share polish: English admin copy, accurate docs, prod-ready CORS/CSRF",
+"mergedAt": "2026-07-16T19:22:34Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 18,
+"title": "Align the UI package for cross-stack consumption and document the structure",
+"mergedAt": "2026-07-16T19:26:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 19,
+"title": "Route the Vercel build through root scripts",
+"mergedAt": "2026-07-16T20:10:28Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 20,
+"title": "Cap the customer seed's CDN download with a timeout",
+"mergedAt": "2026-07-16T20:50:12Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 22,
+"title": "Bundle sharp's libvips binary into the serverless functions",
+"mergedAt": "2026-07-16T21:40:51Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 21,
+"title": "Add the parity harness that gates the restructure",
+"mergedAt": "2026-07-16T22:32:57Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 24,
+"title": "Package sharp without symlinked directories",
+"mergedAt": "2026-07-16T22:46:50Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 23,
+"title": "Style story bodies and decouple the stories component from app CSS",
+"mergedAt": "2026-07-16T23:20:50Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 26,
+"title": "Correct the structure doc for the Lakebase cutover",
+"mergedAt": "2026-07-17T00:18:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 25,
+"title": "Resolve the bulk redirects path from the project Root Directory",
+"mergedAt": "2026-07-17T00:26:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 28,
+"title": "Fix the blank production admin (stale import map) and the failing bulk-redirects deploy",
+"mergedAt": "2026-07-17T01:46:27Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 27,
+"title": "Flatten the workspace under packages/",
+"mergedAt": "2026-07-17T03:32:11Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 30,
+"title": "Fix flaky Apply Payload migrations CI step",
+"mergedAt": "2026-07-17T04:43:54Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 32,
+"title": "SEC-1: harden Payload cookies, maxDepth, admin frame headers",
+"mergedAt": "2026-07-17T04:48:14Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 29,
+"title": "Fix homepage visual-parity gaps",
+"mergedAt": "2026-07-17T04:58:22Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 33,
+"title": "Hygiene: docs truth pass (Neon->Lakebase) + fix COR-2 revalidate gap",
+"mergedAt": "2026-07-17T05:43:17Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 31,
+"title": "Make the customers seed idempotent and crash-safe across the DB/Blob split",
+"mergedAt": "2026-07-17T05:50:14Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 34,
+"title": "Fix seed idempotence regression: fall back to filename for legacy NULL-sourceKey Media rows",
+"mergedAt": "2026-07-17T06:23:43Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 35,
+"title": "Harden Payload: explicit push guard, CI importMap drift check",
+"mergedAt": "2026-07-17T06:28:46Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 36,
+"title": "feat(home): rebuild the homepage as the measured native port",
+"mergedAt": "2026-07-20T16:57:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 39,
+"title": "ci: drop the parity job (baselines fight the migration)",
+"mergedAt": "2026-07-20T23:39:16Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 40,
+"title": "style: slim globals.css to the working foundation (1377 -> 327)",
+"mergedAt": "2026-07-21T00:09:01Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 41,
+"title": "feat(design-system): Heading and Text primitives with stories",
+"mergedAt": "2026-07-21T00:50:43Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 42,
+"title": "feat(design-system): Link, Flex, Stack, Spread and Pill primitives",
+"mergedAt": "2026-07-21T01:01:09Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 43,
+"title": "docs: fold STRUCTURE.md into the README, refresh stale references",
+"mergedAt": "2026-07-21T01:11:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 44,
+"title": "ci: guard the CSS contract (central tokens, bounded globals)",
+"mergedAt": "2026-07-21T01:22:33Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 45,
+"title": "chore(deps): security floors for tmp, dompurify and postcss",
+"mergedAt": "2026-07-21T01:26:08Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 49,
+"title": "docs(agents): one page = one PR = one Linear ticket (strict rule)",
+"mergedAt": "2026-07-22T18:13:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 47,
+"title": "feat(service-other): migrate service-other page family off Webflow",
+"mergedAt": "2026-07-22T19:02:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 55,
+"title": "Add CircleCI Playwright smoke test",
+"mergedAt": "2026-07-22T21:59:26Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 52,
+"title": "feat(seo): pages collection, per-page meta from the DB, and a CI guard",
+"mergedAt": "2026-07-22T22:11:30Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 53,
+"title": "feat(pages): payroll-app as a static page (AIA-852, page 1 of 10)",
+"mergedAt": "2026-07-22T22:15:04Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 58,
+"title": "feat(pages): payroll-app as a static page (AIA-852, page 1 of 10)",
+"mergedAt": "2026-07-22T22:34:34Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 54,
+"title": "feat(food-beverage): migrate /food-beverage page family off Webflow",
+"mergedAt": "2026-07-23T00:23:54Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 56,
+"title": "refactor(footer): one canonical footer in design-system + seamless surround",
+"mergedAt": "2026-07-23T00:36:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 62,
+"title": "docs(agents): announce every finished PR in Slack",
+"mergedAt": "2026-07-23T16:37:21Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 67,
+"title": "docs(agents): root CLAUDE.md importing AGENTS.md + literal test commands",
+"mergedAt": "2026-07-23T18:16:16Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 68,
+"title": "perf(seo): scope the pages query in pageMeta (select + depth 0)",
+"mergedAt": "2026-07-23T18:21:12Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 66,
+"title": "docs(agents): version-matched Next.js docs index in AGENTS.md",
+"mergedAt": "2026-07-23T18:25:17Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 65,
+"title": "chore(lint): sort-objects on Payload config files + payload logger rule",
+"mergedAt": "2026-07-23T18:29:33Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 69,
+"title": "chore(skills): add vercel-react-best-practices + web-design-guidelines",
+"mergedAt": "2026-07-23T18:33:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 70,
+"title": "ci(lighthouse): fix the dormant LHCI config and wire it in, warn-only",
+"mergedAt": "2026-07-23T18:55:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 51,
+"title": "feat(pages): native /payroll page \u2014 Ploy content, our design system (AIA-885)",
+"mergedAt": "2026-07-23T19:14:25Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 73,
+"title": "chore(deps): bump sharp from 0.34.5 to 0.35.3",
+"mergedAt": "2026-07-23T19:27:00Z",
+"author": "app/dependabot",
+"labels": [
+"dependencies",
+"javascript"
+]
+},
+{
+"number": 60,
+"title": "chore(deps): bump next from 16.2.10 to 16.2.11",
+"mergedAt": "2026-07-23T19:34:21Z",
+"author": "app/dependabot",
+"labels": [
+"dependencies",
+"javascript"
+]
+},
+{
+"number": 79,
+"title": "chore(deps): align eslint-config-next with next 16.2.11",
+"mergedAt": "2026-07-23T19:42:35Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 80,
+"title": "fix(seo-tools): accept og:url/og:locale as pinned deltas in the parity diff",
+"mergedAt": "2026-07-23T19:58:15Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 71,
+"title": "chore(deps): bump fast-xml-parser from 5.10.0 to 5.10.1 in /packages/seo-tools",
+"mergedAt": "2026-07-23T21:41:01Z",
+"author": "app/dependabot",
+"labels": [
+"dependencies",
+"javascript"
+]
+},
+{
+"number": 81,
+"title": "feat(medical-veterinary): migrate customer-segment page off Webflow (AIA-853)",
+"mergedAt": "2026-07-23T21:50:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 78,
+"title": "feat(awards): migrate /awards to a native page (AIA-988)",
+"mergedAt": "2026-07-23T22:03:57Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 83,
+"title": "feat(forms): lead-submissions storage foundation (1 table, server action, hardened)",
+"mergedAt": "2026-07-23T22:14:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 85,
+"title": "refactor(footer): the footer is always light \u2014 delete the dark theme",
+"mergedAt": "2026-07-23T22:24:32Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 63,
+"title": "feat(retail): migrate /retail page family off Webflow",
+"mergedAt": "2026-07-23T22:33:15Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 64,
+"title": "feat(health-beauty): migrate /health-beauty page family off Webflow",
+"mergedAt": "2026-07-23T22:41:45Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 82,
+"title": "feat(home-repair): migrate /home-repair page family off Webflow (AIA-941)",
+"mergedAt": "2026-07-23T22:48:54Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 84,
+"title": "feat(hospitality-entertainment): migrate /hospitality-entertainment page family off Webflow (AIA-945)",
+"mergedAt": "2026-07-23T22:55:59Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 86,
+"title": "docs(agents): skill pointers, Payload gotchas 5-8, Linear-ID + shared-file collision rules",
+"mergedAt": "2026-07-23T23:04:21Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 89,
+"title": "chore(ci): add proof-integrity guard for name/asset transposition",
+"mergedAt": "2026-07-24T00:22:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 88,
+"title": "feat(education-caregiving): migrate /education-caregiving page family off Webflow (AIA-1050)",
+"mergedAt": "2026-07-24T00:32:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 91,
+"title": "fix(deps): floor sharp/fast-uri overrides, bump next peer to 16.2.11",
+"mergedAt": "2026-07-24T01:19:32Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 92,
+"title": "chore(design-system): fix collisions-guard scope, dedupe medical-veterinary proof, promote AwardsGrid",
+"mergedAt": "2026-07-24T01:32:01Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 90,
+"title": "feat(parity-tools): add --baseline flag to live-diff for deterministic vs-Ploy diff (AIA-1051)",
+"mergedAt": "2026-07-24T01:59:37Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 93,
+"title": "perf(site-header): named lucide-react imports instead of wildcard",
+"mergedAt": "2026-07-24T03:09:40Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 94,
+"title": "fix(design-system): SplitHeader h1 is the industry kicker, not the shared title",
+"mergedAt": "2026-07-24T03:17:40Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 59,
+"title": "Add new-page link audits and privacy page",
+"mergedAt": "2026-07-24T06:21:36Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 100,
+"title": "AIA-955: Scope privacy renderer to its route",
+"mergedAt": "2026-07-24T21:57:38Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 95,
+"title": "feat: add 3-stage PageSpeed system (per-merge, nightly, weekly field data)",
+"mergedAt": "2026-07-24T22:04:56Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 97,
+"title": "fix(site-header): nav-theme reset + 10px CTA radius + service-other reviews (AIA-1053)",
+"mergedAt": "2026-07-24T22:18:42Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 99,
+"title": "feat(state-labor-laws): migrate /state-labor-laws off Webflow (AIA-940)",
+"mergedAt": "2026-07-24T22:30:52Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 103,
+"title": "AIA-1067 Prevent Druk headline font-swap layout shift",
+"mergedAt": "2026-07-24T22:42:58Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 102,
+"title": "feat(restaurants): migrate /restaurants off Webflow (AIA-948)",
+"mergedAt": "2026-07-24T22:53:22Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 104,
+"title": "feat(security): migrate /security page off Webflow (AIA-1065)",
+"mergedAt": "2026-07-24T23:13:43Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 106,
+"title": "revert: pagespeed monitoring system (AIA-1052) \u2014 revisit after parity",
+"mergedAt": "2026-07-24T23:21:07Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 107,
+"title": "feat(audio-lp): migrate /audio-lp off Webflow (AIA-1069)",
+"mergedAt": "2026-07-24T23:52:21Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 109,
+"title": "feat(free-timesheets-lp): migrate /free-timesheets-smallbusiness-lp off Webflow (AIA-967)",
+"mergedAt": "2026-07-25T00:04:05Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 98,
+"title": "feat(employee-scheduling): migrate /employee-scheduling page family off Webflow (AIA-979)",
+"mergedAt": "2026-07-25T00:24:14Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 108,
+"title": "feat(time-clock): migrate /time-clock off Webflow (AIA-978)",
+"mergedAt": "2026-07-25T00:51:15Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 111,
+"title": "feat(starters-lp): migrate /starters-lp off Webflow (AIA-1071)",
+"mergedAt": "2026-07-25T01:07:12Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 113,
+"title": "feat(timesheets): migrate /timesheets page family off Webflow (AIA-980)",
+"mergedAt": "2026-07-25T02:07:42Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 110,
+"title": "AIA-1074: Fix hero first-paint flicker and mobile parity",
+"mergedAt": "2026-07-25T05:33:28Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 96,
+"title": "AIA-1027: Add bug bounty program page",
+"mergedAt": "2026-07-25T06:04:14Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 101,
+"title": "AIA-1061: Promote the shared Container primitive",
+"mergedAt": "2026-07-25T06:34:47Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 61,
+"title": "feat(pages): port /talk-to-us (AIA-916)",
+"mergedAt": "2026-07-27T15:08:46Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 74,
+"title": "feat(contact-sales): port lead form page (AIA-917)",
+"mergedAt": "2026-07-27T15:45:26Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 114,
+"title": "AIA-1028: Port /methodology",
+"mergedAt": "2026-07-27T16:33:41Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 115,
+"title": "fix(carousel): full-bleed carousels site-wide to match live (AIA-1076)",
+"mergedAt": "2026-07-27T17:37:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 116,
+"title": "fix(employee-scheduling): center-align testimonials carousel to match live (AIA-1196)",
+"mergedAt": "2026-07-27T18:01:00Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 118,
+"title": "fix(employee-scheduling): card widths were one gutter short of live (AIA-1207)",
+"mergedAt": "2026-07-27T19:36:10Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 117,
+"title": "AIA-1197: migrate /team-communication (no-Ploy experiment)",
+"mergedAt": "2026-07-27T20:51:25Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 75,
+"title": "feat(pages): port events talk-to-us (AIA-930)",
+"mergedAt": "2026-07-27T21:01:35Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 77,
+"title": "feat(pages): port payroll talk-to-us (AIA-932)",
+"mergedAt": "2026-07-27T21:51:03Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 119,
+"title": "AIA-1210: parity-tools live-sections \u2014 reveal-aware section/anchor/width diff",
+"mergedAt": "2026-07-27T22:11:37Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 76,
+"title": "feat(pages): port accountants talk-to-us (AIA-931)",
+"mergedAt": "2026-07-27T22:55:45Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 120,
+"title": "AIA-984: migrate /hr-compliance off Webflow",
+"mergedAt": "2026-07-27T23:56:35Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 121,
+"title": "AIA-983: migrate /employee-happiness (no-Ploy route)",
+"mergedAt": "2026-07-28T00:04:20Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 122,
+"title": "AIA-1212: exempt parity-tools diff-output/ from Prettier",
+"mergedAt": "2026-07-28T00:12:37Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 124,
+"title": "AIA-1214: parity-tools live-sections \u2014 measure live pages that have no <main>",
+"mergedAt": "2026-07-28T01:27:31Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 125,
+"title": "AIA-1217: fix /payroll hero first-paint blank gap",
+"mergedAt": "2026-07-28T01:51:52Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 126,
+"title": "AIA-993: migrate /app off Webflow (no-Ploy route)",
+"mergedAt": "2026-07-28T02:27:12Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 127,
+"title": "AIA-1219: promote verified-identical page atoms into design-system",
+"mergedAt": "2026-07-28T02:31:54Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 128,
+"title": "AIA-1220: catch page-scoped component-name collisions in CI",
+"mergedAt": "2026-07-28T02:42:58Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 129,
+"title": "AIA-1221: consolidate near-identical section components behind props",
+"mergedAt": "2026-07-28T04:55:39Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 130,
+"title": "AIA-1208: /timesheets feature rows stack image-first below lg, matching live",
+"mergedAt": "2026-07-28T07:05:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 123,
+"title": "AIA-1026: port /faq-cashout",
+"mergedAt": "2026-07-28T14:18:10Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 132,
+"title": "AIA-1226: key the design-system side of the page-collision check by symbol",
+"mergedAt": "2026-07-28T17:09:50Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 136,
+"title": "AIA-1265: one shared accordion behavior for the FAQ sections",
+"mergedAt": "2026-07-28T17:42:29Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 139,
+"title": "AIA-1269: native <details> FAQs aren't live-equivalent \u2014 fix 6 pages",
+"mergedAt": "2026-07-28T18:18:47Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 141,
+"title": "AIA-1273: FeatureSplit caps the image, not the column \u2014 restores ~100px/row vs live",
+"mergedAt": "2026-07-28T19:01:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 135,
+"title": "AIA-1259: promote RatingCards into design-system behind three props",
+"mergedAt": "2026-07-28T19:09:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 137,
+"title": "chore(skills): add log-migration-decision skill (AIA-1267)",
+"mergedAt": "2026-07-28T19:18:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 138,
+"title": "refactor(dark-cta): make DarkCta the one closing-CTA band (AIA-1261)",
+"mergedAt": "2026-07-28T19:25:57Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 140,
+"title": "refactor(design-system): one customer-quote section for every live quote band (AIA-1270)",
+"mergedAt": "2026-07-28T19:35:59Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 131,
+"title": "AIA-886: port /free-employee-scheduling",
+"mergedAt": "2026-07-28T19:44:46Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 143,
+"title": "fix(subheading): one three-step scale for live's .subheading (AIA-1268)",
+"mergedAt": "2026-07-28T19:50:57Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 144,
+"title": "fix(heading): one Druk scale; display=\"lead\" was wrong on 3 routes (AIA-1276, AIA-1275)",
+"mergedAt": "2026-07-28T19:57:33Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 145,
+"title": "docs(quote): record why one customer's attribution differs across two pages (AIA-1277)",
+"mergedAt": "2026-07-28T20:02:59Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 142,
+"title": "AIA-1260: promote FeatureRow into design-system, absorbing a 5th copy",
+"mergedAt": "2026-07-28T20:32:31Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 147,
+"title": "AIA-1262: rename the two role-collisions instead of merging them",
+"mergedAt": "2026-07-28T20:58:34Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 149,
+"title": "fix(pricing): restore /pricing parity with live (AIA-1281)",
+"mergedAt": "2026-07-28T21:26:44Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 152,
+"title": "AIA-981: migrate /hiring-and-onboarding off Webflow (no-Ploy route)",
+"mergedAt": "2026-07-28T22:31:03Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 153,
+"title": "AIA-985: port /ai-assistants",
+"mergedAt": "2026-07-28T23:11:12Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 157,
+"title": "AIA-1289: one AngledBackdrop for live's _5050-header_shape (5 copies)",
+"mergedAt": "2026-07-28T23:18:58Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 158,
+"title": "AIA-891: migrate /free-time-clock-app-lp off Webflow",
+"mergedAt": "2026-07-28T23:24:23Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 160,
+"title": "feat(how-it-works): migrate /how-it-works off Webflow (AIA-911)",
+"mergedAt": "2026-07-28T23:32:48Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 148,
+"title": "AIA-1167: add phased Webflow proxy",
+"mergedAt": "2026-07-28T23:38:49Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 155,
+"title": "AIA-912: port /integrations off Webflow",
+"mergedAt": "2026-07-28T23:45:06Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 163,
+"title": "feat(compare): migrate /compare off Webflow (AIA-906)",
+"mergedAt": "2026-07-29T00:43:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 164,
+"title": "feat(comparison): migrate /comparison/quickbooks-time off Webflow (AIA-896)",
+"mergedAt": "2026-07-29T01:00:34Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 165,
+"title": "AIA-1010: port /square off Webflow (+ the partner-pages family for the other 16)",
+"mergedAt": "2026-07-29T01:36:34Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 166,
+"title": "feat(industry-payroll): migrate /industry/restaurant-payroll off Webflow (AIA-971)",
+"mergedAt": "2026-07-29T02:13:05Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 173,
+"title": "feat(industry-payroll): migrate /industry/retail-payroll off Webflow (AIA-972)",
+"mergedAt": "2026-07-29T07:52:34Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 176,
+"title": "feat(industry-payroll): migrate /industry/salon-payroll off Webflow (AIA-974)",
+"mergedAt": "2026-07-29T08:01:22Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 177,
+"title": "feat(industry-payroll): migrate /industry/construction-payroll off Webflow (AIA-973)",
+"mergedAt": "2026-07-29T08:07:56Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 178,
+"title": "feat(industry-payroll): migrate /industry/hospitality-payroll off Webflow (AIA-975)",
+"mergedAt": "2026-07-29T08:13:11Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 167,
+"title": "AIA-1024: port /tableneeds off Webflow",
+"mergedAt": "2026-07-29T08:20:27Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 168,
+"title": "AIA-1013: port /lightspeed off Webflow",
+"mergedAt": "2026-07-29T08:26:51Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 169,
+"title": "AIA-1014: port /adp off Webflow",
+"mergedAt": "2026-07-29T08:31:33Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 170,
+"title": "AIA-1015: port /gusto off Webflow",
+"mergedAt": "2026-07-29T08:36:20Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 171,
+"title": "AIA-1017: port /rippling off Webflow",
+"mergedAt": "2026-07-29T08:41:23Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 172,
+"title": "AIA-1011: port /shopify off Webflow",
+"mergedAt": "2026-07-29T08:46:05Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 174,
+"title": "AIA-1018: port /elavon off Webflow",
+"mergedAt": "2026-07-29T08:50:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 175,
+"title": "AIA-1020: port /payanywhere off Webflow",
+"mergedAt": "2026-07-29T08:55:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 159,
+"title": "AIA-915: port /careers",
+"mergedAt": "2026-07-29T14:15:58Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 179,
+"title": "feat(industry-payroll): migrate /industry/nonprofit-payroll off Webflow (AIA-976)",
+"mergedAt": "2026-07-29T16:26:40Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 162,
+"title": "feat(skills): post-migration-progress \u2014 Slack progress bar via MCP (AIA-1293)",
+"mergedAt": "2026-07-29T16:33:07Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 151,
+"title": "feat(lead-forms): verify submissions with reCAPTCHA v3 (AIA-1045)",
+"mergedAt": "2026-07-29T16:39:21Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 181,
+"title": "fix(comparison): cross-fade the side-tab panes (AIA-1317)",
+"mergedAt": "2026-07-29T16:59:12Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 182,
+"title": "feat(healthcare): migrate /healthcare off Webflow (AIA-949)",
+"mergedAt": "2026-07-29T17:27:50Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 183,
+"title": "feat(free-clock-in-out-app-lp): migrate /free-clock-in-out-app-lp off Webflow (AIA-889)",
+"mergedAt": "2026-07-29T17:33:30Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 154,
+"title": "fix(seo-tools): skip SVG <title> so the title gate stops failing on every page (AIA-1288)",
+"mergedAt": "2026-07-29T17:39:33Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 188,
+"title": "feat(cleaning-crews): migrate /cleaning-crews off Webflow (AIA-952)",
+"mergedAt": "2026-07-29T17:45:16Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 191,
+"title": "fix(design-system): delete RatingCardGrid, use the existing RatingCards (AIA-1335)",
+"mergedAt": "2026-07-29T17:52:27Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 184,
+"title": "feat(bar-winery-brewery): migrate /bar-winery-brewery-scheduling off Webflow (AIA-953)",
+"mergedAt": "2026-07-29T17:57:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 189,
+"title": "fix(split-header): reproduce live's hero padding, copy column and email control (AIA-1322)",
+"mergedAt": "2026-07-29T18:04:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 186,
+"title": "feat(free-employee-scheduling-app-lp): migrate /free-employee-scheduling-app-lp off Webflow (AIA-893)",
+"mergedAt": "2026-07-29T18:11:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 187,
+"title": "feat(construction-crews): migrate /construction-crews off Webflow (AIA-950)",
+"mergedAt": "2026-07-29T18:16:57Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 185,
+"title": "feat(groceries-and-markets): migrate /groceries-and-markets off Webflow (AIA-951)",
+"mergedAt": "2026-07-29T18:27:54Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 190,
+"title": "fix(admin): restore the Blob upload handler in importMap + CI guard (AIA-1353)",
+"mergedAt": "2026-07-29T18:36:20Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 192,
+"title": "fix(scribble-cta-band): restore live's band spacing on every caller (AIA-1318)",
+"mergedAt": "2026-07-29T18:53:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 180,
+"title": "feat(pages): port /cashout-employer (AIA-888)",
+"mergedAt": "2026-07-29T19:17:47Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 193,
+"title": "AIA-1340: viewport-gate homepage testimonial video",
+"mergedAt": "2026-07-29T19:32:26Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 197,
+"title": "fix(cleaning-crews): drop live's stale \"[2023]\" from the h1 (AIA-1355)",
+"mergedAt": "2026-07-29T21:20:03Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 198,
+"title": "fix(restaurants): serve live's real meta description, not an invented one (AIA-1328)",
+"mergedAt": "2026-07-29T21:31:33Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 194,
+"title": "AIA-1339: Optimize homepage image delivery",
+"mergedAt": "2026-07-29T21:56:33Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 199,
+"title": "fix(content): correct four wrong-text defects inherited from live (AIA-1354)",
+"mergedAt": "2026-07-29T22:10:52Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 201,
+"title": "feat(lead-forms): forward leads to the Iterable newsletter list + fix /audio-lp (AIA-1045)",
+"mergedAt": "2026-07-29T22:20:01Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 200,
+"title": "fix(buttons): give every hand-rolled CTA the DesignBase radius + a CI gate (AIA-1437)",
+"mergedAt": "2026-07-29T22:28:46Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 202,
+"title": "fix(nav): /app and /ai-assistants render live's lime CTA (AIA-1285)",
+"mergedAt": "2026-07-29T22:35:53Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 195,
+"title": "fix(assets): serve every migrated page's images from the repo, not Webflow (AIA-1356)",
+"mergedAt": "2026-07-29T22:41:05Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 87,
+"title": "chore(tooling): land the ploy tooling in-repo, sourced from Code Sync git (AIA-1440)",
+"mergedAt": "2026-07-29T22:47:00Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 203,
+"title": "fix(industry-payroll): FAQ answers keep live's 16px side margins at mobile (AIA-1313)",
+"mergedAt": "2026-07-29T22:57:31Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 196,
+"title": "feat(assets): port /employee-scheduling's images into the repo + live alt text (AIA-1357)",
+"mergedAt": "2026-07-29T23:03:51Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 207,
+"title": "fix(footer): one footer link set site-wide (AIA-1444)",
+"mergedAt": "2026-07-29T23:38:01Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 211,
+"title": "feat(food-truck): migrate /food-truck-catering-event-management off Webflow (AIA-954)",
+"mergedAt": "2026-07-30T01:23:27Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 210,
+"title": "feat(blog): blog structure \u2014 collections, admin, and /blog at live parity (AIA-882)",
+"mergedAt": "2026-07-30T16:45:46Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 205,
+"title": "fix(retail-payroll): restore live's FAQ bold and its trailing ZWJ paragraph (AIA-1312)",
+"mergedAt": "2026-07-30T17:02:46Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 213,
+"title": "feat(toast): migrate /toast off Webflow (AIA-1012)",
+"mergedAt": "2026-07-30T17:17:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 209,
+"title": "fix(logo-marquee): default to live's 160x80 logo cells, and match its subcopy/CTA rhythm (AIA-1302)",
+"mergedAt": "2026-07-30T17:56:22Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 217,
+"title": "feat(glossgenius): migrate /glossgenius off Webflow (AIA-1022)",
+"mergedAt": "2026-07-30T18:42:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 219,
+"title": "fix(partner-pages): restore live's awards grid and press bar on nine pages (AIA-1490)",
+"mergedAt": "2026-07-30T18:47:30Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 218,
+"title": "feat(lightspeedr): migrate /lightspeedr off Webflow (AIA-1021)",
+"mergedAt": "2026-07-30T19:02:48Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 215,
+"title": "fix(restaurant-payroll): port live's two missing FAQ answers (AIA-1443)",
+"mergedAt": "2026-07-30T19:08:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 216,
+"title": "feat(design-system): four additive props so the last partner pages reuse existing components (AIA-1483)",
+"mergedAt": "2026-07-30T19:16:28Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 221,
+"title": "feat(zensurance): migrate /zensurance off Webflow (AIA-1023)",
+"mergedAt": "2026-07-30T19:23:45Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 224,
+"title": "feat(cloverpos): migrate /cloverpos off Webflow (AIA-1009)",
+"mergedAt": "2026-07-30T19:39:35Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 225,
+"title": "feat(pnc): migrate /pnc off Webflow (AIA-1019)",
+"mergedAt": "2026-07-30T19:58:44Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 222,
+"title": "feat(goose): migrate /goose off Webflow + PartnerPricingGrid (AIA-1025)",
+"mergedAt": "2026-07-30T20:08:42Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 223,
+"title": "feat(amex): migrate /amex off Webflow, reusing PartnerPricingGrid (AIA-1016)",
+"mergedAt": "2026-07-30T20:16:06Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 227,
+"title": "fix(partner-pages): pricing heading, CTA alignment, collapsible legal wall, animated compare rows (AIA-1681)",
+"mergedAt": "2026-07-30T21:15:59Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 214,
+"title": "fix(hero-lp): reveal the diagonal backdrop at md, not lg \u2014 live shows it from 768 (AIA-1292)",
+"mergedAt": "2026-07-30T21:27:13Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 228,
+"title": "fix(e2e): kill flaky homepage testimonial autoplay test (AIA-1482)",
+"mergedAt": "2026-07-30T21:53:44Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 226,
+"title": "fix(ci): catch renamed component copies by layout signature (AIA-1280, AIA-1070)",
+"mergedAt": "2026-07-30T22:01:13Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 220,
+"title": "fix(final-cta-lp): match live's demo-CTA padding step, arrows width and link target (AIA-1300)",
+"mergedAt": "2026-07-30T22:08:10Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 231,
+"title": "AIA-1279: consolidate the two ResourceGrid copies",
+"mergedAt": "2026-07-30T22:51:14Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 230,
+"title": "fix(a11y): sweep raw <a> to Link and write real alt text (AIA-1213)",
+"mergedAt": "2026-07-30T22:56:55Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 233,
+"title": "feat(free-online-time-clock-lp): migrate /free-online-time-clock-lp off Webflow (AIA-890)",
+"mergedAt": "2026-07-30T23:38:49Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 237,
+"title": "feat(free-employee-time-keeping-app-lp): migrate /free-employee-time-keeping-app-lp off Webflow (AIA-892)",
+"mergedAt": "2026-07-30T23:45:25Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 235,
+"title": "feat(free-timesheets-app-lp): migrate /free-timesheets-app-lp off Webflow (AIA-894)",
+"mergedAt": "2026-07-30T23:50:46Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 232,
+"title": "feat(pages): port /payroll-lp (AIA-1685)",
+"mergedAt": "2026-07-31T01:06:46Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 238,
+"title": "AIA-1694: Improve homepage mobile LCP with Vercel Image Optimization",
+"mergedAt": "2026-07-31T16:17:11Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 239,
+"title": "feat(blog): corpus import pipeline, Embed renderer, verbatim post titles (AIA-1667, AIA-1668)",
+"mergedAt": "2026-07-31T17:18:25Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 229,
+"title": "fix(partner-pages): dead proxy CTAs and foreign partner attribution (AIA-1658, AIA-1659, AIA-1682)",
+"mergedAt": "2026-07-31T20:59:27Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 236,
+"title": "docs(ploy-scrape): make importing the page the default first step (AIA-1686)",
+"mergedAt": "2026-07-31T21:10:30Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 241,
+"title": "feat(free-scheduling): migrate /free-scheduling off Webflow (AIA-995)",
+"mergedAt": "2026-07-31T23:24:23Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 242,
+"title": "feat(free-time-clock): migrate /free-time-clock off Webflow (AIA-1002)",
+"mergedAt": "2026-07-31T23:35:56Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 243,
+"title": "feat(about-us): migrate /about-us off Webflow (AIA-986)",
+"mergedAt": "2026-08-03T17:11:53Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 244,
+"title": "docs(agents): one branch + worktree per migrated page, claimed before the first edit (AIA-1781)",
+"mergedAt": "2026-08-03T17:26:34Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 245,
+"title": "fix(design-system): ArrowLink to live's 1rem/1.5em/.5em scale (AIA-1724)",
+"mergedAt": "2026-08-03T18:31:36Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 246,
+"title": "feat(payroll): page-scoped GTM + Amplitude analytics module (AIA-817)",
+"mergedAt": "2026-08-03T19:32:27Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 252,
+"title": "feat(design-system): TestimonialQuote image dims + PartnerDemoCta reverse variant (AIA-1793)",
+"mergedAt": "2026-08-03T20:32:14Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 250,
+"title": "feat(task-manager): migrate /task-manager off Webflow (AIA-998)",
+"mergedAt": "2026-08-03T20:38:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 249,
+"title": "feat(labor-cost): migrate /labor-cost off Webflow (AIA-1003)",
+"mergedAt": "2026-08-03T20:45:38Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 247,
+"title": "feat(switch-payroll): migrate /switch-payroll off Webflow (AIA-1006)",
+"mergedAt": "2026-08-03T21:01:34Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 256,
+"title": "fix(design-system): PayrollCompareTable feature column to live's 40% (AIA-1801)",
+"mergedAt": "2026-08-03T21:35:08Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 260,
+"title": "feat(payroll-customers): migrate /payroll-customers off Webflow (AIA-1001)",
+"mergedAt": "2026-08-03T22:11:56Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 259,
+"title": "feat(compare-payroll): migrate /compare-payroll off Webflow (AIA-999)",
+"mergedAt": "2026-08-03T22:24:21Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 266,
+"title": "fix(design-system): compare-table scrim covers the full clipped region (AIA-1808)",
+"mergedAt": "2026-08-03T22:36:52Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 269,
+"title": "fix(design-system): four DarkCampaign defects, measured against live (AIA-1800)",
+"mergedAt": "2026-08-03T23:39:52Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 270,
+"title": "feat(design-system): AwardsGrid eyebrow, carousel video slide + arrow spacing (AIA-1805)",
+"mergedAt": "2026-08-03T23:46:42Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 271,
+"title": "feat(homebase-accessibility): migrate /homebase-accessibility off Webflow (AIA-957)",
+"mergedAt": "2026-08-04T00:30:50Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 273,
+"title": "feat(referral-terms-and-conditions): migrate /referral-terms-and-conditions off Webflow (AIA-959)",
+"mergedAt": "2026-08-04T00:46:13Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 264,
+"title": "feat(cash-out-faq): migrate /cash-out-faq off Webflow (AIA-1008)",
+"mergedAt": "2026-08-04T00:54:28Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 253,
+"title": "feat(employee-pay-advances): migrate /employee-pay-advances off Webflow (AIA-994)",
+"mergedAt": "2026-08-04T01:04:55Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 248,
+"title": "feat(tip-manager): migrate /tip-manager off Webflow (AIA-996)",
+"mergedAt": "2026-08-04T01:12:12Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 272,
+"title": "feat(social-contest-rules): migrate /social-contest-rules off Webflow (AIA-960)",
+"mergedAt": "2026-08-04T01:19:59Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 268,
+"title": "feat(reviews): migrate /reviews off Webflow (AIA-987)",
+"mergedAt": "2026-08-04T01:40:50Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 287,
+"title": "fix(shared): simple-navbar routes scroll away, PhotoHero matches live (AIA-1843, AIA-1826)",
+"mergedAt": "2026-08-04T02:01:56Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 254,
+"title": "feat(team-management-app): migrate /team-management-app off Webflow (AIA-1004)",
+"mergedAt": "2026-08-04T02:07:57Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 255,
+"title": "feat(for-accountants): migrate /for-accountants off Webflow (AIA-1000)",
+"mergedAt": "2026-08-04T02:13:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 257,
+"title": "feat(money-tab): migrate /money-tab off Webflow (AIA-1005)",
+"mergedAt": "2026-08-04T02:18:40Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 258,
+"title": "feat(minimum-wage-increase): migrate /minimum-wage-increase off Webflow (AIA-1007)",
+"mergedAt": "2026-08-04T02:23:01Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 262,
+"title": "feat(refer): migrate /refer off Webflow (AIA-990)",
+"mergedAt": "2026-08-04T02:28:53Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 265,
+"title": "feat(free-online-time-keeping-app): migrate /free-online-time-keeping-app off Webflow (AIA-997)",
+"mergedAt": "2026-08-04T02:34:16Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 267,
+"title": "feat(affiliates): migrate /affiliates off Webflow (AIA-989)",
+"mergedAt": "2026-08-04T02:39:07Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 278,
+"title": "feat(events): migrate /events off Webflow (AIA-961)",
+"mergedAt": "2026-08-04T02:50:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 283,
+"title": "feat(solutions): migrate /solutions off Webflow (AIA-910)",
+"mergedAt": "2026-08-04T02:56:11Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 279,
+"title": "feat(become-a-partner): migrate /become-a-partner off Webflow (AIA-991)",
+"mergedAt": "2026-08-04T03:39:25Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 282,
+"title": "feat(free): migrate /free off Webflow (AIA-969)",
+"mergedAt": "2026-08-04T03:45:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 285,
+"title": "feat(tools): migrate /tools off Webflow (AIA-1029)",
+"mergedAt": "2026-08-04T04:06:07Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 286,
+"title": "feat(press): migrate /press off Webflow (AIA-918)",
+"mergedAt": "2026-08-04T04:10:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 280,
+"title": "feat(comparison/clockify): migrate /comparison/clockify off Webflow (AIA-895)",
+"mergedAt": "2026-08-04T04:16:25Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 277,
+"title": "feat(audio): migrate /audio off Webflow (AIA-963)",
+"mergedAt": "2026-08-04T04:27:56Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 284,
+"title": "feat(offer): migrate /offer off Webflow (AIA-966)",
+"mergedAt": "2026-08-04T04:32:47Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 281,
+"title": "feat(comparison/connecteam): migrate /comparison/connecteam off Webflow (AIA-897)",
+"mergedAt": "2026-08-04T04:38:08Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 276,
+"title": "feat(hourly-salary-calculator): migrate /hourly-salary-calculator off Webflow (AIA-920)",
+"mergedAt": "2026-08-04T05:24:42Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 275,
+"title": "feat(weekly-schedule-templates): migrate /weekly-schedule-templates off Webflow (AIA-923)",
+"mergedAt": "2026-08-04T06:08:22Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 274,
+"title": "feat(timesheet-template): migrate /timesheet-template off Webflow (AIA-922)",
+"mergedAt": "2026-08-04T06:19:59Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 300,
+"title": "fix(redirects): ship the first 5 legacy 301s via next.config (AIA-970, AIA-968, AIA-919, AIA-958, AIA-992)",
+"mergedAt": "2026-08-05T19:39:32Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 297,
+"title": "feat(blog): /blog-category + /blog-author route families, hub/post pixel parity (AIA-1670, AIA-1719)",
+"mergedAt": "2026-08-05T20:04:02Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 296,
+"title": "feat(blog): add the /authors hub + author Person structured data (AIA-1873)",
+"mergedAt": "2026-08-05T20:10:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 299,
+"title": "feat(free-timesheet-software): migrate /free-timesheet-software off Webflow (AIA-1876)",
+"mergedAt": "2026-08-05T20:17:48Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 301,
+"title": "feat(free-time-card-calculator): migrate /free-time-card-calculator off Webflow (AIA-921)",
+"mergedAt": "2026-08-05T20:23:55Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 298,
+"title": "feat(free-employee-time-card-app): migrate /free-employee-time-card-app off Webflow (AIA-1878)",
+"mergedAt": "2026-08-05T20:30:01Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 304,
+"title": "Install Vercel Web Analytics",
+"mergedAt": "2026-08-05T20:41:28Z",
+"author": "app/vercel",
+"labels": []
+},
+{
+"number": 289,
+"title": "feat(releases): migrate /releases off Webflow (AIA-962)",
+"mergedAt": "2026-08-05T20:52:59Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 305,
+"title": "fix(blog): move the authors hub to /blog-author (AIA-1873)",
+"mergedAt": "2026-08-05T21:24:13Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 293,
+"title": "feat(customers): shared PostCard, absolute canonicals, luxe-bites fixture (AIA-1867, AIA-1868, AIA-1869)",
+"mergedAt": "2026-08-05T22:04:32Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 294,
+"title": "feat(data): publish the March 2026 Main Street Health Report as a page (AIA-1863)",
+"mergedAt": "2026-08-05T23:55:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 302,
+"title": "feat(press): redesign /press to the golden standard (AIA-1897)",
+"mergedAt": "2026-08-06T00:21:53Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 311,
+"title": "fix(blog): land the import runner's prod-run fixes (AIA-1720)",
+"mergedAt": "2026-08-06T16:58:12Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 316,
+"title": "feat(data): draw every Main Street Health Report chart from the source workbook (AIA-1921)",
+"mergedAt": "2026-08-06T22:21:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 317,
+"title": "feat(analytics): main-site event contract, annotation engine, site-wide mount (AIA-1922)",
+"mergedAt": "2026-08-07T00:06:29Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 292,
+"title": "feat(glossary): 426-term port \u2014 multi-category schema, /glossary + /glossary/[slug], working revalidation (AIA-883)",
+"mergedAt": "2026-08-07T19:02:45Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 319,
+"title": "AIA-1872: ship the glossary index at /glossary",
+"mergedAt": "2026-08-07T20:34:43Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 318,
+"title": "AIA-1923: promote the settled glossary term page to /glossary/[slug]",
+"mergedAt": "2026-08-07T21:10:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 323,
+"title": "AIA-1938: stop /glossary stranding readers at the footer when filtering",
+"mergedAt": "2026-08-07T21:56:26Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 325,
+"title": "AIA-1943: apply the approved 6-category glossary consolidation",
+"mergedAt": "2026-08-07T22:35:59Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 326,
+"title": "AIA-1940: wrap the /glossary A\u2013Z strip instead of hiding 63% of it",
+"mergedAt": "2026-08-07T22:52:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 327,
+"title": "AIA-1939: repair the five glossary bodies Webflow ships broken",
+"mergedAt": "2026-08-07T23:00:24Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 322,
+"title": "AIA-1028: rework /methodology to the blog + glossary standard",
+"mergedAt": "2026-08-07T23:07:46Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 324,
+"title": "AIA-1941: close the /glossary/[slug] contents rail box",
+"mergedAt": "2026-08-07T23:29:42Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 332,
+"title": "AIA-1956: run seed:glossary on deploy so the glossary DB tracks the repo",
+"mergedAt": "2026-08-08T00:38:55Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 335,
+"title": "AIA-2003: drop the /glossary A\u2013Z letter filter and fix the rail focus-ring clipping",
+"mergedAt": "2026-08-10T18:40:43Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 306,
+"title": "feat(blog): organize the Posts edit view into tabs (AIA-2005)",
+"mergedAt": "2026-08-10T19:34:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 339,
+"title": "AIA-2006: strip the Whalesync placeholder nodes from the glossary bodies",
+"mergedAt": "2026-08-10T20:12:41Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 338,
+"title": "feat(glossary): organize the Glossary Terms edit view into tabs (AIA-2007)",
+"mergedAt": "2026-08-10T20:26:50Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 288,
+"title": "feat(data): migrate /data off Webflow (AIA-977)",
+"mergedAt": "2026-08-10T20:55:16Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 336,
+"title": "feat(start-a-business): port the 10 state guides onto one route (AIA-2002)",
+"mergedAt": "2026-08-10T21:04:43Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 337,
+"title": "feat(start-a-business): migrate the /start-a-business hub off Webflow (AIA-884)",
+"mergedAt": "2026-08-10T21:12:35Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 334,
+"title": "docs(seo): make the seo-tools parity diff the final step of a page migration (AIA-2004)",
+"mergedAt": "2026-08-10T21:20:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 333,
+"title": "feat(data): publish the July 2026 Main Street Health Report as a page (AIA-2001)",
+"mergedAt": "2026-08-10T21:27:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 340,
+"title": "AIA-2014: strip zero-width characters after parsing, not off the raw HTML",
+"mergedAt": "2026-08-10T21:34:10Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 342,
+"title": "fix(data): drop the slide-up entrance animation on the report pages (AIA-2017)",
+"mergedAt": "2026-08-10T22:01:52Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 343,
+"title": "fix: stop global smooth scroll from animating router navigations (AIA-2019)",
+"mergedAt": "2026-08-10T23:14:23Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 344,
+"title": "feat(hourly-wage-calculator): migrate /hourly-wage-calculator off Webflow Cloud (AIA-928)",
+"mergedAt": "2026-08-11T00:40:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 341,
+"title": "AIA-939: port /small-business-questions off Webflow \u2014 redesigned hub, shared directory components",
+"mergedAt": "2026-08-11T01:21:11Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 313,
+"title": "feat(blog): drafts + preview for the Blog Homepage global (AIA-1448)",
+"mergedAt": "2026-08-11T03:07:04Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 312,
+"title": "feat(seo): dynamic sitemap for the blog corpus and static pages (AIA-1671)",
+"mergedAt": "2026-08-11T03:38:21Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 347,
+"title": "fix(ai-assistants): serve the page's 10 images from the repo, not Webflow (AIA-2048)",
+"mergedAt": "2026-08-11T19:01:15Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 352,
+"title": "fix(industry-payroll): serve /industry/*-payroll images from the repo, not Webflow (AIA-2052)",
+"mergedAt": "2026-08-11T19:10:13Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 350,
+"title": "fix(partner-pages): serve the nine partner-page images from the repo, not Webflow (AIA-2051)",
+"mergedAt": "2026-08-11T19:19:52Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 351,
+"title": "fix(time-clock): serve /time-clock images from the repo, not Webflow (AIA-2054)",
+"mergedAt": "2026-08-11T19:34:00Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 349,
+"title": "fix(images): serve /team-communication and /employee-happiness images from the repo, not Webflow (AIA-2053)",
+"mergedAt": "2026-08-11T19:42:54Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 355,
+"title": "fix(assets): serve /payroll-app, /awards, /careers images from the repo, not Webflow (AIA-2055)",
+"mergedAt": "2026-08-11T19:50:38Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 356,
+"title": "fix(assets): serve 11 route families' images from the repo, not Webflow (AIA-2057)",
+"mergedAt": "2026-08-11T20:04:08Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 354,
+"title": "fix(assets): serve /hr-compliance, /integrations, /service-other and /contact-sales images from the repo, not Webflow (AIA-2056)",
+"mergedAt": "2026-08-11T20:12:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 359,
+"title": "fix(assets): recover 7 manifest rows a merge fused, and gate against it (AIA-2084)",
+"mergedAt": "2026-08-11T20:23:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 345,
+"title": "AIA-2016: /small-business-questions/[slug] \u2014 49 Q&A detail pages on a shared reference template (also restyles /glossary's 426)",
+"mergedAt": "2026-08-11T20:31:24Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 353,
+"title": "fix(docs): serve Storybook section-story images from the repo, not Webflow (AIA-2058)",
+"mergedAt": "2026-08-11T20:49:11Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 360,
+"title": "chore(images): stop allow-listing the Webflow CDN in remotePatterns (AIA-2099)",
+"mergedAt": "2026-08-11T20:56:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 366,
+"title": "AIA-2153: set the /glossary and /small-business-questions h1 in Druk, matching their detail pages",
+"mergedAt": "2026-08-12T09:40:41Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 363,
+"title": "Install Vercel Speed Insights",
+"mergedAt": "2026-08-12T17:14:13Z",
+"author": "app/vercel",
+"labels": []
+},
+{
+"number": 361,
+"title": "perf(images): re-encode 9 Figma-export SVGs to lossless WebP (AIA-2102)",
+"mergedAt": "2026-08-12T17:25:50Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 348,
+"title": "refactor(seo): /sitemap.xml serves a faithful live mirror of Webflow's sitemap (AIA-2050)",
+"mergedAt": "2026-08-12T18:24:20Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 370,
+"title": "AIA-2067: migrate /schedule-maker-tool off Webflow Cloud",
+"mergedAt": "2026-08-12T20:09:46Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 357,
+"title": "feat(seo): import the full Webflow 301 export into the redirect map (AIA-2081)",
+"mergedAt": "2026-08-12T20:16:10Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 365,
+"title": "feat(images): serve static images from Blob via a beforeFiles rewrite (AIA-2114)",
+"mergedAt": "2026-08-12T20:29:44Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 364,
+"title": "feat(media): give blob keys a folder via the per-document prefix field (AIA-2113)",
+"mergedAt": "2026-08-12T20:38:15Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 362,
+"title": "perf(payroll): convert the three feature GIFs to h264 video (AIA-2106)",
+"mergedAt": "2026-08-12T20:46:19Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 368,
+"title": "AIA-2066: migrate /labor-cost-calculator off Webflow Cloud",
+"mergedAt": "2026-08-12T20:56:21Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 374,
+"title": "AIA-2068: migrate /business-entity-selection-tool off Webflow Cloud",
+"mergedAt": "2026-08-12T21:06:15Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 372,
+"title": "AIA-2063: migrate /ai-business-name-generator off Webflow Cloud",
+"mergedAt": "2026-08-12T21:15:08Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 371,
+"title": "AIA-2064: migrate /how-to-get-a-business-license-tool off Webflow Cloud",
+"mergedAt": "2026-08-12T21:37:23Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 386,
+"title": "AIA-2190: fix /schedule-maker-tool Send-with-Homebase card + one-click signup CTA",
+"mergedAt": "2026-08-12T21:45:18Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 376,
+"title": "AIA-2065: migrate /job-description-generator off Webflow Cloud",
+"mergedAt": "2026-08-12T21:55:13Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 381,
+"title": "fix(seo): reject a non-sitemap body so a bad 200 cannot poison the mirror (AIA-2050)",
+"mergedAt": "2026-08-12T22:04:20Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 379,
+"title": "AIA-1856: migrate /labor-cost-calculator/restaurant-labor-cost-calculator off Webflow Cloud",
+"mergedAt": "2026-08-12T22:12:32Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 382,
+"title": "AIA-1857: migrate /labor-cost-calculator/retail-labor-cost-calculator off Webflow Cloud",
+"mergedAt": "2026-08-12T22:21:17Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 387,
+"title": "fix(timesheet-template): repoint a testimonial photo at its shared copy (AIA-2112)",
+"mergedAt": "2026-08-12T22:30:31Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 388,
+"title": "ci(images): fail when a referenced /images/ path is not served from Blob (AIA-2183)",
+"mergedAt": "2026-08-12T22:39:35Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 240,
+"title": "AIA-1705: Prepare public Webflow fallback for cutover",
+"mergedAt": "2026-08-12T22:49:37Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 375,
+"title": "feat(franchise): migrate the franchise landing page off Webflow Cloud (AIA-2060)",
+"mergedAt": "2026-08-12T22:59:42Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 389,
+"title": "AIA-2191: durable per-IP trial quota for the AI tool pages (5/day)",
+"mergedAt": "2026-08-12T23:10:23Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 383,
+"title": "AIA-1858: migrate /labor-cost-calculator/california-labor-cost-calculator off Webflow Cloud",
+"mergedAt": "2026-08-12T23:19:49Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 373,
+"title": "AIA-1602: Preserve payroll price experiment at cutover",
+"mergedAt": "2026-08-12T23:30:11Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 367,
+"title": "feat(paid-lp): migrate /free-employee-scheduling-app off Webflow Cloud (AIA-2072)",
+"mergedAt": "2026-08-12T23:40:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 369,
+"title": "feat(paid-lp): migrate /free-employee-scheduling-app-2 off Webflow Cloud (AIA-2073)",
+"mergedAt": "2026-08-12T23:49:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 380,
+"title": "AIA-2070: migrate /restaurant-schedule-maker off Webflow Cloud",
+"mergedAt": "2026-08-12T23:58:34Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 377,
+"title": "feat(paid-lp): migrate /homebase-solutions off Webflow Cloud (AIA-2074)",
+"mergedAt": "2026-08-13T00:19:24Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 378,
+"title": "feat(paid-lp): migrate /homebase-solutions-2 off Webflow Cloud (AIA-2075)",
+"mergedAt": "2026-08-13T00:31:13Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 384,
+"title": "feat(paid-lp): migrate /free-timesheets-app-lp-2 off Webflow Cloud (AIA-2076)",
+"mergedAt": "2026-08-13T00:53:44Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 392,
+"title": "AIA-2195: paid-landing-page marketer skill \u2014 foundation (skill, scaffold, review Action, registry collection)",
+"mergedAt": "2026-08-13T03:36:59Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 394,
+"title": "AIA-2195: paid-LP skill fixes from the one-shot proof (-- parsing, stale preview SHA, preview-DB seed resilience)",
+"mergedAt": "2026-08-13T04:01:07Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 393,
+"title": "AIA-2201: salon-scheduling-lp: paid landing page (marketer LP)",
+"mergedAt": "2026-08-13T04:21:11Z",
+"author": "allenliao25",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 396,
+"title": "AIA-2207: AEO A/B test PR3 \u2014 aeo-tools measurement harness",
+"mergedAt": "2026-08-13T05:00:31Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 395,
+"title": "AIA-2206: AEO A/B test PR1 \u2014 aeo-facts collection + seed",
+"mergedAt": "2026-08-13T05:11:11Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 397,
+"title": "AIA-2216: AEO A/B test PR2 \u2014 root llms.txt + llms-full.txt routes",
+"mergedAt": "2026-08-13T06:03:08Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 399,
+"title": "AIA-2218: AEO A/B test \u2014 weekly measurement wave automation",
+"mergedAt": "2026-08-13T06:58:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 385,
+"title": "feat(paid-lp): migrate /free-time-clock-app-lp-2 off Webflow Cloud (AIA-2077)",
+"mergedAt": "2026-08-13T16:35:38Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 401,
+"title": "fix(seo): mirror Webflow's robots.txt so it advertises the canonical sitemap (AIA-2050)",
+"mergedAt": "2026-08-13T18:07:49Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 403,
+"title": "AIA-2249: wire footer My Privacy Choices to DataGrail consent banner",
+"mergedAt": "2026-08-13T18:19:33Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 402,
+"title": "fix(seo): serve /favicon.ico from the app instead of 404ing via Webflow (AIA-2050)",
+"mergedAt": "2026-08-13T19:29:35Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 404,
+"title": "perf(proxy): answer known-dead probe paths instead of round-tripping to Webflow (AIA-2251)",
+"mergedAt": "2026-08-13T19:50:14Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 390,
+"title": "AIA-2194: drop stale asset-manifest rows for images moved to shared/",
+"mergedAt": "2026-08-13T22:45:58Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 405,
+"title": "AIA-2252: local preview loop for the paid-landing-page skill (localhost, no database)",
+"mergedAt": "2026-08-13T23:39:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 407,
+"title": "fix(seo): serve the branded Homebase favicon on app-owned routes (AIA-2248)",
+"mergedAt": "2026-08-14T05:20:58Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 410,
+"title": "fix(payroll-lp): restore the canonical and drop nofollow on Webflow-CMS noindex routes (AIA-1684)",
+"mergedAt": "2026-08-14T21:14:32Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 409,
+"title": "fix(food-beverage): restore live's resource cards, F&B logo wall and h3 semantics (AIA-1543)",
+"mergedAt": "2026-08-14T21:23:55Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 413,
+"title": "fix(design-system): InsetCtaBand letter-spacing matches live (AIA-2316)",
+"mergedAt": "2026-08-14T21:32:12Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 412,
+"title": "feat(time-clock): migrate /time-clock/cloud-based-time-tracking off Webflow (AIA-2299)",
+"mergedAt": "2026-08-14T21:43:02Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 411,
+"title": "feat(compare): migrate /compare/homebase-vs-wheniwork off Webflow (AIA-2300)",
+"mergedAt": "2026-08-14T21:59:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 414,
+"title": "AIA-2351: preserve referral params on signup CTAs",
+"mergedAt": "2026-08-14T22:11:45Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 418,
+"title": "feat(proxy): serve /payroll-lp with PPI2026 (AIA-1684)",
+"mergedAt": "2026-08-15T00:21:54Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 419,
+"title": "fix(food-beverage): match live's phone layout at 390 (AIA-2354)",
+"mergedAt": "2026-08-15T01:42:09Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 420,
+"title": "AIA-2359: the contents rail no longer swallows the wheel",
+"mergedAt": "2026-08-15T02:01:17Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 391,
+"title": "AIA-2192: migrate the 51 /state-labor-laws/<state> guides off Webflow (CMS family port + redesign)",
+"mergedAt": "2026-08-15T02:29:05Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 421,
+"title": "AIA-2094: cut over cloud-based time tracking",
+"mergedAt": "2026-08-15T03:57:25Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 415,
+"title": "fix(time-clock): FAQ answer was clipped and unreachable at 390 (AIA-2352)",
+"mergedAt": "2026-08-17T16:44:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 416,
+"title": "fix(food-beverage): day-stepper advanced under the user's thumb on mobile (AIA-2355)",
+"mergedAt": "2026-08-17T17:18:25Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 422,
+"title": "fix(design-system): comparison table dragged the whole page sideways (AIA-2464)",
+"mergedAt": "2026-08-17T17:43:55Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 433,
+"title": "fix(design-system): icon-card weight, FAQ rich answers, PressBar reserved box (AIA-2472)",
+"mergedAt": "2026-08-17T21:30:42Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 425,
+"title": "AIA-2467: Ask AI about us footer row + Google AI on the shared Summarize with AI component",
+"mergedAt": "2026-08-17T21:48:56Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 423,
+"title": "fix(comparison): mobile parity for stat cards, review trio and hero rhythm (AIA-1829, AIA-1832)",
+"mergedAt": "2026-08-17T21:57:29Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 429,
+"title": "feat(time-clock): migrate /time-clock/time-card-software off Webflow (AIA-2348)",
+"mergedAt": "2026-08-17T22:06:34Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 427,
+"title": "feat(time-clock): migrate /time-clock/employee-hour-tracking off Webflow (AIA-2343)",
+"mergedAt": "2026-08-17T22:18:20Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 430,
+"title": "feat(time-clock): migrate /time-clock/overtime off Webflow (AIA-2346)",
+"mergedAt": "2026-08-17T22:27:43Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 432,
+"title": "feat(time-clock): migrate /time-clock/time-tracking off Webflow (AIA-2349)",
+"mergedAt": "2026-08-17T22:40:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 431,
+"title": "feat(time-clock): migrate /time-clock/break-management off Webflow (AIA-2342)",
+"mergedAt": "2026-08-17T22:51:57Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 424,
+"title": "feat(time-clock): migrate /time-clock/mobile-gps-time-clock off Webflow (AIA-2344)",
+"mergedAt": "2026-08-17T23:00:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 440,
+"title": "AIA-2490: per-engine click tracking for the Ask AI rows + deliberate engine order",
+"mergedAt": "2026-08-17T23:47:42Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 439,
+"title": "fix(design-system): time-clock hero rhythm and square media (AIA-2491)",
+"mergedAt": "2026-08-18T00:03:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 426,
+"title": "feat(time-clock): migrate /time-clock/mobile-time-clock off Webflow (AIA-2345)",
+"mergedAt": "2026-08-18T00:14:56Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 428,
+"title": "feat(time-clock): migrate /time-clock/punch-clock off Webflow (AIA-2347)",
+"mergedAt": "2026-08-18T00:27:41Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 445,
+"title": "revert(time-clock): back out all 9 /time-clock/* page migrations for one consolidated PR",
+"mergedAt": "2026-08-18T18:52:49Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 443,
+"title": "restaurants-time-clock-lp: paid landing page (marketer LP)",
+"mergedAt": "2026-08-18T19:59:53Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish",
+"paid-lp:reping"
+]
+},
+{
+"number": 447,
+"title": "fix(lp): serve restaurants time clock page on public host",
+"mergedAt": "2026-08-18T20:55:01Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 448,
+"title": "AIA-1543: cut over /food-beverage to Vercel",
+"mergedAt": "2026-08-18T21:04:46Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 450,
+"title": "AIA-2504: upgrade Next.js and Payload",
+"mergedAt": "2026-08-18T22:52:49Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 455,
+"title": "fix(proxy): stop claiming the reverted cloud time tracking route (AIA-2505)",
+"mergedAt": "2026-08-18T23:06:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 459,
+"title": "docs(analytics): explain how the marketing analytics layer works",
+"mergedAt": "2026-08-18T23:53:43Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 464,
+"title": "AIA-2507: branded not-found page (catches every bad URL)",
+"mergedAt": "2026-08-19T01:41:44Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 320,
+"title": "chore(seo-tools): install the SEO Lens audit harness, then fix its false positives (AIA-1926)",
+"mergedAt": "2026-08-19T01:55:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 460,
+"title": "AIA-2506: update React to 19.2.8",
+"mergedAt": "2026-08-19T04:11:09Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 468,
+"title": "AIA-2508: upgrade Tailwind to 4.3.3",
+"mergedAt": "2026-08-19T04:41:10Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 469,
+"title": "AIA-2520: upgrade Playwright to 1.62.1",
+"mergedAt": "2026-08-19T05:06:37Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 470,
+"title": "AIA-2521: upgrade pnpm to 11.22.0",
+"mergedAt": "2026-08-19T05:32:03Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 471,
+"title": "AIA-2522: upgrade Node.js to 24.19.0 LTS",
+"mergedAt": "2026-08-19T06:04:07Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 454,
+"title": "Refine restaurant time clock landing page",
+"mergedAt": "2026-08-19T17:57:58Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:reping"
+]
+},
+{
+"number": 473,
+"title": "fix(scheduling): review-slider nav arrows below the card, not above (AIA-2527)",
+"mergedAt": "2026-08-19T18:24:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 475,
+"title": "fix(scheduling): Steps CTA position/style + review-slider peek clipping (AIA-2533)",
+"mergedAt": "2026-08-19T19:55:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 457,
+"title": "feat(time-clock): restore the 9 /time-clock pages as static pages",
+"mergedAt": "2026-08-19T20:35:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 477,
+"title": "AIA-2535: fix /free-time-clock live-parity (responsive sweep before cutover)",
+"mergedAt": "2026-08-19T20:55:59Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 478,
+"title": "AIA-2536: /build-page skill \u2014 scaffold any new page from a reference",
+"mergedAt": "2026-08-19T21:18:40Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 479,
+"title": "AIA-2534: fix /free-employee-scheduling live-parity (responsive sweep before cutover)",
+"mergedAt": "2026-08-19T21:38:19Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 474,
+"title": "AIA-2438: port /payroll/direct-deposit",
+"mergedAt": "2026-08-19T21:47:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 476,
+"title": "fix(design-system,scheduling): HeroLp badges never render + ratings grid breakpoint (AIA-2537)",
+"mergedAt": "2026-08-19T22:07:37Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 484,
+"title": "Add opt-in paid-LP rail navigation and copy wrapping",
+"mergedAt": "2026-08-19T22:19:27Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 458,
+"title": "restaurants-scheduling-lp: paid landing page",
+"mergedAt": "2026-08-19T22:30:52Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 485,
+"title": "chore(ci): guard VERCEL_ROUTES against dangling entries + flip-page-live skill (AIA-2505)",
+"mergedAt": "2026-08-19T22:39:22Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 486,
+"title": "feat(proxy): serve the 5-page rollout pilot on the public host",
+"mergedAt": "2026-08-19T22:53:19Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 490,
+"title": "Route restaurant scheduling landing page to Vercel",
+"mergedAt": "2026-08-19T23:03:24Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 489,
+"title": "fix(parity): phone-width sweep for the time-clock / timesheets / paid-LP family (AIA-2551)",
+"mergedAt": "2026-08-19T23:13:43Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 493,
+"title": "fix(time-clock): CTA width, carousel arrow gap, unclipped backdrop (AIA-2553)",
+"mergedAt": "2026-08-19T23:25:33Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 488,
+"title": "AIA-2546: /free-time-clock hero \u2014 product image inside the hero, live top spacing",
+"mergedAt": "2026-08-19T23:33:54Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 482,
+"title": "AIA-2392 \u00b7 AIA-2393 \u00b7 AIA-2394 \u00b7 AIA-2395 \u00b7 AIA-2396 \u00b7 AIA-2397 \u00b7 AIA-2398 \u00b7 AIA-2399 \u00b7 AIA-2400 \u00b7 AIA-2401: migrate the 10 /hiring-and-onboarding pages off Webflow",
+"mergedAt": "2026-08-19T23:53:20Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 492,
+"title": "feat(proxy): serve wave 2 of the paid-traffic rollout (15 pages)",
+"mergedAt": "2026-08-20T00:05:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 472,
+"title": "AIA-2524: shared-component duplication analysis + decision artifact builder",
+"mergedAt": "2026-08-20T16:32:47Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 481,
+"title": "AIA-2539: migrate the 17 /integrations/<slug> setup guides off Webflow",
+"mergedAt": "2026-08-20T16:43:36Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 483,
+"title": "AIA-2421 AIA-2422 AIA-2423 AIA-2424 AIA-2425 AIA-2426 AIA-2427 AIA-2428 AIA-2429 AIA-2430 AIA-2431 AIA-2432 AIA-2433 AIA-2434 AIA-2435 AIA-2436: migrate the 16 /hr-compliance child pages off Webflow",
+"mergedAt": "2026-08-20T17:03:19Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 494,
+"title": "fix(free-time-card-calculator): point account CTAs at the signup flow",
+"mergedAt": "2026-08-20T17:30:05Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 487,
+"title": "feat(employee-scheduling): migrate the 9 /employee-scheduling child pages off Webflow (AIA-2402, AIA-2404, AIA-2406, AIA-2407, AIA-2408, AIA-2409, AIA-2410, AIA-2411, AIA-2412)",
+"mergedAt": "2026-08-20T18:19:06Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 495,
+"title": "AIA-2566: fix section-padding parity on the ten /hiring-and-onboarding children",
+"mergedAt": "2026-08-20T18:48:43Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 466,
+"title": "AIA-2510: fix(create-lp) read manifests after the branch switch, and let CI see a page-less entry",
+"mergedAt": "2026-08-20T19:09:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 465,
+"title": "AIA-2512: fix(create-lp) keep manifest writes ASCII so a scaffold touches one entry",
+"mergedAt": "2026-08-20T19:19:03Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 467,
+"title": "AIA-2511: unblock the paid-landing-page skill (dev image preview + design-system ./lp/* export)",
+"mergedAt": "2026-08-20T19:28:36Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 497,
+"title": "AIA-2567: fix rendering parity on the sixteen /hr-compliance child pages (shattered paragraphs + missing check markers)",
+"mergedAt": "2026-08-20T19:47:51Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 496,
+"title": "feat(timesheets): migrate the 2 /timesheets child pages off Webflow (AIA-2447, AIA-2448)",
+"mergedAt": "2026-08-20T20:57:46Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 461,
+"title": "AIA-2509: add Okta SSO to Payload admin",
+"mergedAt": "2026-08-20T22:00:20Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 501,
+"title": "fix(hr-compliance): restore live's awards grid and press bar (AIA-2571)",
+"mergedAt": "2026-08-20T23:45:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 502,
+"title": "fix(app): restore live's results band, hero rating row, awards and press (AIA-2572)",
+"mergedAt": "2026-08-20T23:54:46Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 505,
+"title": "fix(hr-compliance): live serves h3 on the ratings and grid headings (AIA-2574)",
+"mergedAt": "2026-08-21T00:04:16Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 500,
+"title": "AIA-2439 \u00b7 AIA-2440 \u00b7 AIA-2441 \u00b7 AIA-2442 \u00b7 AIA-2443 \u00b7 AIA-2444 \u00b7 AIA-2445 \u00b7 AIA-2446: migrate the 8 /payroll child pages off Webflow",
+"mergedAt": "2026-08-21T00:16:58Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 504,
+"title": "AIA-2576: retire the 23 consolidated pages from the Aug 18 sheet (301s + delete 19 pages + repoint 54 links)",
+"mergedAt": "2026-08-21T00:30:19Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 499,
+"title": "fix(compare): reconcile the shared /compare + /comparison bands to live (AIA-2585)",
+"mergedAt": "2026-08-21T00:41:57Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 503,
+"title": "fix(app): live's hero cutouts, sticky download bar and per-row store badges (AIA-2573)",
+"mergedAt": "2026-08-21T00:57:34Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 509,
+"title": "chore(admin): group the ungrouped collections in the admin nav",
+"mergedAt": "2026-08-21T01:47:24Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 514,
+"title": "AIA-2583: BoldLink inherits its container's size (40 in-copy links across 5 routes)",
+"mergedAt": "2026-08-21T02:06:29Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 510,
+"title": "fix(admin): center the Okta login button; rename custom.scss to custom.css",
+"mergedAt": "2026-08-21T02:42:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 511,
+"title": "chore(admin): order the nav by editorial priority; brand the tab title",
+"mergedAt": "2026-08-21T02:51:54Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 512,
+"title": "docs(skills): vendor the homebase-brand skill from marketing-landing-pages",
+"mergedAt": "2026-08-21T03:10:31Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 506,
+"title": "AIA-2575 Remove inert Payload local-auth database schema",
+"mergedAt": "2026-08-21T03:23:51Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 516,
+"title": "chore(admin): make the three big text collections searchable by slug too",
+"mergedAt": "2026-08-21T03:39:10Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 515,
+"title": "feat(admin): brand the admin panel (logo, icon, accent colors)",
+"mergedAt": "2026-08-21T03:47:51Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 517,
+"title": "AIA-2093: cut over When I Work comparison to Vercel",
+"mergedAt": "2026-08-21T04:13:27Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 507,
+"title": "AIA-2580: move the 10 /start-a-business/<state> guides into Payload as a CMS collection",
+"mergedAt": "2026-08-21T17:53:35Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 523,
+"title": "fix(start-a-business): give the rail live's 352px so the sidebar CTA fits",
+"mergedAt": "2026-08-21T21:28:08Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 524,
+"title": "feat(start-a-business): convert the 24 blog-only states into the guides collection",
+"mergedAt": "2026-08-21T22:02:06Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 520,
+"title": "fix(compare): ship the CollectionPage and BreadcrumbList JSON-LD live serves (AIA-1525)",
+"mergedAt": "2026-08-21T23:00:42Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 522,
+"title": "fix(team-communication): live tags these two bands h3, not h2 (AIA-1636)",
+"mergedAt": "2026-08-21T23:10:35Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 519,
+"title": "fix(starters-lp): live's heading markup and four dropped FAQ passages (AIA-1630)",
+"mergedAt": "2026-08-21T23:20:21Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 521,
+"title": "fix(contact-sales): reproduce live's heading tags on the form and call band (AIA-1532)",
+"mergedAt": "2026-08-21T23:30:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 525,
+"title": "fix(reviews): restore the review headlines and dates live shows (AIA-1595)",
+"mergedAt": "2026-08-21T23:38:23Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 527,
+"title": "fix(start-a-business): cap the sticky rail so its CTA button stays reachable",
+"mergedAt": "2026-08-21T23:44:57Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 530,
+"title": "chore(start-a-business): chain the guides seed into the build like its siblings",
+"mergedAt": "2026-08-22T00:12:19Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 531,
+"title": "fix(build): group the seeds behind seed:all, the build command hit Vercel's 256 char limit",
+"mergedAt": "2026-08-22T00:28:32Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 532,
+"title": "fix(build): define seed:all where the build actually runs",
+"mergedAt": "2026-08-22T00:39:00Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 526,
+"title": "fix(seo): the Organization logo 404s on every page",
+"mergedAt": "2026-08-22T02:01:01Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 533,
+"title": "AIA-2675: port /tools/attendance-policy-template",
+"mergedAt": "2026-08-24T13:39:44Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 529,
+"title": "fix(seo): build the two hub breadcrumbs from the canonical origin",
+"mergedAt": "2026-08-24T15:59:28Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 535,
+"title": "AIA-2678: port weekly employee schedule template",
+"mergedAt": "2026-08-24T16:37:31Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 537,
+"title": "AIA-2676: port /tools/pay-stub-template",
+"mergedAt": "2026-08-24T17:03:21Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 539,
+"title": "feat(forms): wire the newsletter band's signup",
+"mergedAt": "2026-08-24T17:20:57Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 534,
+"title": "AIA-2677: Port shift report template",
+"mergedAt": "2026-08-24T17:33:45Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 540,
+"title": "fix(reference): cap the sticky rail so its signup card stays reachable",
+"mergedAt": "2026-08-24T17:49:16Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 536,
+"title": "AIA-2679: port starting a small business checklist",
+"mergedAt": "2026-08-24T18:05:06Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 538,
+"title": "AIA-2680: port small business tax deductions checklist",
+"mergedAt": "2026-08-24T18:30:08Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 541,
+"title": "fix(nav): match the Products panel type scale and balance its two halves",
+"mergedAt": "2026-08-24T19:06:12Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 545,
+"title": "content(time-clock): update the hero eyebrow and dek",
+"mergedAt": "2026-08-24T19:16:08Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 528,
+"title": "AIA-1567: serve the glossary family from Next (426 terms + hub)",
+"mergedAt": "2026-08-24T19:27:52Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 547,
+"title": "ATR-9: Update employee scheduling eyebrow copy",
+"mergedAt": "2026-08-24T19:41:04Z",
+"author": "BrianHB-TO",
+"labels": [
+"page",
+"page:publish"
+]
+},
+{
+"number": 513,
+"title": "AIA-2327: port /compare/homebase-vs-gusto as a Payload CMS collection (AIA-2318)",
+"mergedAt": "2026-08-24T20:53:02Z",
+"author": "allenliao25",
+"labels": []
+},
+{
+"number": 551,
+"title": "ATR-10: Restore employee scheduling subhead copy",
+"mergedAt": "2026-08-24T21:07:46Z",
+"author": "BrianHB-TO",
+"labels": [
+"page",
+"page:publish"
+]
+},
+{
+"number": 542,
+"title": "fix(seo): add WebPage/FAQPage/BreadcrumbList JSON-LD to /free-timesheet-software (AIA-1877)",
+"mergedAt": "2026-08-24T22:31:35Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 548,
+"title": "fix(seo): fail the build on an empty /glossary index (AIA-1567)",
+"mergedAt": "2026-08-24T22:43:46Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 543,
+"title": "fix(seo): FeatureRow bulletGroups sub-headings render as h3 not h4 (AIA-1531)",
+"mergedAt": "2026-08-24T22:55:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 552,
+"title": "fix(scheduling): center paid-hero copy on mobile, matching live (AIA-2168)",
+"mergedAt": "2026-08-24T23:03:52Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 554,
+"title": "design-system: add Eyebrow tone, SectionIntro/TabsShowcase dek + imageFit (AIA-2696)",
+"mergedAt": "2026-08-24T23:17:01Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 546,
+"title": "fix(seo): wire /service-other canonical through pageMeta (AIA-1623)",
+"mergedAt": "2026-08-25T00:11:07Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 549,
+"title": "free-employee-time-keeping-app-lp-2: paid landing page (marketer LP)",
+"mergedAt": "2026-08-25T00:22:48Z",
+"author": "twong-prog",
+"labels": [
+"paid-lp"
+]
+},
+{
+"number": 555,
+"title": "Fix compare seed production Blob collisions",
+"mergedAt": "2026-08-25T00:36:13Z",
+"author": "BrianHB-TO",
+"labels": [
+"paid-lp",
+"page",
+"page:publish"
+]
+},
+{
+"number": 556,
+"title": "AIA-2708: allow byte-identical Media Blob reuse",
+"mergedAt": "2026-08-25T04:07:13Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 557,
+"title": "AIA-2320: port /compare/homebase-vs-7shifts to Payload CMS",
+"mergedAt": "2026-08-25T04:45:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 558,
+"title": "AIA-2714: act on the MSHR report page review",
+"mergedAt": "2026-08-25T06:13:08Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 561,
+"title": "AIA-2727: feature July 2026 on the /data hub and shelve June into the library",
+"mergedAt": "2026-08-25T06:54:58Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 560,
+"title": "AIA-2724: serve public/files and public/videos from Blob",
+"mergedAt": "2026-08-25T07:05:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 563,
+"title": "AIA-2727: record the two new /data images in the asset manifest",
+"mergedAt": "2026-08-25T07:23:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 564,
+"title": "AIA-2724: give .xlsx its MIME type and refuse unknown extensions",
+"mergedAt": "2026-08-25T07:39:49Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 562,
+"title": "AIA-2208: serve the /data family from Next (hub + 23 reports)",
+"mergedAt": "2026-08-25T08:00:04Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 559,
+"title": "AIA-2339: Port /compare/homebase-vs-tsheets to Payload CMS",
+"mergedAt": "2026-08-25T12:51:57Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 565,
+"title": "AIA-2333: Port Patriot compare page to Payload CMS",
+"mergedAt": "2026-08-25T13:28:56Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 566,
+"title": "AIA-2321: port ADP compare page to Payload CMS",
+"mergedAt": "2026-08-25T14:01:58Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 567,
+"title": "AIA-2322: port BambooHR compare page to Payload CMS",
+"mergedAt": "2026-08-25T14:52:58Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 568,
+"title": "AIA-2323: port Clockify compare page to Payload CMS",
+"mergedAt": "2026-08-25T15:29:36Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 550,
+"title": "restaurants-lp: paid landing page (marketer LP)",
+"mergedAt": "2026-08-25T16:48:32Z",
+"author": "twong-prog",
+"labels": [
+"paid-lp"
+]
+},
+{
+"number": 553,
+"title": "AIA-2692: /glossary/flsa as a hand-authored glossary term (+ the mechanism for repo-only terms)",
+"mergedAt": "2026-08-25T17:52:11Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 570,
+"title": "AIA-2743: migrate restaurant scheduling page",
+"mergedAt": "2026-08-25T18:27:38Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 571,
+"title": "AIA-1508: hosting cutover for /ai-assistants",
+"mergedAt": "2026-08-25T18:48:11Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 569,
+"title": "AIA-2324: port Homebase vs. ClockShark",
+"mergedAt": "2026-08-25T19:04:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 573,
+"title": "Backfill 18 Phase 2 routes missing from VERCEL_ROUTES",
+"mergedAt": "2026-08-25T19:27:08Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 574,
+"title": "AIA-2744: migrate restaurant task management page",
+"mergedAt": "2026-08-25T19:47:13Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 572,
+"title": "AIA-2755: /glossary/fmla as the second hand-authored glossary term",
+"mergedAt": "2026-08-25T20:55:26Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 595,
+"title": "AIA-2745: migrate restaurant team communication page",
+"mergedAt": "2026-08-25T21:43:57Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 596,
+"title": "docs(skills): package the Main Street Health Report pipeline as a skill (AIA-2762)",
+"mergedAt": "2026-08-25T21:57:53Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 582,
+"title": "feat(hosting): cut over /responsible-disclosure-program to Vercel (AIA-1616)",
+"mergedAt": "2026-08-26T04:44:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 576,
+"title": "feat(hosting): cut over /homebase-accessibility to Vercel (AIA-1577)",
+"mergedAt": "2026-08-26T04:56:23Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 597,
+"title": "AIA-2746: migrate restaurant time clock page",
+"mergedAt": "2026-08-26T14:33:13Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 575,
+"title": "feat(hosting): cut over /small-business-questions to Vercel (AIA-1625)",
+"mergedAt": "2026-08-26T17:10:53Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 579,
+"title": "feat(hosting): cut over /restaurants to Vercel (AIA-1617)",
+"mergedAt": "2026-08-26T17:33:41Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 580,
+"title": "feat(hosting): cut over /integrations to Vercel (AIA-1590)",
+"mergedAt": "2026-08-26T18:04:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 581,
+"title": "feat(hosting): cut over /refer to Vercel (AIA-1611)",
+"mergedAt": "2026-08-26T18:13:47Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 583,
+"title": "feat(hosting): cut over /affiliates to Vercel (AIA-1506)",
+"mergedAt": "2026-08-26T18:23:09Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 584,
+"title": "feat(hosting): cut over /bar-winery-brewery-scheduling to Vercel (AIA-1515)",
+"mergedAt": "2026-08-26T18:32:13Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 588,
+"title": "feat(hosting): cut over /security to Vercel (AIA-1622)",
+"mergedAt": "2026-08-26T18:40:13Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 590,
+"title": "feat(hosting): cut over /money-tab to Vercel (AIA-1598)",
+"mergedAt": "2026-08-26T18:51:26Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 591,
+"title": "feat(hosting): cut over /timesheet-template to Vercel (AIA-1640)",
+"mergedAt": "2026-08-26T19:18:43Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 587,
+"title": "feat(hosting): cut over /awards to Vercel (AIA-1514)",
+"mergedAt": "2026-08-26T19:34:33Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 586,
+"title": "feat(hosting): cut over /careers to Vercel (AIA-1521)",
+"mergedAt": "2026-08-26T19:43:48Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 600,
+"title": "AIA-2769: retire /hr-compliance/flsa and /hr-compliance/fmla \u2014 301 into their glossary terms",
+"mergedAt": "2026-08-26T19:56:50Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 602,
+"title": "AIA-2770: /glossary/labor-law-posters as the third hand-authored glossary term",
+"mergedAt": "2026-08-27T13:49:19Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 616,
+"title": "AIA-2803: Extract shared static compare foundation",
+"mergedAt": "2026-08-27T14:44:48Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 604,
+"title": "AIA-2774: /glossary/spread-of-hours as the fourth hand-authored glossary term",
+"mergedAt": "2026-08-27T15:14:48Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 617,
+"title": "AIA-2325: Port Connecteam compare page as static route",
+"mergedAt": "2026-08-27T15:45:39Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 618,
+"title": "feat(compare): port Harri as static page (AIA-2328)",
+"mergedAt": "2026-08-27T16:28:22Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 589,
+"title": "feat(hosting): cut over /accountants-talk-to-us to Vercel (AIA-1505)",
+"mergedAt": "2026-08-27T16:49:06Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 594,
+"title": "feat(hosting): cut over /tools to Vercel (AIA-1644)",
+"mergedAt": "2026-08-27T16:57:55Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 592,
+"title": "feat(hosting): cut over /task-manager to Vercel (AIA-1635)",
+"mergedAt": "2026-08-27T17:08:18Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 593,
+"title": "feat(hosting): cut over /hourly-salary-calculator to Vercel (AIA-1579)",
+"mergedAt": "2026-08-27T17:18:21Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 598,
+"title": "feat(hosting): cut over /tip-manager to Vercel (AIA-1642)",
+"mergedAt": "2026-08-27T17:36:26Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 577,
+"title": "feat(hosting): cut over /reviews to Vercel (AIA-1619)",
+"mergedAt": "2026-08-27T17:47:38Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 599,
+"title": "fix(design-system): Get-started CTA button not full-width on mobile",
+"mergedAt": "2026-08-27T17:57:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 605,
+"title": "AIA-2779: restore live's SoftwareApplication JSON-LD on the homepage",
+"mergedAt": "2026-08-27T18:13:28Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 606,
+"title": "AIA-2783: restore live's h1 on /labor-cost",
+"mergedAt": "2026-08-27T18:23:14Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 607,
+"title": "AIA-2781: match live's /pricing plan-name heading level",
+"mergedAt": "2026-08-27T19:11:51Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 608,
+"title": "AIA-2782: restore live's proof stat trio on /industry/construction-payroll and /industry/nonprofit-payroll",
+"mergedAt": "2026-08-27T19:23:27Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 609,
+"title": "AIA-2778: emit a default og:image site-wide",
+"mergedAt": "2026-08-27T19:43:24Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 610,
+"title": "AIA-2780: move labor-cost-calculator children onto live's canonical slugs",
+"mergedAt": "2026-08-27T19:59:11Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 612,
+"title": "AIA-2797: correct \"Hombebase\" typo on /hiring-and-onboarding",
+"mergedAt": "2026-08-27T20:19:00Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 613,
+"title": "chore(seo): commit the /medical-veterinary parity baseline \u2014 audit found no divergence (AIA-1595)",
+"mergedAt": "2026-08-27T20:29:02Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 614,
+"title": "AIA-2799: fix live's empty stat bindings on 3 industry-payroll pages",
+"mergedAt": "2026-08-27T20:39:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 615,
+"title": "AIA-2792: restore live's proof stat trio on /industry/restaurant-payroll",
+"mergedAt": "2026-08-27T20:49:07Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 611,
+"title": "AIA-2784: re-port /privacy from live's Aug 18 2026 policy",
+"mergedAt": "2026-08-27T20:58:29Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 621,
+"title": "AIA-1785: land the live-vs-branch compare sheet with one command",
+"mergedAt": "2026-08-27T21:21:36Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 619,
+"title": "AIA-2331 Port /compare/homebase-vs-humanity as static",
+"mergedAt": "2026-08-27T22:00:09Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 622,
+"title": "AIA-1504: cut over 12 routes from this session's parity batch",
+"mergedAt": "2026-08-27T22:48:33Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 601,
+"title": "MW-525: homepage SEO audit + live parity pass",
+"mergedAt": "2026-08-27T23:00:47Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 635,
+"title": "AIA-2823: keep pricing savings badge visible and align tier cards",
+"mergedAt": "2026-08-28T00:08:17Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 623,
+"title": "AIA-2326: Port /compare/homebase-vs-deputy as a static route",
+"mergedAt": "2026-08-28T01:11:19Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 637,
+"title": "AIA-2329: port HigherMe compare page as static route",
+"mergedAt": "2026-08-28T02:16:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 638,
+"title": "AIA-2330: port Hubstaff compare page as static route",
+"mergedAt": "2026-08-28T03:38:38Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 636,
+"title": "AIA-2824: persist signup attribution across site navigations",
+"mergedAt": "2026-08-28T04:32:40Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 640,
+"title": "AIA-2836: prioritize homepage mobile LCP image",
+"mergedAt": "2026-08-28T04:45:04Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 639,
+"title": "AIA-2837: Optimize homepage posters and hero video",
+"mergedAt": "2026-08-28T05:04:04Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 641,
+"title": "AIA-2839: Fix non-descriptive homepage AI assistant links",
+"mergedAt": "2026-08-28T05:44:54Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 642,
+"title": "AIA-2840: Refine homepage testimonial video overlay spacing",
+"mergedAt": "2026-08-28T05:59:59Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 643,
+"title": "AIA-2332: port OnTheClock compare page as static route",
+"mergedAt": "2026-08-28T15:09:09Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 644,
+"title": "AIA-2334: port Paycor by Paychex compare page as static route",
+"mergedAt": "2026-08-28T16:16:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 646,
+"title": "AIA-2820: restore live's awards grid and press bar on /team-communication",
+"mergedAt": "2026-08-28T17:12:52Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 648,
+"title": "AIA-1636: cut over /team-communication to Vercel",
+"mergedAt": "2026-08-28T17:51:25Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 645,
+"title": "Add end-of-year payroll offer landing page",
+"mergedAt": "2026-08-28T18:03:42Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 647,
+"title": "AIA-2335: port QuickBooks compare page as static route",
+"mergedAt": "2026-08-28T18:39:32Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 651,
+"title": "AIA-2844: prevent homepage clickjacking",
+"mergedAt": "2026-08-28T18:51:11Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 652,
+"title": "ci: run the checks in three lanes instead of one queue",
+"mergedAt": "2026-08-28T19:18:38Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 624,
+"title": "feat(hosting): cut over /bug-bounty-program to Vercel (AIA-1518)",
+"mergedAt": "2026-08-28T19:25:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 625,
+"title": "feat(hosting): cut over /cloverpos to Vercel (AIA-1524)",
+"mergedAt": "2026-08-28T19:38:11Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 627,
+"title": "feat(hosting): cut over /employee-happiness to Vercel (AIA-1537)",
+"mergedAt": "2026-08-28T19:43:44Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 629,
+"title": "feat(hosting): cut over /employee-pay-advances to Vercel (AIA-1538)",
+"mergedAt": "2026-08-28T19:49:47Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 628,
+"title": "feat(hosting): cut over /become-a-partner to Vercel (AIA-1516)",
+"mergedAt": "2026-08-28T19:55:58Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 630,
+"title": "feat(hosting): cut over /cleaning-crews to Vercel (AIA-1523)",
+"mergedAt": "2026-08-28T20:01:33Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 653,
+"title": "Route eoy offer through Vercel",
+"mergedAt": "2026-08-28T20:07:59Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 649,
+"title": "AIA-2804: Add homepage FAQs",
+"mergedAt": "2026-08-28T20:31:30Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 631,
+"title": "feat(hosting): cut over /cash-out-faq to Vercel (AIA-1520)",
+"mergedAt": "2026-08-28T20:39:19Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 632,
+"title": "feat(hosting): cut over /faq-cashout to Vercel (AIA-1542)",
+"mergedAt": "2026-08-28T20:44:49Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 633,
+"title": "feat(hosting): cut over /events to Vercel (AIA-1540)",
+"mergedAt": "2026-08-28T20:50:03Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 634,
+"title": "feat(hosting): cut over /compare-payroll to Vercel (AIA-1526)",
+"mergedAt": "2026-08-28T20:55:00Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 620,
+"title": "AIA-2813: retire /hr-compliance/labor-law-alerts and /timesheets/spread-of-hours \u2014 closes AIA-2577",
+"mergedAt": "2026-08-28T21:03:10Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 656,
+"title": "AIA-2847: remove the fifth /team-communication self-link",
+"mergedAt": "2026-08-28T21:09:09Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 657,
+"title": "AIA-2851: grayscale homepage customer logos",
+"mergedAt": "2026-08-28T21:22:51Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 654,
+"title": "docs(agents): describe the three CI lanes, not the old single job",
+"mergedAt": "2026-08-28T21:30:19Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 658,
+"title": "AIA-2850: add mobile app links to universal footer",
+"mergedAt": "2026-08-28T21:39:06Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 659,
+"title": "AIA-2960: update homepage App Store review cards",
+"mergedAt": "2026-08-28T22:26:48Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 662,
+"title": "AIA-2965: update mobile homepage App Store review count",
+"mergedAt": "2026-08-28T22:51:40Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 663,
+"title": "AIA-2966 Match homepage eyebrow styles",
+"mergedAt": "2026-08-28T23:27:41Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 660,
+"title": "Polish end-of-year offer campaign page",
+"mergedAt": "2026-08-28T23:45:03Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 408,
+"title": "AIA-2248: add Apple and admin icon coverage",
+"mergedAt": "2026-08-28T23:58:12Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 664,
+"title": "AIA-2967: restore homepage Organization schema parity",
+"mergedAt": "2026-08-29T00:11:05Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 665,
+"title": "AIA-2968: tighten homepage customer story spacing",
+"mergedAt": "2026-08-29T00:52:39Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 585,
+"title": "feat(hosting): cut over /about-us to Vercel (AIA-1503)",
+"mergedAt": "2026-08-29T23:18:01Z",
+"author": "twong-prog",
+"labels": []
+},
+{
+"number": 650,
+"title": "AIA-1581: cut over /how-it-works to Vercel",
+"mergedAt": "2026-08-29T23:50:31Z",
+"author": "lnichlani-homebase",
+"labels": []
+},
+{
+"number": 666,
+"title": "AIA-2980: fix CenterHeader flag-backdrop CLS",
+"mergedAt": "2026-08-30T04:13:59Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 667,
+"title": "AIA-1629: cut over /start-a-business to Vercel",
+"mergedAt": "2026-08-30T04:47:33Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 655,
+"title": "AIA-2336: port Sling compare page as static route",
+"mergedAt": "2026-08-31T01:36:36Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 672,
+"title": "fix(compare): version Sling scheduling image asset",
+"mergedAt": "2026-08-31T02:08:35Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 670,
+"title": "AIA-2337: port Square compare page as static route",
+"mergedAt": "2026-08-31T02:36:31Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 669,
+"title": "AIA-2338: Migrate Homebase vs Toast comparison",
+"mergedAt": "2026-08-31T03:30:25Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 673,
+"title": "AIA-2340: port Workstream compare page as static route",
+"mergedAt": "2026-08-31T04:22:49Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 674,
+"title": "AIA-2341: port ZoomShift compare page as static route",
+"mergedAt": "2026-08-31T05:15:13Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 675,
+"title": "feat(industry): share restaurant scheduling awards across heroes (ATR-4)",
+"mergedAt": "2026-08-31T14:17:32Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 676,
+"title": "AIA-2416: migrate /team-communication/manager-log off Webflow",
+"mergedAt": "2026-08-31T15:19:25Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 677,
+"title": "AIA-3003: finish removing the hero email captures that dropped paid attribution",
+"mergedAt": "2026-08-31T17:15:44Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 661,
+"title": "AIA-3003: stop the hero email capture from dropping paid attribution",
+"mergedAt": "2026-08-31T17:31:52Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 679,
+"title": "AIA-3005: patch transitive js-yaml supply-chain findings",
+"mergedAt": "2026-08-31T20:10:25Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 685,
+"title": "AIA-3014: serve the footer app store badges from the deployment",
+"mergedAt": "2026-08-31T21:19:51Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 681,
+"title": "feat(hosting): cut over /gusto to Vercel (AIA-1571)",
+"mergedAt": "2026-08-31T22:19:58Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 683,
+"title": "feat(hosting): cut over /methodology to Vercel (AIA-1596)",
+"mergedAt": "2026-08-31T22:27:37Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 688,
+"title": "AIA-3016: keep range requests off the Blob rewrite",
+"mergedAt": "2026-08-31T22:34:10Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 691,
+"title": "fix(industry): add approved badges to restaurant time clock (ATR-4)",
+"mergedAt": "2026-08-31T23:00:08Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 678,
+"title": "AIA-3017: render the markdown links Webflow never converted",
+"mergedAt": "2026-09-01T00:21:41Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 693,
+"title": "AIA-2953: match live's preview cards on the shared tools template, and serve the six pages",
+"mergedAt": "2026-09-01T01:57:54Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 696,
+"title": "feat(hosting): cut over /hr-compliance to Vercel (AIA-1583)",
+"mergedAt": "2026-09-01T04:50:03Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 695,
+"title": "AIA-2941: serve six more time-clock pages from Vercel",
+"mergedAt": "2026-09-01T06:00:51Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 698,
+"title": "AIA-2857: serve 15 static compare pages from Vercel",
+"mergedAt": "2026-09-01T14:15:43Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 700,
+"title": "AIA-3024: restore compare banner artwork and update 150K+ copy",
+"mergedAt": "2026-09-01T15:37:38Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 701,
+"title": "AIA-1507: serve seven more pages, and fix the two shared components lot A review surfaced",
+"mergedAt": "2026-09-01T19:37:03Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 702,
+"title": "feat(customers): restore hub and story parity (AIA-2104, AIA-2616)",
+"mergedAt": "2026-09-01T20:04:47Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 703,
+"title": "AIA-3041: add legacy Cash Out redirects",
+"mergedAt": "2026-09-01T21:15:26Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 707,
+"title": "fix(customers): seed missing stories on deploy",
+"mergedAt": "2026-09-01T21:25:20Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 709,
+"title": "AIA-1624: serve eleven more pages from Vercel",
+"mergedAt": "2026-09-01T21:35:27Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 704,
+"title": "AIA-2886: serve thirteen more pages from Vercel",
+"mergedAt": "2026-09-01T21:51:37Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 699,
+"title": "feat(franchise): redesign franchise page (ATR-29)",
+"mergedAt": "2026-09-01T22:15:19Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 708,
+"title": "AIA-1593: serve twelve more pages from Vercel",
+"mergedAt": "2026-09-01T22:41:44Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 711,
+"title": "AIA-1631: serve three page families from Vercel",
+"mergedAt": "2026-09-01T23:22:05Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 710,
+"title": "feat(data): publish the August 2026 Main Street Health Report as a page",
+"mergedAt": "2026-09-02T13:53:42Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 713,
+"title": "ATR-33 Fix pricing contact support link",
+"mergedAt": "2026-09-02T15:48:55Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 694,
+"title": "AIA-3021: add AI SMS and call consent opt-ins",
+"mergedAt": "2026-09-02T19:28:51Z",
+"author": "JustinNazari",
+"labels": []
+},
+{
+"number": 717,
+"title": "AIA-1512: serve twenty-two more pages from Vercel",
+"mergedAt": "2026-09-02T20:30:43Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 716,
+"title": "AIA-3085 Fix customer story overview parity",
+"mergedAt": "2026-09-02T20:52:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 715,
+"title": "AIA-3084 Retire payroll price experiment",
+"mergedAt": "2026-09-02T21:02:59Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 712,
+"title": "AIA-3045: redirect state business blogs to Payload guides",
+"mergedAt": "2026-09-02T21:17:21Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 720,
+"title": "AIA-1441: forward Contact Sales leads to Salesforce",
+"mergedAt": "2026-09-02T21:50:20Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 723,
+"title": "Update Hiring Assistant pricing card on /pricing",
+"mergedAt": "2026-09-02T22:46:20Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 726,
+"title": "AIA-3088: Port /terms-eoy6-plus",
+"mergedAt": "2026-09-02T23:32:25Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 719,
+"title": "AIA-2176: cut over /franchise to Vercel",
+"mergedAt": "2026-09-02T23:42:42Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 722,
+"title": "AIA-1533 Cut over the customer-story CMS family",
+"mergedAt": "2026-09-02T23:51:07Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 727,
+"title": "AIA-3090: Port /terms-eoy6-payroll",
+"mergedAt": "2026-09-02T23:57:43Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 728,
+"title": "AIA-3089: Port /terms-eoy6-tips",
+"mergedAt": "2026-09-03T00:08:57Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 721,
+"title": "AIA-3087: Backfill 13 missing blog posts into Payload",
+"mergedAt": "2026-09-03T01:20:49Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 729,
+"title": "AIA-2853/AIA-2872: cut over static compare pages and retire CMS collection",
+"mergedAt": "2026-09-03T05:31:47Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 730,
+"title": "AIA-3092: Restore Sierra chat and analytics on /pricing",
+"mergedAt": "2026-09-03T05:55:20Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 714,
+"title": "feat(press): match ATR-22 newsroom redesign",
+"mergedAt": "2026-09-03T06:26:04Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 732,
+"title": "feat(press): cut over route to Vercel",
+"mergedAt": "2026-09-03T06:46:12Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 684,
+"title": "feat(hosting): cut over /compare and /starters-lp to Vercel (AIA-1525, AIA-1630)",
+"mergedAt": "2026-09-03T06:56:36Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 734,
+"title": "fix(press): clarify proof labels",
+"mergedAt": "2026-09-03T16:30:45Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 735,
+"title": "AIA-1527: cut over comparison pages to Vercel",
+"mergedAt": "2026-09-03T16:44:51Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 682,
+"title": "feat(hosting): cut over /contact-sales to Vercel (AIA-1532)",
+"mergedAt": "2026-09-03T17:51:48Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 736,
+"title": "AIA-3098: use Trusted by for press businesses stat",
+"mergedAt": "2026-09-03T19:55:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 741,
+"title": "AIA-3102 Backfill two newly discovered live blog posts",
+"mergedAt": "2026-09-03T22:32:28Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 745,
+"title": "fix(blog): repair Blob media parity",
+"mergedAt": "2026-09-04T02:32:55Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 746,
+"title": "AIA-3110: fix blog repair truncation guard and un-chain from deploy path",
+"mergedAt": "2026-09-04T03:10:35Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 739,
+"title": "AIA-3099: Feature August 2026 report on /data",
+"mergedAt": "2026-09-04T04:16:42Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 740,
+"title": "fix(blog): align hub parity and CTAs (AIA-882, AIA-1719)",
+"mergedAt": "2026-09-04T06:30:12Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 748,
+"title": "perf(blog): stream the featured card + topic blocks, keep the hero heading static (AIA-3118)",
+"mergedAt": "2026-09-04T17:40:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 743,
+"title": "AIA-2050: generate robots.txt and sitemap.xml here instead of mirroring Webflow",
+"mergedAt": "2026-09-04T18:09:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 742,
+"title": "AIA-1880: redirect the URLs Webflow still serves that have no port",
+"mergedAt": "2026-09-04T18:15:57Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 751,
+"title": "AIA-821: cut the Webflow fallback, with its redirects, SEO files and /cashout",
+"mergedAt": "2026-09-04T18:25:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 753,
+"title": "Keep Blob hero URLs absolute in the blog post og:image",
+"mergedAt": "2026-09-04T18:50:15Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 754,
+"title": "AIA-2513: render the branded 404 for notFound() inside (frontend) routes",
+"mergedAt": "2026-09-04T19:20:17Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 755,
+"title": "AIA-3121: port /sitemap from Webflow \u2014 static page, 1:1 link parity",
+"mergedAt": "2026-09-04T22:03:33Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 756,
+"title": "AIA-3122: make the /sitemap Blog section Payload-driven",
+"mergedAt": "2026-09-04T22:58:40Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 758,
+"title": "AIA-3124: link the category badge and the byline on blog cards, as live does",
+"mergedAt": "2026-09-04T23:32:21Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 757,
+"title": "AIA-3123: add CMS-controlled review methodology disclosure to blog posts",
+"mergedAt": "2026-09-08T02:39:12Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 765,
+"title": "[ATR-25] Add \"How It Works\" link to footer and top nav dropdown",
+"mergedAt": "2026-09-08T19:49:00Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 761,
+"title": "ATR-45: update /sitemap links to their post-redirect URLs",
+"mergedAt": "2026-09-08T20:18:15Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 770,
+"title": "ATR-46: wrap the author Person in a ProfilePage and add its breadcrumb",
+"mergedAt": "2026-09-08T22:28:29Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 772,
+"title": "eoy-new: paid landing page (marketer LP)",
+"mergedAt": "2026-09-08T23:50:07Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 763,
+"title": "AIA-3095: update 2026 EOY offer T&C pages",
+"mergedAt": "2026-09-09T14:11:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 764,
+"title": "AIA-3134: install @payloadcms/plugin-mcp, pinned at 3.88.0",
+"mergedAt": "2026-09-09T19:21:22Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 780,
+"title": "Update job post boost and Hiring Assistant add-on copy on /pricing",
+"mergedAt": "2026-09-09T20:29:07Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 781,
+"title": "Update eoy payroll offer landing page",
+"mergedAt": "2026-09-09T22:48:02Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish",
+"paid-lp:reping"
+]
+},
+{
+"number": 769,
+"title": "[ATR-47] Update Industry \u2192 Payroll pages awards module with current awards",
+"mergedAt": "2026-09-10T03:19:31Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 773,
+"title": "ATR-59: fix industry payroll mobile heroes",
+"mergedAt": "2026-09-10T04:22:34Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 775,
+"title": "ATR-61: gate Payload writes and deletes behind user roles",
+"mergedAt": "2026-09-10T16:31:05Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 776,
+"title": "ATR-60: let editors add a redirect from the Payload admin",
+"mergedAt": "2026-09-10T16:52:01Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 786,
+"title": "[ATR-64] Add case-insensitive redirect: uppercase paths 301 to lowercase equivalent",
+"mergedAt": "2026-09-10T18:50:26Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 774,
+"title": "AIA-3119: rebuild /labor-cost-calculator as a tool page (calculator + education zone)",
+"mergedAt": "2026-09-10T20:50:04Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 793,
+"title": "AIA-3176 + AIA-3180: restore paragraph spacing and the case-study video on customer stories",
+"mergedAt": "2026-09-10T22:57:30Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 766,
+"title": "ATR-8: draft /payroll/small-business page (design review only \u2014 do not merge)",
+"mergedAt": "2026-09-11T18:56:42Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 768,
+"title": "ATR-7: add /industry/restaurant-tip-pooling page",
+"mergedAt": "2026-09-11T19:59:00Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 799,
+"title": "Allow route-specific PayrollSwitchPromo descriptions",
+"mergedAt": "2026-09-11T20:20:00Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 783,
+"title": "Update EOY new payroll base fee",
+"mergedAt": "2026-09-11T20:37:42Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish",
+"paid-lp:reping"
+]
+},
+{
+"number": 797,
+"title": "ATR-78: build /free-roster-software and /free-team-chat-app",
+"mergedAt": "2026-09-11T21:19:13Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 782,
+"title": "Update EOY offer payroll base fee",
+"mergedAt": "2026-09-11T22:30:41Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 777,
+"title": "[ATR-32] Create /payroll/free landing page from mockup",
+"mergedAt": "2026-09-12T00:58:12Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 812,
+"title": "Update offer page to match EOY campaign",
+"mergedAt": "2026-09-14T20:01:17Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 803,
+"title": "ATR-80: run the job queue, so a scheduled publish actually publishes",
+"mergedAt": "2026-09-14T20:37:30Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 804,
+"title": "ATR-81: declare the live preview that was already built, and let posts schedule",
+"mergedAt": "2026-09-14T20:44:56Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 805,
+"title": "ATR-82: revalidate a route when its metadata row changes",
+"mergedAt": "2026-09-14T20:52:27Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 806,
+"title": "ATR-83: preview the URL each collection actually publishes, and title it from its own field",
+"mergedAt": "2026-09-14T20:59:22Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 809,
+"title": "[ATR-88] Fix cut-off header gradient on /payroll/small-business",
+"mergedAt": "2026-09-14T21:38:55Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 807,
+"title": "ATR-84: six admin groups instead of eleven, and a description on every collection",
+"mergedAt": "2026-09-14T21:52:28Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 785,
+"title": "AIA-3127: add the integrations collection, block and migration",
+"mergedAt": "2026-09-14T22:56:40Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 813,
+"title": "feat(lp): add tv paid landing page",
+"mergedAt": "2026-09-14T23:32:32Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 814,
+"title": "Rotate nine testimonials in the /hiring-and-onboarding photo-quote band",
+"mergedAt": "2026-09-15T01:12:40Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 784,
+"title": "ATR-63: Update pricing page & add sitewide sticky banner for EOY payroll campaign",
+"mergedAt": "2026-09-15T15:47:28Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 817,
+"title": "ATR-93: Add EOY promo module below the homepage logo bar",
+"mergedAt": "2026-09-15T16:08:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 818,
+"title": "AIA-3211: fix(analytics) \u2014 forward Impact irclickid and restore its attribution cookie",
+"mergedAt": "2026-09-15T16:50:48Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 820,
+"title": "ATR-95: Render the EOY sitewide banner on the own-header LP routes too",
+"mergedAt": "2026-09-15T17:08:16Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 819,
+"title": "feat(lp): update EOY pricing toggle",
+"mergedAt": "2026-09-15T17:36:59Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp:publish"
+]
+},
+{
+"number": 822,
+"title": "feat(lp): extend EOY pricing offer to campaign pages",
+"mergedAt": "2026-09-15T18:55:05Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 821,
+"title": "ATR-96: let an Infogram chart be as tall as it says it is",
+"mergedAt": "2026-09-15T19:14:17Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 811,
+"title": "AIA-3205: content_index, the shared taxonomy, and the content_index_v1 view",
+"mergedAt": "2026-09-15T19:16:45Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 816,
+"title": "AIA-3141: one registry for collection \u2192 URL, enforced by CI",
+"mergedAt": "2026-09-15T19:47:26Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 825,
+"title": "ATR-48: Derive FAQPage schema from the rendered FAQ on 12 pages",
+"mergedAt": "2026-09-15T20:04:49Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 823,
+"title": "ATR-6: List all 34 state guides on the /start-a-business hub",
+"mergedAt": "2026-09-15T21:36:24Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 829,
+"title": "Size responsive_iframe Infogram charts by their own aspect ratio",
+"mergedAt": "2026-09-15T21:52:00Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 834,
+"title": "ATR-102: fix start-a-business-guides field note and sitemap coverage",
+"mergedAt": "2026-09-15T22:07:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 826,
+"title": "feat(lp): sync EOY offer banners",
+"mergedAt": "2026-09-15T23:05:59Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 835,
+"title": "ATR-49: restore lost SoftwareApplication and BreadcrumbList schema",
+"mergedAt": "2026-09-16T16:25:49Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 833,
+"title": "[ATR-101] Center hero heading/subheading and reduce whitespace on /free-scheduling",
+"mergedAt": "2026-09-16T17:35:41Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 836,
+"title": "ATR-51: restore structured data lost in the Webflow to Next migration",
+"mergedAt": "2026-09-16T17:45:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 837,
+"title": "[ATR-105] Reduce breadcrumb whitespace and add line-height spacing below \"Free forever\" text on /free-roster-software",
+"mergedAt": "2026-09-16T18:19:55Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 840,
+"title": "ATR-50: restore the BlogPosting fields dropped from 815 posts",
+"mergedAt": "2026-09-16T19:00:26Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 796,
+"title": "[ATR-79] Remove duplicate table of contents on /methodology page",
+"mergedAt": "2026-09-16T19:18:42Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 838,
+"title": "[ATR-106] Remove \"Up to $2,500 in value.\" from homepage offer module; move T&C disclosure to page footer",
+"mergedAt": "2026-09-16T19:40:28Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 844,
+"title": "feat(design-system): add opt-in heroImageGap to BreadcrumbHero (ATR-13)",
+"mergedAt": "2026-09-16T21:13:20Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 843,
+"title": "[ATR-114] Payroll product pricing update: $39 \u2192 $49 base fee on /payroll and /pricing",
+"mergedAt": "2026-09-16T21:39:53Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 846,
+"title": "ATR-107: extend the admin session lifetime from one hour to four",
+"mergedAt": "2026-09-16T22:44:25Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 839,
+"title": "fix(lp): remove EOY offer value copy",
+"mergedAt": "2026-09-16T23:11:03Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 848,
+"title": "ATR-48: derive FAQPage schema on the remaining 17 pages",
+"mergedAt": "2026-09-16T23:36:22Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 603,
+"title": "feat(page): /free-pto-tracking \u2014 free PTO tracking software page",
+"mergedAt": "2026-09-17T02:21:33Z",
+"author": "BrianHB-TO",
+"labels": [
+"page"
+]
+},
+{
+"number": 828,
+"title": "ATR-76: allowlist query params on blog pager/filter links",
+"mergedAt": "2026-09-17T03:04:07Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 841,
+"title": "ATR-107: warn the admin before and after the Okta session ends",
+"mergedAt": "2026-09-17T20:21:39Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 860,
+"title": "ATR-122: restore the /scooterscoffee partner landing page",
+"mergedAt": "2026-09-17T21:19:48Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 851,
+"title": "ATR-108: stage 2026 Main Street AI Gap Report blog post (draft until manual publish)",
+"mergedAt": "2026-09-17T22:11:04Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 861,
+"title": "Add a proof-metrics band to /hiring-and-onboarding",
+"mergedAt": "2026-09-17T22:41:18Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 862,
+"title": "ATR-122: bring /scooterscoffee to parity with the Webflow page",
+"mergedAt": "2026-09-17T22:52:17Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 850,
+"title": "ATR-104: add /terms-eoy26-bonus \u2014 $150 November Payroll Bonus terms page",
+"mergedAt": "2026-09-18T22:21:21Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 865,
+"title": "ATR-124: make the admin Preview button work across the two origins",
+"mergedAt": "2026-09-18T22:53:44Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 866,
+"title": "ATR-116: apply Tatiana's copy comments on /glossary",
+"mergedAt": "2026-09-21T06:29:23Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 867,
+"title": "ATR-117: apply Tatiana's copy comments on /small-business-questions",
+"mergedAt": "2026-09-21T06:39:58Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 852,
+"title": "[ATR-115] Restore WebPage + DefinedTerm schema on glossary pages",
+"mergedAt": "2026-09-21T06:49:42Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 847,
+"title": "AIA-3236: add the atrium-ops skill and pnpm run atr",
+"mergedAt": "2026-09-21T06:57:45Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 868,
+"title": "AIA-3269: the requester's Vercel comments, and two gate traps",
+"mergedAt": "2026-09-21T16:25:42Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 845,
+"title": "ATR-103: /payroll Payroll-Campaign-2026 redesign",
+"mergedAt": "2026-09-22T00:47:00Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 870,
+"title": "Add atrium-ops PITFALLS.md from shipped-ticket learnings",
+"mergedAt": "2026-09-22T15:26:40Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 863,
+"title": "feat(lp): match EOY offer banner styling",
+"mergedAt": "2026-09-22T18:29:15Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp",
+"paid-lp:publish"
+]
+},
+{
+"number": 872,
+"title": "AIA-3288: Statsig A/B tests: ab-test skill, script, and the /time-clock H1 experiment",
+"mergedAt": "2026-09-22T20:22:52Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 874,
+"title": "ATR-125: add /compare/homebase-vs-tcp-software page + hub tile",
+"mergedAt": "2026-09-22T21:32:44Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 873,
+"title": "ATR-128: hold /payroll hero at the wide-frame geometry above 1440",
+"mergedAt": "2026-09-22T22:47:21Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 878,
+"title": "AIA-3293: A/B test Google time clock landing-page URL split",
+"mergedAt": "2026-09-23T00:42:27Z",
+"author": "mjump-lab",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 877,
+"title": "ab-test skill: Statsig keys from any 1Password item or the shell (docs)",
+"mergedAt": "2026-09-23T00:58:06Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+}
+]

@@ -1,0 +1,722 @@
+[
+{
+"date": "2026-05-26",
+"signups": 291,
+"traffic": 15473,
+"rate": 0.0188
+},
+{
+"date": "2026-05-27",
+"signups": 314,
+"traffic": 15072,
+"rate": 0.0208
+},
+{
+"date": "2026-05-28",
+"signups": 292,
+"traffic": 15368,
+"rate": 0.019
+},
+{
+"date": "2026-05-29",
+"signups": 291,
+"traffic": 13983,
+"rate": 0.0208
+},
+{
+"date": "2026-05-30",
+"signups": 193,
+"traffic": 10697,
+"rate": 0.018
+},
+{
+"date": "2026-05-31",
+"signups": 173,
+"traffic": 11801,
+"rate": 0.0147
+},
+{
+"date": "2026-06-01",
+"signups": 355,
+"traffic": 16639,
+"rate": 0.0213
+},
+{
+"date": "2026-06-02",
+"signups": 340,
+"traffic": 17572,
+"rate": 0.0193
+},
+{
+"date": "2026-06-03",
+"signups": 288,
+"traffic": 15560,
+"rate": 0.0185
+},
+{
+"date": "2026-06-04",
+"signups": 265,
+"traffic": 13599,
+"rate": 0.0195
+},
+{
+"date": "2026-06-05",
+"signups": 243,
+"traffic": 15796,
+"rate": 0.0154
+},
+{
+"date": "2026-06-06",
+"signups": 129,
+"traffic": 13403,
+"rate": 0.0096
+},
+{
+"date": "2026-06-07",
+"signups": 151,
+"traffic": 12744,
+"rate": 0.0118
+},
+{
+"date": "2026-06-08",
+"signups": 267,
+"traffic": 17685,
+"rate": 0.0151
+},
+{
+"date": "2026-06-09",
+"signups": 267,
+"traffic": 17776,
+"rate": 0.015
+},
+{
+"date": "2026-06-10",
+"signups": 263,
+"traffic": 21378,
+"rate": 0.0123
+},
+{
+"date": "2026-06-11",
+"signups": 201,
+"traffic": 17878,
+"rate": 0.0112
+},
+{
+"date": "2026-06-12",
+"signups": 202,
+"traffic": 16155,
+"rate": 0.0125
+},
+{
+"date": "2026-06-13",
+"signups": 119,
+"traffic": 13594,
+"rate": 0.0088
+},
+{
+"date": "2026-06-14",
+"signups": 153,
+"traffic": 12544,
+"rate": 0.0122
+},
+{
+"date": "2026-06-15",
+"signups": 234,
+"traffic": 17438,
+"rate": 0.0134
+},
+{
+"date": "2026-06-16",
+"signups": 276,
+"traffic": 18289,
+"rate": 0.0151
+},
+{
+"date": "2026-06-17",
+"signups": 248,
+"traffic": 18637,
+"rate": 0.0133
+},
+{
+"date": "2026-06-18",
+"signups": 229,
+"traffic": 15982,
+"rate": 0.0143
+},
+{
+"date": "2026-06-19",
+"signups": 204,
+"traffic": 17197,
+"rate": 0.0119
+},
+{
+"date": "2026-06-20",
+"signups": 134,
+"traffic": 13293,
+"rate": 0.0101
+},
+{
+"date": "2026-06-21",
+"signups": 119,
+"traffic": 14044,
+"rate": 0.0085
+},
+{
+"date": "2026-06-22",
+"signups": 278,
+"traffic": 18566,
+"rate": 0.015
+},
+{
+"date": "2026-06-23",
+"signups": 268,
+"traffic": 17022,
+"rate": 0.0157
+},
+{
+"date": "2026-06-24",
+"signups": 275,
+"traffic": 20146,
+"rate": 0.0137
+},
+{
+"date": "2026-06-25",
+"signups": 268,
+"traffic": 17505,
+"rate": 0.0153
+},
+{
+"date": "2026-06-26",
+"signups": 215,
+"traffic": 15576,
+"rate": 0.0138
+},
+{
+"date": "2026-06-27",
+"signups": 170,
+"traffic": 12833,
+"rate": 0.0132
+},
+{
+"date": "2026-06-28",
+"signups": 153,
+"traffic": 13440,
+"rate": 0.0114
+},
+{
+"date": "2026-06-29",
+"signups": 291,
+"traffic": 21276,
+"rate": 0.0137
+},
+{
+"date": "2026-06-30",
+"signups": 236,
+"traffic": 18564,
+"rate": 0.0127
+},
+{
+"date": "2026-07-01",
+"signups": 240,
+"traffic": 19483,
+"rate": 0.0123
+},
+{
+"date": "2026-07-02",
+"signups": 248,
+"traffic": 17891,
+"rate": 0.0139
+},
+{
+"date": "2026-07-03",
+"signups": 189,
+"traffic": 15482,
+"rate": 0.0122
+},
+{
+"date": "2026-07-04",
+"signups": 135,
+"traffic": 13439,
+"rate": 0.01
+},
+{
+"date": "2026-07-05",
+"signups": 123,
+"traffic": 14303,
+"rate": 0.0086
+},
+{
+"date": "2026-07-06",
+"signups": 259,
+"traffic": 18886,
+"rate": 0.0137
+},
+{
+"date": "2026-07-07",
+"signups": 258,
+"traffic": 19585,
+"rate": 0.0132
+},
+{
+"date": "2026-07-08",
+"signups": 297,
+"traffic": 18608,
+"rate": 0.016
+},
+{
+"date": "2026-07-09",
+"signups": 265,
+"traffic": 11449,
+"rate": 0.0231
+},
+{
+"date": "2026-07-10",
+"signups": 231,
+"traffic": 11036,
+"rate": 0.0209
+},
+{
+"date": "2026-07-11",
+"signups": 153,
+"traffic": 7172,
+"rate": 0.0213
+},
+{
+"date": "2026-07-12",
+"signups": 142,
+"traffic": 6962,
+"rate": 0.0204
+},
+{
+"date": "2026-07-13",
+"signups": 261,
+"traffic": 12825,
+"rate": 0.0204
+},
+{
+"date": "2026-07-14",
+"signups": 283,
+"traffic": 16536,
+"rate": 0.0171
+},
+{
+"date": "2026-07-15",
+"signups": 189,
+"traffic": 12350,
+"rate": 0.0153
+},
+{
+"date": "2026-07-16",
+"signups": 273,
+"traffic": 11913,
+"rate": 0.0229
+},
+{
+"date": "2026-07-17",
+"signups": 299,
+"traffic": 11247,
+"rate": 0.0266
+},
+{
+"date": "2026-07-18",
+"signups": 162,
+"traffic": 7314,
+"rate": 0.0221
+},
+{
+"date": "2026-07-19",
+"signups": 168,
+"traffic": 7028,
+"rate": 0.0239
+},
+{
+"date": "2026-07-20",
+"signups": 326,
+"traffic": 12772,
+"rate": 0.0255
+},
+{
+"date": "2026-07-21",
+"signups": 373,
+"traffic": 12257,
+"rate": 0.0304
+},
+{
+"date": "2026-07-22",
+"signups": 348,
+"traffic": 12391,
+"rate": 0.0281
+},
+{
+"date": "2026-07-23",
+"signups": 331,
+"traffic": 12060,
+"rate": 0.0274
+},
+{
+"date": "2026-07-24",
+"signups": 251,
+"traffic": 13060,
+"rate": 0.0192
+},
+{
+"date": "2026-07-25",
+"signups": 167,
+"traffic": 7966,
+"rate": 0.021
+},
+{
+"date": "2026-07-26",
+"signups": 182,
+"traffic": 8382,
+"rate": 0.0217
+},
+{
+"date": "2026-07-27",
+"signups": 331,
+"traffic": 21966,
+"rate": 0.0151
+},
+{
+"date": "2026-07-28",
+"signups": 297,
+"traffic": 14313,
+"rate": 0.0208
+},
+{
+"date": "2026-07-29",
+"signups": 331,
+"traffic": 14096,
+"rate": 0.0235
+},
+{
+"date": "2026-07-30",
+"signups": 325,
+"traffic": 13335,
+"rate": 0.0244
+},
+{
+"date": "2026-07-31",
+"signups": 273,
+"traffic": 12469,
+"rate": 0.0219
+},
+{
+"date": "2026-08-01",
+"signups": 191,
+"traffic": 8446,
+"rate": 0.0226
+},
+{
+"date": "2026-08-02",
+"signups": 195,
+"traffic": 8409,
+"rate": 0.0232
+},
+{
+"date": "2026-08-03",
+"signups": 320,
+"traffic": 14515,
+"rate": 0.022
+},
+{
+"date": "2026-08-04",
+"signups": 344,
+"traffic": 15754,
+"rate": 0.0218
+},
+{
+"date": "2026-08-05",
+"signups": 317,
+"traffic": 13185,
+"rate": 0.024
+},
+{
+"date": "2026-08-06",
+"signups": 324,
+"traffic": 13084,
+"rate": 0.0248
+},
+{
+"date": "2026-08-07",
+"signups": 285,
+"traffic": 12759,
+"rate": 0.0223
+},
+{
+"date": "2026-08-08",
+"signups": 157,
+"traffic": 7958,
+"rate": 0.0197
+},
+{
+"date": "2026-08-09",
+"signups": 181,
+"traffic": 7626,
+"rate": 0.0237
+},
+{
+"date": "2026-08-10",
+"signups": 346,
+"traffic": 15423,
+"rate": 0.0224
+},
+{
+"date": "2026-08-11",
+"signups": 309,
+"traffic": 13559,
+"rate": 0.0228
+},
+{
+"date": "2026-08-12",
+"signups": 303,
+"traffic": 14441,
+"rate": 0.021
+},
+{
+"date": "2026-08-13",
+"signups": 298,
+"traffic": 13641,
+"rate": 0.0218
+},
+{
+"date": "2026-08-14",
+"signups": 295,
+"traffic": 12740,
+"rate": 0.0232
+},
+{
+"date": "2026-08-15",
+"signups": 192,
+"traffic": 8576,
+"rate": 0.0224
+},
+{
+"date": "2026-08-16",
+"signups": 170,
+"traffic": 8632,
+"rate": 0.0197
+},
+{
+"date": "2026-08-17",
+"signups": 345,
+"traffic": 15602,
+"rate": 0.0221
+},
+{
+"date": "2026-08-18",
+"signups": 341,
+"traffic": 16076,
+"rate": 0.0212
+},
+{
+"date": "2026-08-19",
+"signups": 327,
+"traffic": 17127,
+"rate": 0.0191
+},
+{
+"date": "2026-08-20",
+"signups": 328,
+"traffic": 17853,
+"rate": 0.0184
+},
+{
+"date": "2026-08-21",
+"signups": 288,
+"traffic": 13836,
+"rate": 0.0208
+},
+{
+"date": "2026-08-22",
+"signups": 176,
+"traffic": 8606,
+"rate": 0.0205
+},
+{
+"date": "2026-08-23",
+"signups": 182,
+"traffic": 7817,
+"rate": 0.0233
+},
+{
+"date": "2026-08-24",
+"signups": 329,
+"traffic": 15121,
+"rate": 0.0218
+},
+{
+"date": "2026-08-25",
+"signups": 341,
+"traffic": 16002,
+"rate": 0.0213
+},
+{
+"date": "2026-08-26",
+"signups": 320,
+"traffic": 18707,
+"rate": 0.0171
+},
+{
+"date": "2026-08-27",
+"signups": 299,
+"traffic": 19082,
+"rate": 0.0157
+},
+{
+"date": "2026-08-28",
+"signups": 276,
+"traffic": 18810,
+"rate": 0.0147
+},
+{
+"date": "2026-08-29",
+"signups": 170,
+"traffic": 15070,
+"rate": 0.0113
+},
+{
+"date": "2026-08-30",
+"signups": 154,
+"traffic": 13620,
+"rate": 0.0113
+},
+{
+"date": "2026-08-31",
+"signups": 311,
+"traffic": 22001,
+"rate": 0.0141
+},
+{
+"date": "2026-09-01",
+"signups": 331,
+"traffic": 21225,
+"rate": 0.0156
+},
+{
+"date": "2026-09-02",
+"signups": 304,
+"traffic": 20608,
+"rate": 0.0148
+},
+{
+"date": "2026-09-03",
+"signups": 307,
+"traffic": 19605,
+"rate": 0.0157
+},
+{
+"date": "2026-09-04",
+"signups": 255,
+"traffic": 18695,
+"rate": 0.0136
+},
+{
+"date": "2026-09-05",
+"signups": 193,
+"traffic": 12712,
+"rate": 0.0152
+},
+{
+"date": "2026-09-06",
+"signups": 128,
+"traffic": 12501,
+"rate": 0.0102
+},
+{
+"date": "2026-09-07",
+"signups": 195,
+"traffic": 14889,
+"rate": 0.0131
+},
+{
+"date": "2026-09-08",
+"signups": 269,
+"traffic": 19521,
+"rate": 0.0138
+},
+{
+"date": "2026-09-09",
+"signups": 308,
+"traffic": 19529,
+"rate": 0.0158
+},
+{
+"date": "2026-09-10",
+"signups": 282,
+"traffic": 20248,
+"rate": 0.0139
+},
+{
+"date": "2026-09-11",
+"signups": 244,
+"traffic": 19079,
+"rate": 0.0128
+},
+{
+"date": "2026-09-12",
+"signups": 163,
+"traffic": 14281,
+"rate": 0.0114
+},
+{
+"date": "2026-09-13",
+"signups": 158,
+"traffic": 14162,
+"rate": 0.0112
+},
+{
+"date": "2026-09-14",
+"signups": 291,
+"traffic": 20102,
+"rate": 0.0145
+},
+{
+"date": "2026-09-15",
+"signups": 288,
+"traffic": 19775,
+"rate": 0.0146
+},
+{
+"date": "2026-09-16",
+"signups": 273,
+"traffic": 20827,
+"rate": 0.0131
+},
+{
+"date": "2026-09-17",
+"signups": 253,
+"traffic": 19139,
+"rate": 0.0132
+},
+{
+"date": "2026-09-18",
+"signups": 203,
+"traffic": 17452,
+"rate": 0.0116
+},
+{
+"date": "2026-09-19",
+"signups": 154,
+"traffic": 13573,
+"rate": 0.0113
+},
+{
+"date": "2026-09-20",
+"signups": 136,
+"traffic": 14263,
+"rate": 0.0095
+},
+{
+"date": "2026-09-21",
+"signups": 274,
+"traffic": 20071,
+"rate": 0.0137
+},
+{
+"date": "2026-09-22",
+"signups": 237,
+"traffic": 18610,
+"rate": 0.0127
+}
+]
