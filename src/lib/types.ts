@@ -72,6 +72,23 @@ export interface StatusCounts {
   canceled: number;
 }
 
+export interface ActiveProjectUpdate {
+  excerpt: string;
+  health: string;
+  url: string;
+  createdAt: string;
+}
+
+export interface ActiveProjectProgress {
+  id: string;
+  name: string;
+  shortName: string;
+  url: string;
+  counts: StatusCounts;
+  recent: TrackedIssue[];
+  latestUpdate: ActiveProjectUpdate | null;
+}
+
 export interface BlogMigration {
   estimatedPosts: number | null;
   status: PageStatus;
@@ -117,6 +134,7 @@ export interface Snapshot {
     recent: TrackedIssue[];
     questions: TrackedIssue[];
   };
+  activeProjects: ActiveProjectProgress[];
   stakeholderRecaps: {
     migration: StakeholderRecap;
     cutover: StakeholderRecap;

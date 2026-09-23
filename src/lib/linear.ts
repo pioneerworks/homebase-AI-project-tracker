@@ -1,5 +1,6 @@
 import { fallbackSnapshot } from "./fallback";
 import {
+  ACTIVE_PROJECTS,
   DECISIONS_PROJECT,
   HOSTING_PROJECT,
   MIGRATION_PROJECT,
@@ -8,6 +9,8 @@ import {
   SNAPSHOT_TAG,
 } from "./projects";
 import type {
+  ActiveProjectProgress,
+  ActiveProjectUpdate,
   CutoverMilestoneProgress,
   CutoverRecord,
   PageRecord,
@@ -68,9 +71,11 @@ interface LinearSnapshotData {
   webflowCloud: LinearProjectResult;
   decisions: LinearProjectResult;
   hosting: LinearProjectResult;
+  activeProjects: LinearProjectResult[];
   mainUpdates: LinearProjectUpdatesResult;
   pageUpdates: LinearProjectUpdatesResult;
   hostingUpdates: LinearProjectUpdatesResult;
+  activeProjectUpdates: LinearProjectUpdatesResult[];
 }
 
 interface LinearProjectPageResponse {
@@ -1229,6 +1234,49 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
       new Date(ticket.completedAt).getTime() >= sevenDaysAgo,
   ).length;
 
+  const activeProjects: ActiveProjectProgress[] = ACTIVE_PROJECTS.map(
+    (project, index) => {
+      const issues = data.activeProjects[index]?.issues.nodes ?? [];
+      const tracked = [...issues]
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        )
+        .map(issueToTracked);
+      const counts = countStatuses(
+        issues.map((issue) => ({ status: normalizeStatus(issue) })),
+      );
+      const update = latestProjectUpdate(
+        data.activeProjectUpdates[index]?.updates ?? [],
+      );
+      const updateExcerpt = update
+        ? cleanMarkdownLine(
+            update.body
+              .split("\n")
+              .find((line) => line.trim() && !line.trim().startsWith("#")) ??
+              "",
+          )
+        : "";
+      const latestUpdate: ActiveProjectUpdate | null = update
+        ? {
+            excerpt: shortRecapText(updateExcerpt || update.health || "No health note"),
+            health: update.health ?? "",
+            url: update.url,
+            createdAt: update.createdAt,
+          }
+        : null;
+      return {
+        id: project.key,
+        name: project.name,
+        shortName: project.shortName,
+        url: project.url,
+        counts,
+        recent: tracked.slice(0, 4),
+        latestUpdate,
+      };
+    },
+  );
+
   return {
     generatedAt,
     source: "linear",
@@ -1265,6 +1313,7 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
       recent,
       questions,
     },
+    activeProjects,
     stakeholderRecaps: buildStakeholderRecaps({
       generatedAt,
       projectPages: pages,
@@ -1389,21 +1438,35 @@ async function fetchProjectUpdates(
 }
 
 async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
-  const [projectResults, mainUpdates, pageUpdateResults, hostingUpdates] =
-    await Promise.all([
-      Promise.all(
-        snapshotProjects.map(({ id, includeArchived }) =>
-          fetchProjectIssues(apiKey, id, includeArchived),
-        ),
+  const [
+    projectResults,
+    activeIssueResults,
+    mainUpdates,
+    pageUpdateResults,
+    hostingUpdates,
+    activeUpdateResults,
+  ] = await Promise.all([
+    Promise.all(
+      snapshotProjects.map(({ id, includeArchived }) =>
+        fetchProjectIssues(apiKey, id, includeArchived),
       ),
-      fetchProjectUpdates(apiKey, MIGRATION_PROJECT.id),
-      Promise.all(
-        PILLAR_PROJECTS.map((project) =>
-          fetchProjectUpdates(apiKey, project.id),
-        ),
+    ),
+    Promise.all(
+      ACTIVE_PROJECTS.map((project) =>
+        fetchProjectIssues(apiKey, project.id, false),
       ),
-      fetchProjectUpdates(apiKey, HOSTING_PROJECT.id),
-    ]);
+    ),
+    fetchProjectUpdates(apiKey, MIGRATION_PROJECT.id),
+    Promise.all(
+      PILLAR_PROJECTS.map((project) =>
+        fetchProjectUpdates(apiKey, project.id),
+      ),
+    ),
+    fetchProjectUpdates(apiKey, HOSTING_PROJECT.id),
+    Promise.all(
+      ACTIVE_PROJECTS.map((project) => fetchProjectUpdates(apiKey, project.id)),
+    ),
+  ]);
   const [product, seo, blog, foundations, webflowCloud, decisions, hosting] =
     projectResults;
 
@@ -1415,11 +1478,13 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
     webflowCloud,
     decisions,
     hosting,
+    activeProjects: activeIssueResults,
     mainUpdates,
     pageUpdates: {
       updates: pageUpdateResults.flatMap((result) => result.updates),
     },
     hostingUpdates,
+    activeProjectUpdates: activeUpdateResults,
   });
 }
 

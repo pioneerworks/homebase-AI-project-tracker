@@ -290,6 +290,7 @@ export const fallbackSnapshot: Snapshot = {
     recent,
     questions,
   },
+  activeProjects: [],
   stakeholderRecaps: {
     migration: {
       asOf: "2026-08-14T16:24:00.000Z",

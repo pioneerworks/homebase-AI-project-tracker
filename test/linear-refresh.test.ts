@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { refreshSnapshot } from "../src/lib/linear";
 import {
+  ACTIVE_PROJECTS,
   DECISIONS_PROJECT,
   HOSTING_PROJECT,
   MIGRATION_PROJECT,
@@ -132,6 +133,18 @@ test("fetches each Linear project separately and follows pagination", async () =
           },
         ]);
       }
+      if (request.variables.project === ACTIVE_PROJECTS[0].id) {
+        return projectUpdatesResponse([
+          {
+            id: "active-project-update-test",
+            body: "Payload readiness is moving through the merge queue.",
+            health: "onTrack",
+            url: "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
+            createdAt: now,
+            updatedAt: now,
+          },
+        ]);
+      }
       return projectUpdatesResponse();
     }
     if (
@@ -175,6 +188,17 @@ test("fetches each Linear project separately and follows pagination", async () =
           "Approximately half of the hosting configuration is ready.",
           { name: "Backlog", type: "backlog" },
           ["Phase 1"],
+        ),
+      ]);
+    }
+    if (request.variables.project === ACTIVE_PROJECTS[0].id) {
+      return projectResponse(false, null, [
+        issue(
+          "AIA-TEST-ACTIVE",
+          "Prove the payload redirect deploy hook",
+          "Saved redirects must survive the production deploy hook.",
+          { name: "In Progress", type: "started" },
+          [],
         ),
       ]);
     }
@@ -280,7 +304,22 @@ test("fetches each Linear project separately and follows pagination", async () =
       .some((text) => text.includes("missing page routes")),
     false,
   );
-  assert.equal(requests.length, 15);
+  const activeProject = snapshot.activeProjects.find(
+    (project) => project.id === ACTIVE_PROJECTS[0].key,
+  );
+  if (!activeProject) throw new Error("active project missing from snapshot");
+  assert.equal(activeProject.counts.total, 1);
+  assert.equal(activeProject.counts.active, 1);
+  assert.equal(activeProject.recent[0]?.id, "AIA-TEST-ACTIVE");
+  assert.equal(
+    activeProject.latestUpdate?.excerpt,
+    "Payload readiness is moving through the merge queue.",
+  );
+  assert.equal(
+    activeProject.latestUpdate?.url,
+    "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
+  );
+  assert.equal(requests.length, 27);
   assert.deepEqual(
     requests
       .filter((request) => request.after === null)
@@ -289,6 +328,7 @@ test("fetches each Linear project separately and follows pagination", async () =
       ...PILLAR_PROJECTS.map((project) => project.id),
       DECISIONS_PROJECT.id,
       HOSTING_PROJECT.id,
+      ...ACTIVE_PROJECTS.map((project) => project.id),
     ],
   );
   assert.deepEqual(
@@ -304,6 +344,11 @@ test("fetches each Linear project separately and follows pagination", async () =
       ?.includeArchived,
     false,
   );
+  assert.equal(
+    requests.find((request) => request.project === ACTIVE_PROJECTS[0].id)
+      ?.includeArchived,
+    false,
+  );
   assert.deepEqual(
     requests
       .filter((request) => request.after === undefined)
@@ -313,6 +358,7 @@ test("fetches each Linear project separately and follows pagination", async () =
       MIGRATION_PROJECT.id,
       ...PILLAR_PROJECTS.map((project) => project.id),
       HOSTING_PROJECT.id,
+      ...ACTIVE_PROJECTS.map((project) => project.id),
     ].sort(),
   );
 });

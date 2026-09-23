@@ -115,6 +115,12 @@ The Hosting cutover view reads every ticket in the dedicated Hosting Migration
 project. Canceled tickets remain visible but are excluded from its completion
 percentage. The Phase 1 cohort is derived from the Linear `Phase 1` label.
 
+The dashboard also polls the six Linear projects carrying the next phase of
+site work (Payload CMS marketing-readiness, Marketing Site Execution agents,
+internal linking, self-serve site changes, the marketing context layer, and
+the landing-page feedback tool). Each hourly refresh pulls their full issue
+inventory and latest project updates into the “Active projects” section.
+
 Both dashboard tabs open with a stakeholder recap generated from the same Linear
 snapshot as the detailed tracker. Page Migration only uses the five page-pillar
 projects and migration decisions. Hosting Cutover only uses the dedicated Hosting
