@@ -103,6 +103,27 @@ test("development user bypass is disabled in production and on Vercel", () => {
     }),
     null,
   );
+  assert.deepEqual(
+    developmentSessionUser({
+      DASHBOARD_DEV_USER: "developer@joinhomebase.com",
+      DASHBOARD_DEV_NAME: "Developer",
+      DASHBOARD_DISABLE_OKTA: "1",
+      NODE_ENV: "production",
+      VERCEL: "1",
+    }),
+    {
+      sub: "dev:developer@joinhomebase.com",
+      email: "developer@joinhomebase.com",
+      name: "Developer",
+    },
+  );
+  assert.equal(
+    developmentSessionUser({
+      DASHBOARD_DISABLE_OKTA: "1",
+      NODE_ENV: "production",
+    }),
+    null,
+  );
 });
 
 test("session tokens round-trip and reject a different signing secret", async () => {
