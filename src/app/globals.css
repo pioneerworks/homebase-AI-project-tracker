@@ -2161,3 +2161,60 @@ footer {
   color: var(--faint);
   font-size: 11px;
 }
+
+/* ===== overflow guards for the shell layout (all tabs/pages) ===== */
+.shell-layout {
+  overflow-x: clip;
+}
+
+.shell-content {
+  min-width: 0;
+}
+
+.shell-layout .page {
+  overflow-x: clip;
+}
+
+/* metric bands: allow cells to shrink instead of pushing the page wide */
+.shell-layout .metric-band,
+.shell-layout .decision-band {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* list rows: wrap long content rather than overflowing the card */
+.shell-layout .issue-row {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.shell-layout .issue-row-meta {
+  white-space: normal;
+  text-align: right;
+}
+
+/* project cards + chart can never force width */
+.project-card,
+.impact-chart {
+  min-width: 0;
+}
+
+/* PR drill-down: chips wrap, long titles wrap */
+.pr-row {
+  min-width: 0;
+}
+
+.pr-row-meta {
+  flex-wrap: wrap;
+}
+
+.pr-row-title,
+.pr-row-link {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* sidebar: long labels wrap instead of stretching the column */
+.sidebar-link,
+.sidebar-user-name {
+  overflow-wrap: anywhere;
+}
