@@ -93,9 +93,10 @@ export default async function OverviewPage() {
           <p className="section-note">
             Bars show merged PRs per day from {MERGE_REPO} (
             {mergeSource === "github" ? "live from GitHub" : "seeded snapshot"}
-            ) — click a bar to see exactly which PRs merged that day. Signups
-            and traffic are real data (Omni export); signup rate = signups ÷
-            traffic.
+            ) — click a bar to see exactly which PRs merged that day.
+            {signupSeries.source === "amplitude"
+              ? " Signups + traffic are the live Amplitude funnel (unique users; recent window), older days from the Omni export."
+              : " Signups and traffic are real data (Omni export); signup rate = signups ÷ traffic."}
           </p>
         </section>
 

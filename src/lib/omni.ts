@@ -3,8 +3,8 @@
  *
  * Placeholder wiring: when the OMNI_* env vars are set (IT is delivering the
  * API key), this queries Omni's REST API server-side and returns real signup
- * + conversion data. Until then it returns the captured Omni export
- * (real data snapshot in src/data/signup-history.json).
+ * + conversion data. Until then it uses the live Amplitude funnel (if the
+ * AMPLITUDE_* keys are readable) or the captured Omni export snapshot.
  *
  * Env vars needed to go live:
  *  - OMNI_API_KEY         personal access token or org API key
@@ -16,11 +16,27 @@
  *  - OMNI_SIGNUPS_RATE_FIELD   conversion rate field, e.g. "signups.conversion_rate"
  */
 import { capturedSignups, type SignupDay } from "@/lib/signup-data";
+import { getAmplitudeFunnel } from "@/lib/amplitude";
 
 export type SignupSeries = {
-  source: "omni" | "export";
+  source: "amplitude" | "omni" | "export";
   days: SignupDay[];
 };
+
+/**
+ * Prefer live Amplitude funnel data when configured (covers its window, e.g.
+ * the last N days); the captured Omni export fills everything before it.
+ * Falls back to Omni API (when OMNI_* is configured) or the export snapshot.
+ */
+export function mergeSignupSources(
+  captured: SignupDay[],
+  amplitude: { days: SignupDay[]; windowStart: string } | null,
+): SignupDay[] {
+  if (!amplitude) return captured;
+  const ampDays = new Set(amplitude.days.map((d) => d.date));
+  const older = captured.filter((d) => !ampDays.has(d.date) && d.date < amplitude.windowStart);
+  return [...older, ...amplitude.days].sort((a, b) => a.date.localeCompare(b.date));
+}
 
 type OmniQueryResponse = {
   data?: string; // base64 Arrow when resultType isn't json
@@ -87,6 +103,22 @@ export function omniConfigured(
 export async function getSignupSeries(
   env: Record<string, string | undefined> = process.env,
 ): Promise<SignupSeries> {
+  // Preferred source: live Amplitude funnel (when key + secret are readable)
+  try {
+    const amplitude = await getAmplitudeFunnel(env);
+    if (amplitude && amplitude.days.length) {
+      return {
+        source: "amplitude",
+        days: mergeSignupSources(capturedSignups(), amplitude),
+      };
+    }
+  } catch (error) {
+    console.error(
+      "Amplitude funnel fetch failed, falling back:",
+      error instanceof Error ? error.message : error,
+    );
+  }
+
   if (!omniConfigured(env)) {
     return { source: "export", days: capturedSignups() };
   }
