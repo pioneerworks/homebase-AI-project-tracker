@@ -167,7 +167,6 @@ const snapshotProjects = [
   },
   { id: DECISIONS_PROJECT.id, includeArchived: false },
   { id: HOSTING_PROJECT.id, includeArchived: true },
-  ...ACTIVE_PROJECTS.map(({ id }) => ({ id, includeArchived: false })),
 ] as const;
 
 function normalizeStatus(issue: LinearIssue): PageStatus {
@@ -1251,12 +1250,17 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
         data.activeProjectUpdates[index]?.updates ?? [],
       );
       const updateExcerpt = update
-        ? cleanMarkdownLine(update.body.split("\n").find((line) => line.trim()) ?? "")
+        ? cleanMarkdownLine(
+            update.body
+              .split("\n")
+              .find((line) => line.trim() && !line.trim().startsWith("#")) ??
+              "",
+          )
         : "";
       const latestUpdate: ActiveProjectUpdate | null = update
         ? {
-            excerpt: shortRecapText(updateExcerpt || update.health),
-            health: update.health,
+            excerpt: shortRecapText(updateExcerpt || update.health || "No health note"),
+            health: update.health ?? "",
             url: update.url,
             createdAt: update.createdAt,
           }
@@ -1434,27 +1438,37 @@ async function fetchProjectUpdates(
 }
 
 async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
-  const [projectResults, mainUpdates, pageUpdateResults, hostingUpdates, activeUpdateResults] =
-    await Promise.all([
-      Promise.all(
-        snapshotProjects.map(({ id, includeArchived }) =>
-          fetchProjectIssues(apiKey, id, includeArchived),
-        ),
+  const [
+    projectResults,
+    activeIssueResults,
+    mainUpdates,
+    pageUpdateResults,
+    hostingUpdates,
+    activeUpdateResults,
+  ] = await Promise.all([
+    Promise.all(
+      snapshotProjects.map(({ id, includeArchived }) =>
+        fetchProjectIssues(apiKey, id, includeArchived),
       ),
-      fetchProjectUpdates(apiKey, MIGRATION_PROJECT.id),
-      Promise.all(
-        PILLAR_PROJECTS.map((project) =>
-          fetchProjectUpdates(apiKey, project.id),
-        ),
+    ),
+    Promise.all(
+      ACTIVE_PROJECTS.map((project) =>
+        fetchProjectIssues(apiKey, project.id, false),
       ),
-      fetchProjectUpdates(apiKey, HOSTING_PROJECT.id),
-      Promise.all(
-        ACTIVE_PROJECTS.map((project) => fetchProjectUpdates(apiKey, project.id)),
+    ),
+    fetchProjectUpdates(apiKey, MIGRATION_PROJECT.id),
+    Promise.all(
+      PILLAR_PROJECTS.map((project) =>
+        fetchProjectUpdates(apiKey, project.id),
       ),
-    ]);
+    ),
+    fetchProjectUpdates(apiKey, HOSTING_PROJECT.id),
+    Promise.all(
+      ACTIVE_PROJECTS.map((project) => fetchProjectUpdates(apiKey, project.id)),
+    ),
+  ]);
   const [product, seo, blog, foundations, webflowCloud, decisions, hosting] =
     projectResults;
-  const activeProjectResults = projectResults.slice(-ACTIVE_PROJECTS.length);
 
   return buildSnapshot({
     product,
@@ -1464,7 +1478,7 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
     webflowCloud,
     decisions,
     hosting,
-    activeProjects: activeProjectResults,
+    activeProjects: activeIssueResults,
     mainUpdates,
     pageUpdates: {
       updates: pageUpdateResults.flatMap((result) => result.updates),

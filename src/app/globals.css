@@ -849,7 +849,8 @@ button {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
 }
 
 .active-project-head a {
@@ -887,12 +888,6 @@ button {
 
 .active-project .issue-list {
   margin-top: 12px;
-}
-
-@media (max-width: 900px) {
-  .active-project-list {
-    grid-template-columns: 1fr;
-  }
 }
 
 .blog-notice {
@@ -1425,6 +1420,10 @@ footer {
 
   .activity-row {
     grid-template-columns: 100px minmax(200px, 1fr) 66px 66px 16px;
+  }
+
+  .active-project-list {
+    grid-template-columns: 1fr;
   }
 
   .activity-pillar {
