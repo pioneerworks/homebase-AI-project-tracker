@@ -16,7 +16,8 @@ function firstParagraph(body: string): string {
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith("#") && !l.startsWith("!") && !l.startsWith("<!--"))[0];
-  return text ?? body.slice(0, 240);
+  // strip simple markdown emphasis so raw asterisks don't show
+  return (text ?? body.slice(0, 240)).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/`/g, "");
 }
 
 export default async function ProjectPage({
