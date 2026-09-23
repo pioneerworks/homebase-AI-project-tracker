@@ -73,7 +73,14 @@ export function developmentSessionUser(
 ): SessionUser | null {
   const email = env.DASHBOARD_DEV_USER?.trim();
   if (!email) return null;
-  if (env.NODE_ENV === "production" || env.VERCEL) return null;
+
+  // Temporary Okta-bypass escape hatch: the dev user is normally blocked in
+  // production and on Vercel, but an explicit DASHBOARD_DISABLE_OKTA=1 opts
+  // in. Remove that env var to restore the Okta gate.
+  const bypassOkta = env.DASHBOARD_DISABLE_OKTA?.trim() === "1";
+  if ((env.NODE_ENV === "production" || env.VERCEL) && !bypassOkta) {
+    return null;
+  }
 
   return {
     sub: `dev:${email}`,
