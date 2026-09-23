@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 const MERGE_REPO = "marketing-site-payload";
+// Chart window: Jun 1 2026 onward
+const CHART_START = "2026-06-01";
 
 export default async function OverviewPage() {
   const user = await getSessionUser();
@@ -18,13 +20,15 @@ export default async function OverviewPage() {
 
   const mergesByDay = new Map(mergeDayList.map((d) => [d.date, d.count]));
 
-  // align both series on the signup calendar
-  const points: ImpactPoint[] = signupSeries.days.map((s) => ({
-    date: s.date,
-    signups: s.signups,
-    rate: s.rate,
-    merges: mergesByDay.get(s.date) ?? 0,
-  }));
+  // align both series on the signup calendar, chart window starts Jun 1 2026
+  const points: ImpactPoint[] = signupSeries.days
+    .filter((s) => s.date >= CHART_START)
+    .map((s) => ({
+      date: s.date,
+      signups: s.signups,
+      rate: s.rate,
+      merges: mergesByDay.get(s.date) ?? 0,
+    }));
 
   const stats = mergeStats(mergeDayList);
   const last7 = points.slice(-7);
