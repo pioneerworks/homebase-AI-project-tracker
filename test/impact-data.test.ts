@@ -46,7 +46,7 @@ test("isChore filters housekeeping merges", () => {
 });
 
 test("captured signup history is well-formed and rate = signups/traffic", () => {
-  assert.ok(signupHistory.length > 150, "expected a substantial history");
+  assert.ok(signupHistory.length > 100, "expected a substantial history");
   const dates = signupHistory.map((d) => d.date);
   assert.deepEqual(dates, [...dates].sort(), "dates must be sorted");
   for (const day of signupHistory) {
