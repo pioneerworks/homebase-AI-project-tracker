@@ -41,6 +41,51 @@ export const PILLAR_PROJECTS: ProjectConfig[] = [
   },
 ];
 
+export const ACTIVE_PROJECTS: ProjectConfig[] = [
+  {
+    id: "414a5123-e910-428f-b761-30b156b2dd7f",
+    key: "payload-cms",
+    name: "Payload CMS — from just a migrated to marketing-ready",
+    shortName: "Payload CMS",
+    url: "https://linear.app/joinhomebase/project/payload-cms-from-just-a-migrated-to-marketing-ready-14729364d08d",
+  },
+  {
+    id: "01dbdbcb-19e4-448f-b774-0b50bbd953c3",
+    key: "execution-agents",
+    name: "Marketing Site Execution agents",
+    shortName: "Execution agents",
+    url: "https://linear.app/joinhomebase/project/marketing-site-execution-agents-c5b9ca95167e",
+  },
+  {
+    id: "8df2e3c5-20ca-40c1-a246-7a6dd1c3c9ea",
+    key: "internal-linking",
+    name: "Internal Linking Infrastructure (Payload CMS)",
+    shortName: "Internal linking",
+    url: "https://linear.app/joinhomebase/project/internal-linking-infrastructure-payload-cms-678361d6ebf9",
+  },
+  {
+    id: "20f71cb2-8396-44d0-b54f-112745894ff0",
+    key: "self-serve",
+    name: "Self-serve site changes",
+    shortName: "Self-serve changes",
+    url: "https://linear.app/joinhomebase/project/self-serve-site-changes-eab631bd2f63",
+  },
+  {
+    id: "55d85f87-4449-4b54-a408-1af3b1e55468",
+    key: "context-layer",
+    name: "Homebase Marketing Context Layer + Agent",
+    shortName: "Context layer",
+    url: "https://linear.app/joinhomebase/project/homebase-marketing-context-layer-agent-e366b0052681",
+  },
+  {
+    id: "c31cd530-66ea-4b1b-b521-23cbf88881c5",
+    key: "feedback-tool",
+    name: "Agent-friendly feedback tool for landing pages",
+    shortName: "Feedback tool",
+    url: "https://linear.app/joinhomebase/project/agent-friendly-feedback-tool-for-landing-pages-4ebbfc1e8d7b",
+  },
+];
+
 export const DECISIONS_PROJECT: ProjectConfig = {
   id: "7d651fee-d6cc-4b3f-bfbd-ab44c3e1e955",
   key: "decisions",

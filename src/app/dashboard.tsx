@@ -623,6 +623,57 @@ export default function Dashboard({
           </div>
         </section>
 
+        <section id="active-projects" className="section">
+          <div className="shell">
+            <div className="section-head">
+              <div>
+                <span className="section-kicker">Next phase</span>
+                <h2>Active projects</h2>
+                <p>
+                  The Linear projects carrying the site's next phase of work:
+                  Payload CMS readiness, execution agents, internal linking,
+                  self-serve site changes, the marketing context layer, and the
+                  landing-page feedback tool. Polled hourly with their project
+                  updates.
+                </p>
+              </div>
+            </div>
+            <div className="active-project-list" aria-label="Active Linear projects">
+              {snapshot.activeProjects.map((project) => (
+                <div className="active-project" key={project.id}>
+                  <div className="active-project-head">
+                    <a href={project.url} target="_blank" rel="noreferrer">
+                      <strong>{project.name}</strong>
+                      <span className="external" aria-hidden="true">
+                        ↗
+                      </span>
+                    </a>
+                    <span className="active-project-counts">
+                      {project.counts.active} active · {project.counts.backlog}{" "}
+                      backlog · {project.counts.done} done
+                    </span>
+                  </div>
+                  {project.latestUpdate && (
+                    <a
+                      className="active-project-update"
+                      href={project.latestUpdate.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Project update · {formatShortDate(project.latestUpdate.createdAt)} —{" "}
+                      {project.latestUpdate.excerpt}
+                    </a>
+                  )}
+                  <IssueList
+                    issues={project.recent}
+                    empty="No issues in this project yet."
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section id="activity" className="section section-tinted">
           <div className="shell">
             <div className="section-head">

@@ -830,6 +830,71 @@ button {
   font-size: 12px;
 }
 
+.active-project-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.active-project {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 18px 20px;
+  min-width: 0;
+}
+
+.active-project-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.active-project-head a {
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.active-project-head a:hover strong {
+  text-decoration: underline;
+}
+
+.active-project-head strong {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.active-project-counts {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.active-project-update {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.active-project-update:hover {
+  color: var(--ink);
+}
+
+.active-project .issue-list {
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .active-project-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .blog-notice {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

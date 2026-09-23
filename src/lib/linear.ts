@@ -1,5 +1,6 @@
 import { fallbackSnapshot } from "./fallback";
 import {
+  ACTIVE_PROJECTS,
   DECISIONS_PROJECT,
   HOSTING_PROJECT,
   MIGRATION_PROJECT,
@@ -8,6 +9,8 @@ import {
   SNAPSHOT_TAG,
 } from "./projects";
 import type {
+  ActiveProjectProgress,
+  ActiveProjectUpdate,
   CutoverMilestoneProgress,
   CutoverRecord,
   PageRecord,
@@ -68,9 +71,11 @@ interface LinearSnapshotData {
   webflowCloud: LinearProjectResult;
   decisions: LinearProjectResult;
   hosting: LinearProjectResult;
+  activeProjects: LinearProjectResult[];
   mainUpdates: LinearProjectUpdatesResult;
   pageUpdates: LinearProjectUpdatesResult;
   hostingUpdates: LinearProjectUpdatesResult;
+  activeProjectUpdates: LinearProjectUpdatesResult[];
 }
 
 interface LinearProjectPageResponse {
@@ -162,6 +167,7 @@ const snapshotProjects = [
   },
   { id: DECISIONS_PROJECT.id, includeArchived: false },
   { id: HOSTING_PROJECT.id, includeArchived: true },
+  ...ACTIVE_PROJECTS.map(({ id }) => ({ id, includeArchived: false })),
 ] as const;
 
 function normalizeStatus(issue: LinearIssue): PageStatus {
@@ -1229,6 +1235,44 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
       new Date(ticket.completedAt).getTime() >= sevenDaysAgo,
   ).length;
 
+  const activeProjects: ActiveProjectProgress[] = ACTIVE_PROJECTS.map(
+    (project, index) => {
+      const issues = data.activeProjects[index]?.issues.nodes ?? [];
+      const tracked = [...issues]
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        )
+        .map(issueToTracked);
+      const counts = countStatuses(
+        issues.map((issue) => ({ status: normalizeStatus(issue) })),
+      );
+      const update = latestProjectUpdate(
+        data.activeProjectUpdates[index]?.updates ?? [],
+      );
+      const updateExcerpt = update
+        ? cleanMarkdownLine(update.body.split("\n").find((line) => line.trim()) ?? "")
+        : "";
+      const latestUpdate: ActiveProjectUpdate | null = update
+        ? {
+            excerpt: shortRecapText(updateExcerpt || update.health),
+            health: update.health,
+            url: update.url,
+            createdAt: update.createdAt,
+          }
+        : null;
+      return {
+        id: project.key,
+        name: project.name,
+        shortName: project.shortName,
+        url: project.url,
+        counts,
+        recent: tracked.slice(0, 4),
+        latestUpdate,
+      };
+    },
+  );
+
   return {
     generatedAt,
     source: "linear",
@@ -1265,6 +1309,7 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
       recent,
       questions,
     },
+    activeProjects,
     stakeholderRecaps: buildStakeholderRecaps({
       generatedAt,
       projectPages: pages,
@@ -1389,7 +1434,7 @@ async function fetchProjectUpdates(
 }
 
 async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
-  const [projectResults, mainUpdates, pageUpdateResults, hostingUpdates] =
+  const [projectResults, mainUpdates, pageUpdateResults, hostingUpdates, activeUpdateResults] =
     await Promise.all([
       Promise.all(
         snapshotProjects.map(({ id, includeArchived }) =>
@@ -1403,9 +1448,13 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
         ),
       ),
       fetchProjectUpdates(apiKey, HOSTING_PROJECT.id),
+      Promise.all(
+        ACTIVE_PROJECTS.map((project) => fetchProjectUpdates(apiKey, project.id)),
+      ),
     ]);
   const [product, seo, blog, foundations, webflowCloud, decisions, hosting] =
     projectResults;
+  const activeProjectResults = projectResults.slice(-ACTIVE_PROJECTS.length);
 
   return buildSnapshot({
     product,
@@ -1415,11 +1464,13 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
     webflowCloud,
     decisions,
     hosting,
+    activeProjects: activeProjectResults,
     mainUpdates,
     pageUpdates: {
       updates: pageUpdateResults.flatMap((result) => result.updates),
     },
     hostingUpdates,
+    activeProjectUpdates: activeUpdateResults,
   });
 }
 
