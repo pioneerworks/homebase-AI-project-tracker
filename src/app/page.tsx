@@ -95,8 +95,8 @@ export default async function OverviewPage() {
             {mergeSource === "github" ? "live from GitHub" : "seeded snapshot"}
             ) — click a bar to see exactly which PRs merged that day.
             {signupSeries.source === "amplitude"
-              ? " Signups + traffic are the live Amplitude funnel (unique users; recent window), older days from the Omni export."
-              : " Signups and traffic are real data (Omni export); signup rate = signups ÷ traffic."}
+              ? " Signups and traffic are live from the Amplitude Export API (unique users)."
+              : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP); signup rate = signups ÷ traffic."}
           </p>
         </section>
 

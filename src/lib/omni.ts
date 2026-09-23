@@ -4,7 +4,7 @@
  * Placeholder wiring: when the OMNI_* env vars are set (IT is delivering the
  * API key), this queries Omni's REST API server-side and returns real signup
  * + conversion data. Until then it uses the live Amplitude funnel (if the
- * AMPLITUDE_* keys are readable) or the captured Omni export snapshot.
+ * AMPLITUDE_* keys are readable) or the captured Amplitude snapshot.
  *
  * Env vars needed to go live:
  *  - OMNI_API_KEY         personal access token or org API key
@@ -25,7 +25,7 @@ export type SignupSeries = {
 
 /**
  * Prefer live Amplitude funnel data when configured (covers its window, e.g.
- * the last N days); the captured Omni export fills everything before it.
+ * the last N days); the captured Amplitude snapshot fills everything before it.
  * Falls back to Omni API (when OMNI_* is configured) or the export snapshot.
  */
 export function mergeSignupSources(
