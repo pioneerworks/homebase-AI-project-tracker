@@ -1,12 +1,11 @@
 /**
- * Captured signup history exported from Omni (Chat Query export, 2026-09-23).
- * Daily totals across Paid + Organic channels. Traffic (Vercel visitors) is
- * derived by inverting the per-channel 1D1 rate (visitors = signups / rate),
- * so `rate` is exactly signups / traffic — the precomputed per-channel rates
- * themselves are disregarded per product decision.
+ * Captured signup history from Amplitude (MCP query, 2026-09-23).
+ * Daily unique users: signups = "Owner Sign Up", traffic = "Page Viewed" with
+ * product_area mw_* and device_type != Linux (the funnel chart's definition).
+ * rate = signups / traffic. Today's incomplete interval is excluded.
  *
- * When the OMNI_* env vars land, the live API query in lib/omni.ts supersedes
- * this snapshot; until then this is the real series (not sample data).
+ * When the AMPLITUDE_* Export keys work or OMNI_* lands, a live query
+ * supersedes this snapshot; until then this is the real series.
  */
 import rawHistory from "@/data/signup-history.json";
 
