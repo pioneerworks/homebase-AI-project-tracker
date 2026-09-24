@@ -118,8 +118,8 @@ export default async function OverviewPage() {
             <code>page-touch</code> or <code>infra</code> GitHub label overrides
             the heuristic.
             {signupSeries.source === "amplitude"
-              ? " Signups and traffic are live from the Amplitude Export API (unique users)."
-              : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP); signup rate = signups ÷ traffic."}
+              ? " Signups (Owner Account Created) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot, which counts Owner Sign Up."
+              : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP); signups in this snapshot count Owner Sign Up; signup rate = signups ÷ traffic."}
           </p>
         </section>
 

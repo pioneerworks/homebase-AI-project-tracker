@@ -16,7 +16,7 @@ import rawHistory from "@/data/signup-history.json";
 export type SignupDay = {
   date: string; // YYYY-MM-DD
   signups: number;
-  traffic: number; // derived Vercel visitors
+  traffic: number; // unique users with a qualifying Amplitude Page Viewed
   rate: number | null; // signups / traffic; null when traffic unknown (today)
 };
 

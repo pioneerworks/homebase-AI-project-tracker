@@ -88,6 +88,14 @@ test("amplitudeConfig ignores masked or missing credentials", () => {
       windowDays: 30,
     },
   );
+  assert.equal(
+    amplitudeConfig({
+      AMPLITUDE_API_KEY: "k",
+      AMPLITUDE_SECRET: "s",
+      AMPLITUDE_SIGNUP_EVENT: "Custom Event",
+    })?.signupEvent,
+    "Custom Event",
+  );
 });
 
 test("mergeSignupSources prefers amplitude days and keeps older captured days", () => {

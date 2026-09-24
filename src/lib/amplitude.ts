@@ -16,6 +16,8 @@
  *  - day bucketing uses UTC, the Amplitude UI uses the project timezone
  *  - identity = user_id, falling back to device_id (cross-platform stitching
  *    may differ slightly from Amplitude's identity resolution)
+ *  - signups count every unique user with the conversion event that day; the
+ *    chart only counts users who also completed the Page Viewed step first
  */
 import { gunzipSync, unzipSync } from "fflate";
 
