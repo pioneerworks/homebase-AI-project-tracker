@@ -134,8 +134,35 @@ function PrRow({ pr }: { pr: MergedPr }) {
   );
 }
 
+export type RangePreset = "7d" | "30d" | "90d" | "all" | "custom";
+
+const PRESETS: { key: Exclude<RangePreset, "custom">; label: string }[] = [
+  { key: "7d", label: "7D" },
+  { key: "30d", label: "30D" },
+  { key: "90d", label: "90D" },
+  { key: "all", label: "All" },
+];
+
+function shiftDate(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Inclusive date window for a preset, anchored on the latest data point. */
+export function presetRange(
+  preset: Exclude<RangePreset, "custom">,
+  firstDate: string,
+  lastDate: string,
+): { from: string; to: string } {
+  if (preset === "all" || !lastDate) return { from: firstDate, to: lastDate };
+  const days = preset === "7d" ? 7 : preset === "30d" ? 30 : 90;
+  const from = shiftDate(lastDate, -(days - 1));
+  return { from: from < firstDate ? firstDate : from, to: lastDate };
+}
+
 export default function ImpactChart({
-  points,
+  points: allPoints,
   mergeDays,
   sampleNote,
 }: {
@@ -143,6 +170,17 @@ export default function ImpactChart({
   mergeDays: MergeDay[];
   sampleNote?: string;
 }) {
+  const firstDate = allPoints[0]?.date ?? "";
+  const lastDate = allPoints.at(-1)?.date ?? "";
+  const [preset, setPreset] = useState<RangePreset>("all");
+  const [customFrom, setCustomFrom] = useState(firstDate);
+  const [customTo, setCustomTo] = useState(lastDate);
+  const range =
+    preset === "custom"
+      ? { from: customFrom || firstDate, to: customTo || lastDate }
+      : presetRange(preset, firstDate, lastDate);
+  const points = allPoints.filter((p) => p.date >= range.from && p.date <= range.to);
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [view, setView] = useState<"all" | "page">("all");
   const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
@@ -156,6 +194,60 @@ export default function ImpactChart({
   return (
     <div className="impact-chart">
       <div className="impact-chart-head">
+        <div className="impact-range">
+          <div className="impact-toggle" role="group" aria-label="Date range">
+            {PRESETS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                aria-pressed={preset === p.key}
+                onClick={() => setPreset(p.key)}
+              >
+                {p.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-pressed={preset === "custom"}
+              onClick={() => {
+                setCustomFrom(range.from);
+                setCustomTo(range.to);
+                setPreset("custom");
+              }}
+            >
+              Custom
+            </button>
+          </div>
+          {preset === "custom" ? (
+            <span className="impact-range-inputs">
+              <label>
+                <span className="sr-only">From</span>
+                <input
+                  type="date"
+                  value={customFrom}
+                  min={firstDate}
+                  max={customTo || lastDate}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                />
+              </label>
+              <span aria-hidden="true">–</span>
+              <label>
+                <span className="sr-only">To</span>
+                <input
+                  type="date"
+                  value={customTo}
+                  min={customFrom || firstDate}
+                  max={lastDate}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                />
+              </label>
+            </span>
+          ) : (
+            <span className="impact-range-label">
+              {range.from && `${dayLabel(range.from)} – ${dayLabel(range.to)}`}
+            </span>
+          )}
+        </div>
         <div className="impact-toggle" role="group" aria-label="Merge view">
           <button
             type="button"

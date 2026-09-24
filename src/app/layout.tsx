@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Homebase migration progress",
+  title: "Homebase AI project tracker",
   description:
-    "Live progress, page parity, migration decisions, and open questions from Linear.",
+    "Milestones, owners, and signup impact for the Homebase AI team's Linear projects.",
   robots: {
     index: false,
     follow: false,

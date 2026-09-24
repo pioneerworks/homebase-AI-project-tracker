@@ -131,7 +131,6 @@ export default async function OverviewPage() {
             <h2>Signups · {formatDay(daily.date)}</h2>
             <span className="standup-caveat">
               Definition: <code>{signupEvent}</code> in Amplitude, unique users.
-              Not yet agreed with V.
             </span>
           </div>
           <div className="metric-band standup-band">

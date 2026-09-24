@@ -1,3 +1,4 @@
+import MilestoneIssues from "@/components/milestone-issues";
 import { getProjectOverview, type ProjectHealth } from "@/lib/linear-projects";
 import { getSessionUser } from "@/lib/oidc-session";
 import { torontoToday } from "@/lib/standup";
@@ -253,22 +254,7 @@ export default async function ProjectPage({
                       <span style={{ width: `${m.progress}%` }} />
                     </div>
                     {m.description && <p className="milestone-description">{m.description}</p>}
-                    {m.issues.length > 0 && (
-                      <ul className="milestone-issues">
-                        {m.issues.map((issue) => (
-                          <li key={issue.identifier}>
-                            <a href={issue.url} target="_blank" rel="noreferrer">
-                              <span className="milestone-issue-id">{issue.identifier}</span>{" "}
-                              {issue.title}
-                            </a>
-                            <span className="milestone-issue-meta">
-                              {issue.stateName}
-                              {issue.assignee ? ` · ${issue.assignee}` : " · unassigned"}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <MilestoneIssues issues={m.issues} />
                   </li>
                 ))}
               </ol>
