@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  classifyPageTouch,
+  extractRoute,
   isChore,
   mergeStats,
+  pageTouchCount,
   ticketKey,
   type MergedPr,
 } from "../src/lib/merges";
@@ -43,6 +46,98 @@ test("isChore filters housekeeping merges", () => {
   assert.equal(isChore(pr({ title: "docs: readme" })), true);
   assert.equal(isChore(pr({ author: "vercel[bot]" })), true);
   assert.equal(isChore(pr({ title: "feat: AIA-100 new section" })), false);
+});
+
+test("extractRoute pulls a leading route path from a title", () => {
+  assert.equal(extractRoute("feat(pages): native /payroll page"), "/payroll");
+  assert.equal(
+    extractRoute("feat(industry-payroll): migrate /industry/retail-payroll off Webflow"),
+    "/industry/retail-payroll",
+  );
+  assert.equal(extractRoute("chore(deps): bump sharp"), null);
+});
+
+test("classifyPageTouch marks route and page-keyword PRs as page-touching", () => {
+  assert.equal(
+    classifyPageTouch(pr({ title: "feat(pages): native /payroll page" })).touchesPage,
+    true,
+  );
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "feat(service-other): migrate service-other page family off Webflow" }),
+    ).touchesPage,
+    true,
+  );
+  assert.equal(
+    classifyPageTouch(pr({ title: "Fix homepage visual-parity gaps" })).touchesPage,
+    true,
+  );
+  assert.equal(
+    classifyPageTouch(pr({ title: "AIA-1028: Port /methodology" })).route,
+    "/methodology",
+  );
+});
+
+test("classifyPageTouch marks infra, deps, docs, and bot PRs as not page-touching", () => {
+  assert.equal(
+    classifyPageTouch(pr({ title: "chore(deps): bump sharp" })).touchesPage,
+    false,
+  );
+  assert.equal(
+    classifyPageTouch(pr({ title: "docs(agents): announce every finished PR" })).touchesPage,
+    false,
+  );
+  assert.equal(
+    classifyPageTouch(pr({ title: "feat(seo): pages collection, per-page meta from the DB" }))
+      .touchesPage,
+    false,
+  );
+  assert.equal(
+    classifyPageTouch(pr({ author: "app/dependabot", title: "bump next" })).touchesPage,
+    false,
+  );
+});
+
+test("classifyPageTouch lets an explicit GitHub label override the heuristic", () => {
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "chore(deps): bump sharp", labels: ["page"] }),
+    ).touchesPage,
+    true,
+  );
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "ATR-10: Restore employee scheduling subhead copy", labels: ["page", "page:publish"] }),
+    ).touchesPage,
+    true,
+  );
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "feat(home): rebuild the homepage", labels: ["infra"] }),
+    ).touchesPage,
+    false,
+  );
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "chore(deps): bump sharp", labels: ["page"] }),
+    ).source,
+    "label",
+  );
+  assert.equal(
+    classifyPageTouch(
+      pr({ title: "Add end-of-year payroll offer landing page", labels: ["paid-lp", "paid-lp:publish"] }),
+    ).touchesPage,
+    true,
+  );
+});
+
+test("pageTouchCount counts only page-touching PRs", () => {
+  const prs = [
+    pr({ title: "feat(pages): native /payroll page" }),
+    pr({ title: "chore(deps): bump sharp" }),
+    pr({ title: "fix(pricing): restore /pricing parity with live" }),
+  ];
+  assert.equal(pageTouchCount(prs), 2);
 });
 
 test("captured signup history is well-formed and rate = signups/traffic", () => {

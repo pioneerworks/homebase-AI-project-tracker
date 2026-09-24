@@ -1959,6 +1959,39 @@ footer {
   padding: 18px 14px 10px;
 }
 
+.impact-chart-head {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 2px 8px;
+}
+
+.impact-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.impact-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.impact-toggle button + button {
+  border-left: 1px solid var(--line);
+}
+
+.impact-toggle button[aria-pressed="true"] {
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+
 .impact-legend {
   display: flex;
   flex-wrap: wrap;
@@ -1991,7 +2024,16 @@ footer {
 }
 
 .impact-dot-merges {
-  background: var(--progress);
+  background: var(--primary);
+}
+
+.impact-dot-page {
+  background: var(--primary);
+}
+
+.impact-dot-other {
+  background: var(--surface-strong);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .impact-tooltip {
@@ -2278,6 +2320,33 @@ footer {
   font-size: 11px;
 }
 
+.pr-row-touch {
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 8px;
+  letter-spacing: 0.03em;
+}
+
+.pr-row-touch-page {
+  background: var(--primary);
+  color: oklch(1 0 0);
+}
+
+.pr-row-touch-infra {
+  background: var(--surface-strong);
+  color: var(--muted);
+}
+
+.pr-row-route {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 10.5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
 /* ===== overflow guards for the shell layout (all tabs/pages) ===== */
 .shell-layout {
   overflow-x: clip;
@@ -2339,4 +2408,19 @@ footer {
 .sidebar-link,
 .sidebar-user-name {
   overflow-wrap: anywhere;
+}
+
+/* overview: five-metric band (page-touching PRs gets its own cell) */
+.shell-layout .metric-band-five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .shell-layout .metric-band-five {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metric-band-five > div:last-child {
+    grid-column: 1 / -1;
+  }
 }
