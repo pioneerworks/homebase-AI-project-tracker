@@ -53,6 +53,28 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
       "Take Payload from 'just migrated' to marketing-ready: authoring experience, content ops, and site features on the new CMS.",
     repos: ["marketing-site-payload"],
   },
+  {
+    key: "launch-more-tool-pages",
+    name: "Launch more tool pages",
+    linearSlugId: "d03b951404ed",
+    linearUrl:
+      "https://linear.app/joinhomebase/project/launch-more-tool-pages-d03b951404ed/overview",
+    status: "active",
+    shortPurpose:
+      "Ship one or two new or rebuilt tool pages every two weeks, then automate their post-publish distribution and monitoring.",
+    repos: ["marketing-site-payload"],
+  },
+  {
+    key: "unlock-agentic-design-content",
+    name: "Unlock agentic design/content capabilities",
+    linearSlugId: "b12b50221653",
+    linearUrl:
+      "https://linear.app/joinhomebase/project/unlock-agentic-designcontent-capabilities-b12b50221653/overview",
+    status: "active",
+    shortPurpose:
+      "Make Figma the front door to the agent pipeline, with a master brand-safe design file as the source of truth for agent work.",
+    repos: ["marketing-site-payload"],
+  },
 ];
 
 export const DONE_PROJECTS = [
