@@ -1,4 +1,3 @@
-import AppShell from "@/components/app-shell";
 import Dashboard from "@/app/dashboard";
 import { getSnapshot } from "@/lib/linear";
 import { getSessionUser } from "@/lib/oidc-session";
@@ -11,9 +10,5 @@ export default async function MigrationPage() {
   if (!user) redirect("/login?callbackUrl=/migration");
 
   const snapshot = await getSnapshot();
-  return (
-    <AppShell user={user}>
-      <Dashboard initialSnapshot={snapshot} user={user} />
-    </AppShell>
-  );
+  return <Dashboard initialSnapshot={snapshot} user={user} />;
 }
