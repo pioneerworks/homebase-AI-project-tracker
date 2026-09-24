@@ -53,13 +53,18 @@ export async function fetchMergedPrs(
   // instead of one-by-one: a cold cache previously paid up to 10 sequential
   // round-trips before the overview page could paint. Early-exit conditions
   // are still evaluated in page order, so we stop as soon as the original
-  // sequential loop would have.
+  // sequential loop would have (though up to two extra pages per round may
+  // be fetched and discarded).
   for (let first = 1; first <= 10; first += 3) {
     const pages = [first, first + 1, first + 2].filter((page) => page <= 10);
     let batches: GitHubPull[][];
     try {
       batches = await Promise.all(pages.map(fetchPage));
-    } catch {
+    } catch (error) {
+      console.warn(
+        "GitHub merged-PR fetch failed; falling back to seed data:",
+        error instanceof Error ? error.message : error,
+      );
       return null;
     }
 

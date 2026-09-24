@@ -1935,6 +1935,11 @@ footer {
   height: 72px;
 }
 
+/* bare spans in the skeleton hero don't get h1/p margins, so space them out */
+.hero .skeleton-line + .skeleton-line {
+  margin-top: 14px;
+}
+
 @keyframes skeleton-shimmer {
   from {
     background-position: 200% 0;
@@ -1950,7 +1955,6 @@ footer {
     animation: none;
   }
 }
-
 
 .hero-eyebrow {
   font-size: 12px;
