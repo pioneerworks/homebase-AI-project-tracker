@@ -2298,9 +2298,15 @@ footer {
 }
 
 /* list rows: wrap long content rather than overflowing the card */
+.shell-layout .issue-list {
+  list-style: none;
+  padding: 0;
+}
+
 .shell-layout .issue-row {
   flex-wrap: wrap;
   row-gap: 4px;
+  padding: 9px 18px;
 }
 
 .shell-layout .issue-row-meta {
