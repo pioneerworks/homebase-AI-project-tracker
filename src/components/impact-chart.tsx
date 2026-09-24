@@ -15,6 +15,7 @@ import {
 
 import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/merges";
 import type { SignupDay } from "@/lib/signup-data";
+import { presetRange, type RangePreset } from "@/lib/standup";
 
 const REPO = "marketing-site-payload";
 
@@ -134,8 +135,19 @@ function PrRow({ pr }: { pr: MergedPr }) {
   );
 }
 
+function orderRange(a: string, b: string): { from: string; to: string } {
+  return a <= b ? { from: a, to: b } : { from: b, to: a };
+}
+
+const PRESETS: { key: Exclude<RangePreset, "custom">; label: string }[] = [
+  { key: "7d", label: "7D" },
+  { key: "30d", label: "30D" },
+  { key: "90d", label: "90D" },
+  { key: "all", label: "All" },
+];
+
 export default function ImpactChart({
-  points,
+  points: allPoints,
   mergeDays,
   sampleNote,
 }: {
@@ -143,7 +155,20 @@ export default function ImpactChart({
   mergeDays: MergeDay[];
   sampleNote?: string;
 }) {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const firstDate = allPoints[0]?.date ?? "";
+  const lastDate = allPoints.at(-1)?.date ?? "";
+  const [preset, setPreset] = useState<RangePreset>("all");
+  const [customFrom, setCustomFrom] = useState(firstDate);
+  const [customTo, setCustomTo] = useState(lastDate);
+  const range =
+    preset === "custom"
+      ? orderRange(customFrom || firstDate, customTo || lastDate)
+      : presetRange(preset, firstDate, lastDate);
+  const points = allPoints.filter((p) => p.date >= range.from && p.date <= range.to);
+
+  const [pickedDate, setSelectedDate] = useState<string | null>(null);
+  const selectedDate =
+    pickedDate && pickedDate >= range.from && pickedDate <= range.to ? pickedDate : null;
   const [view, setView] = useState<"all" | "page">("all");
   const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
   const selectedPoint = points.find((p) => p.date === selectedDate) ?? null;
@@ -156,6 +181,60 @@ export default function ImpactChart({
   return (
     <div className="impact-chart">
       <div className="impact-chart-head">
+        <div className="impact-range">
+          <div className="impact-toggle" role="group" aria-label="Date range">
+            {PRESETS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                aria-pressed={preset === p.key}
+                onClick={() => setPreset(p.key)}
+              >
+                {p.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-pressed={preset === "custom"}
+              onClick={() => {
+                setCustomFrom(range.from);
+                setCustomTo(range.to);
+                setPreset("custom");
+              }}
+            >
+              Custom
+            </button>
+          </div>
+          {preset === "custom" ? (
+            <span className="impact-range-inputs">
+              <label>
+                <span className="sr-only">From</span>
+                <input
+                  type="date"
+                  value={customFrom}
+                  min={firstDate}
+                  max={customTo || lastDate}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                />
+              </label>
+              <span aria-hidden="true">–</span>
+              <label>
+                <span className="sr-only">To</span>
+                <input
+                  type="date"
+                  value={customTo}
+                  min={customFrom || firstDate}
+                  max={lastDate}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                />
+              </label>
+            </span>
+          ) : (
+            <span className="impact-range-label">
+              {range.from && `${dayLabel(range.from)} – ${dayLabel(range.to)}`}
+            </span>
+          )}
+        </div>
         <div className="impact-toggle" role="group" aria-label="Merge view">
           <button
             type="button"
@@ -173,6 +252,10 @@ export default function ImpactChart({
           </button>
         </div>
       </div>
+      {points.length === 0 && (
+        <p className="empty-message">No data in this date range.</p>
+      )}
+      {points.length > 0 && (
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
@@ -248,6 +331,7 @@ export default function ImpactChart({
           />
         </ComposedChart>
       </ResponsiveContainer>
+      )}
 
       <div className="impact-legend">
         <span className="impact-legend-item">
