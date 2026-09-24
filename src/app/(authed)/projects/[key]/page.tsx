@@ -1,5 +1,6 @@
 import MilestoneIssues from "@/components/milestone-issues";
-import { getProjectOverview, type ProjectHealth } from "@/lib/linear-projects";
+import HealthPill from "@/components/health-pill";
+import { getProjectOverview } from "@/lib/linear-projects";
 import { getSessionUser } from "@/lib/oidc-session";
 import { torontoToday } from "@/lib/standup";
 import { trackerProject, TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -118,17 +119,6 @@ function isOverdue(targetDate: string | null, progress: number): boolean {
   return Boolean(targetDate && progress < 100 && targetDate < torontoToday());
 }
 
-const HEALTH_LABEL: Record<ProjectHealth, string> = {
-  onTrack: "On track",
-  atRisk: "At risk",
-  offTrack: "Off track",
-};
-
-function HealthPill({ health }: { health: ProjectHealth | null }) {
-  if (!health) return <span className="health-pill health-none">Not set</span>;
-  return <span className={`health-pill health-${health}`}>{HEALTH_LABEL[health]}</span>;
-}
-
 export default async function ProjectPage({
   params,
 }: {
@@ -152,7 +142,7 @@ export default async function ProjectPage({
   const purpose = overview?.description?.trim() || project.shortPurpose;
   const latest = overview?.updates[0];
   // No project update posted yet: fall back to the brief its creators wrote.
-  const brief = overview?.content ?? overview?.description?.trim() ?? null;
+  const brief = overview?.content ?? null;
 
   return (
     <div className="page">

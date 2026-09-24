@@ -15,6 +15,7 @@ import {
 
 import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/merges";
 import type { SignupDay } from "@/lib/signup-data";
+import { presetRange, type RangePreset } from "@/lib/standup";
 
 const REPO = "marketing-site-payload";
 
@@ -134,7 +135,9 @@ function PrRow({ pr }: { pr: MergedPr }) {
   );
 }
 
-export type RangePreset = "7d" | "30d" | "90d" | "all" | "custom";
+function orderRange(a: string, b: string): { from: string; to: string } {
+  return a <= b ? { from: a, to: b } : { from: b, to: a };
+}
 
 const PRESETS: { key: Exclude<RangePreset, "custom">; label: string }[] = [
   { key: "7d", label: "7D" },
@@ -142,24 +145,6 @@ const PRESETS: { key: Exclude<RangePreset, "custom">; label: string }[] = [
   { key: "90d", label: "90D" },
   { key: "all", label: "All" },
 ];
-
-function shiftDate(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
-/** Inclusive date window for a preset, anchored on the latest data point. */
-export function presetRange(
-  preset: Exclude<RangePreset, "custom">,
-  firstDate: string,
-  lastDate: string,
-): { from: string; to: string } {
-  if (preset === "all" || !lastDate) return { from: firstDate, to: lastDate };
-  const days = preset === "7d" ? 7 : preset === "30d" ? 30 : 90;
-  const from = shiftDate(lastDate, -(days - 1));
-  return { from: from < firstDate ? firstDate : from, to: lastDate };
-}
 
 export default function ImpactChart({
   points: allPoints,
@@ -177,11 +162,13 @@ export default function ImpactChart({
   const [customTo, setCustomTo] = useState(lastDate);
   const range =
     preset === "custom"
-      ? { from: customFrom || firstDate, to: customTo || lastDate }
+      ? orderRange(customFrom || firstDate, customTo || lastDate)
       : presetRange(preset, firstDate, lastDate);
   const points = allPoints.filter((p) => p.date >= range.from && p.date <= range.to);
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [pickedDate, setSelectedDate] = useState<string | null>(null);
+  const selectedDate =
+    pickedDate && pickedDate >= range.from && pickedDate <= range.to ? pickedDate : null;
   const [view, setView] = useState<"all" | "page">("all");
   const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
   const selectedPoint = points.find((p) => p.date === selectedDate) ?? null;
@@ -265,6 +252,10 @@ export default function ImpactChart({
           </button>
         </div>
       </div>
+      {points.length === 0 && (
+        <p className="empty-message">No data in this date range.</p>
+      )}
+      {points.length > 0 && (
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
@@ -340,6 +331,7 @@ export default function ImpactChart({
           />
         </ComposedChart>
       </ResponsiveContainer>
+      )}
 
       <div className="impact-legend">
         <span className="impact-legend-item">

@@ -124,7 +124,7 @@ test("torontoToday uses the Toronto calendar", () => {
 });
 
 test("presetRange anchors on the latest day and clamps to the first", async () => {
-  const { presetRange } = await import("../src/components/impact-chart");
+  const { presetRange } = await import("../src/lib/standup");
   assert.deepEqual(presetRange("7d", "2026-06-01", "2026-09-22"), { from: "2026-09-16", to: "2026-09-22" });
   assert.deepEqual(presetRange("90d", "2026-08-01", "2026-09-22"), { from: "2026-08-01", to: "2026-09-22" });
   assert.deepEqual(presetRange("all", "2026-06-01", "2026-09-22"), { from: "2026-06-01", to: "2026-09-22" });

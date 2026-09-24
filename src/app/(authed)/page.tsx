@@ -1,12 +1,9 @@
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import { amplitudeConfig } from "@/lib/amplitude";
-import {
-  getProjectOverview,
-  nextMilestone,
-  type ProjectHealth,
-} from "@/lib/linear-projects";
+import HealthPill from "@/components/health-pill";
+import { getProjectOverview, nextMilestone } from "@/lib/linear-projects";
 import { getMergeDays, mergeStats, pageTouchCount } from "@/lib/merges";
-import { dailySignupSummary, pctChange, torontoToday } from "@/lib/standup";
+import { dailySignupSummary, pctChange, shiftDate, torontoToday } from "@/lib/standup";
 import { getSignupSeries } from "@/lib/omni";
 import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -32,10 +29,12 @@ function DeltaCell({
   label,
   delta,
   detail,
+  value,
 }: {
   label: string;
   delta: number | null;
   detail: string | null;
+  value?: string;
 }) {
   return (
     <div className="metric">
@@ -43,22 +42,11 @@ function DeltaCell({
       <span
         className={`metric-value${delta == null ? "" : delta >= 0 ? " metric-up" : " metric-down"}`}
       >
-        {delta == null ? "—" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`}
+        {value ?? (delta == null ? "—" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`)}
       </span>
       <span className="metric-delta">{detail ?? "no data for that day"}</span>
     </div>
   );
-}
-
-const HEALTH_LABEL: Record<ProjectHealth, string> = {
-  onTrack: "On track",
-  atRisk: "At risk",
-  offTrack: "Off track",
-};
-
-function HealthPill({ health }: { health: ProjectHealth | null }) {
-  if (!health) return <span className="health-pill health-none">No health</span>;
-  return <span className={`health-pill health-${health}`}>{HEALTH_LABEL[health]}</span>;
 }
 
 export default async function OverviewPage() {
@@ -71,7 +59,13 @@ export default async function OverviewPage() {
       getSignupSeries(),
       Promise.all(
         TRACKER_PROJECTS.map((p) =>
-          getProjectOverview(p.linearSlugId, p.key).catch(() => null),
+          getProjectOverview(p.linearSlugId, p.key).catch((error) => {
+            console.log(
+              `[overview] Linear fetch failed for ${p.key}:`,
+              error instanceof Error ? error.message : error,
+            );
+            return null;
+          }),
         ),
       ),
     ]);
@@ -79,6 +73,7 @@ export default async function OverviewPage() {
   const daily = dailySignupSummary(signupSeries.days, torontoToday());
   const dayDelta = daily ? pctChange(daily.signups, daily.prevDay?.signups) : null;
   const weekDelta = daily ? pctChange(daily.signups, daily.lastWeek?.signups) : null;
+  const dailyIsYesterday = daily?.date === shiftDate(torontoToday(), -1);
 
   const mergesByDay = new Map(mergeDayList.map((d) => [d.date, d.count]));
   const pageMergesByDay = new Map(
@@ -102,8 +97,10 @@ export default async function OverviewPage() {
     });
 
   const stats = mergeStats(mergeDayList);
-  const last7 = points.slice(-7);
-  const prev7 = points.slice(-14, -7);
+  // signup averages use complete days only, so today's partial count can't drag them down
+  const completePoints = points.filter((p) => p.date < torontoToday());
+  const last7 = completePoints.slice(-7);
+  const prev7 = completePoints.slice(-14, -7);
   const avg = (rows: ImpactPoint[]) =>
     rows.length ? rows.reduce((s, r) => s + (r.signups ?? 0), 0) / rows.length : 0;
   const rateAvg = (rows: ImpactPoint[]) =>
@@ -131,11 +128,15 @@ export default async function OverviewPage() {
             <h2>Signups · {formatDay(daily.date)}</h2>
             <span className="standup-caveat">
               Definition: <code>{signupEvent}</code> in Amplitude, unique users.
+              {!dailyIsYesterday &&
+                " Latest complete day in the data; the live feed is behind."}
             </span>
           </div>
           <div className="metric-band standup-band">
             <div className="metric">
-              <span className="metric-label">Signups yesterday</span>
+              <span className="metric-label">
+                {dailyIsYesterday ? "Signups yesterday" : "Signups"}
+              </span>
               <span className="metric-value">{daily.signups}</span>
               <span className="metric-delta">
                 {daily.rate != null
@@ -153,15 +154,12 @@ export default async function OverviewPage() {
               delta={weekDelta}
               detail={daily.lastWeek && `${daily.lastWeek.signups} on ${formatDay(daily.lastWeek.date)}`}
             />
-            <div className="metric">
-              <span className="metric-label">7-day average</span>
-              <span className="metric-value">{avg(last7).toFixed(0)}</span>
-              <span
-                className={`metric-delta ${signupDelta >= 0 ? "metric-up" : "metric-down"}`}
-              >
-                {signupDelta >= 0 ? "▲" : "▼"} {Math.abs(signupDelta).toFixed(1)}% vs prior 7d
-              </span>
-            </div>
+            <DeltaCell
+              label="Site traffic"
+              delta={null}
+              value={daily.traffic.toLocaleString("en-US")}
+              detail="unique visitors that day"
+            />
           </div>
         </section>
       )}

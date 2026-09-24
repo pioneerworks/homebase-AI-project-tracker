@@ -94,7 +94,7 @@ type ProjectNode = {
       sortOrder: number;
     }[];
   };
-  issues: { nodes: IssueNode[] };
+  issues: { nodes: IssueNode[]; pageInfo?: { hasNextPage: boolean; endCursor: string | null } };
   projectUpdates: {
     nodes: { body: string; health: string | null; createdAt: string; url: string | null }[];
   };
@@ -126,6 +126,7 @@ query ProjectOverview($id: String!) {
       }
     }
     issues(first: 250) {
+      pageInfo { hasNextPage endCursor }
       nodes {
         identifier
         title
@@ -148,6 +149,40 @@ query ProjectOverview($id: String!) {
   }
 }
 `;
+
+const moreIssuesQuery = `
+query ProjectIssues($id: String!, $after: String) {
+  project(id: $id) {
+    issues(first: 250, after: $after) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        identifier
+        title
+        url
+        completedAt
+        canceledAt
+        state { name type }
+        assignee { name }
+        projectMilestone { id }
+      }
+    }
+  }
+}
+`;
+
+async function linearQuery<T>(apiKey: string, body: unknown, tag: string): Promise<T> {
+  const response = await fetch(LINEAR_API, {
+    method: "POST",
+    headers: { Authorization: apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    next: { revalidate: CACHE_TTL, tags: [tag] },
+  });
+  if (!response.ok) throw new Error(`Linear API error: ${response.status}`);
+  const json = (await response.json()) as { data?: T; errors?: { message: string }[] };
+  if (json.errors?.length) throw new Error(`Linear GraphQL error: ${json.errors[0].message}`);
+  if (!json.data) throw new Error("Linear API returned no data");
+  return json.data;
+}
 
 async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
   const response = await fetch(`${RELAY_ORIGIN}/api/projects/${key}`, {
@@ -290,32 +325,27 @@ export async function getProjectOverview(slugId: string, key?: string): Promise<
     return fetchRelayOverview(key);
   }
 
-  const response = await fetch(
-    LINEAR_API,
-    {
-      method: "POST",
-      headers: {
-        Authorization: apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query, variables: { id: slugId } }),
-      next: { revalidate: CACHE_TTL, tags: [`linear-project-${slugId}`] },
-    },
+  const tag = `linear-project-${slugId}`;
+  const data = await linearQuery<{ project?: ProjectNode | null }>(
+    apiKey,
+    { query, variables: { id: slugId } },
+    tag,
   );
-
-  if (!response.ok) {
-    throw new Error(`Linear API error: ${response.status}`);
-  }
-
-  const body = (await response.json()) as {
-    data?: { project?: ProjectNode | null };
-    errors?: { message: string }[];
-  };
-  if (body.errors?.length) {
-    throw new Error(`Linear GraphQL error: ${body.errors[0].message}`);
-  }
-  const project = body.data?.project;
+  const project = data.project;
   if (!project) throw new Error(`Linear project not found: ${slugId}`);
+
+  // Large projects (e.g. the admin rebuild) exceed one 250-issue page.
+  let pageInfo = project.issues.pageInfo;
+  for (let page = 0; pageInfo?.hasNextPage && pageInfo.endCursor && page < 8; page++) {
+    const more = await linearQuery<{ project?: { issues: ProjectNode["issues"] } | null }>(
+      apiKey,
+      { query: moreIssuesQuery, variables: { id: slugId, after: pageInfo.endCursor } },
+      tag,
+    );
+    if (!more.project) break;
+    project.issues.nodes.push(...more.project.issues.nodes);
+    pageInfo = more.project.issues.pageInfo;
+  }
 
   return toProjectOverview(project);
 }
