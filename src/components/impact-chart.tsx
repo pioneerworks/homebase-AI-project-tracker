@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { MergeDay, MergedPr } from "@/lib/merges";
+import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/merges";
 import type { SignupDay } from "@/lib/signup-data";
 
 const REPO = "marketing-site-payload";
@@ -23,6 +23,8 @@ export type ImpactPoint = {
   signups: number | null;
   rate: number | null;
   merges: number | null;
+  pageMerges: number | null;
+  otherMerges: number | null;
 };
 
 const dayLabel = (iso: string) =>
@@ -79,6 +81,12 @@ function ImpactTooltip({
           <span className="impact-tooltip-hint">click for details</span>
         </div>
       )}
+      {point.pageMerges != null && point.pageMerges > 0 && (
+        <div className="impact-tooltip-row">
+          <span className="impact-dot impact-dot-page" /> Touching a page:{" "}
+          <strong>{point.pageMerges}</strong>
+        </div>
+      )}
       {sampleNote && <div className="impact-tooltip-note">{sampleNote}</div>}
     </div>
   );
@@ -86,6 +94,7 @@ function ImpactTooltip({
 
 function PrRow({ pr }: { pr: MergedPr }) {
   const ticket = pr.title.match(/\b([A-Z]{3,7}-\d+)\b/)?.[1];
+  const touch = classifyPageTouch(pr);
   return (
     <li className="pr-row">
       <a
@@ -99,6 +108,21 @@ function PrRow({ pr }: { pr: MergedPr }) {
       </a>
       <span className="pr-row-meta">
         {ticket && <span className="pr-row-ticket">{ticket}</span>}
+        <span
+          className={`pr-row-touch ${touch.touchesPage ? "pr-row-touch-page" : "pr-row-touch-infra"}`}
+          title={
+            touch.touchesPage
+              ? touch.source === "label"
+                ? "Touches a page (GitHub label)"
+                : "Touches a page (inferred)"
+              : touch.source === "label"
+                ? "Infrastructure (GitHub label)"
+                : "Infrastructure (inferred)"
+          }
+        >
+          {touch.touchesPage ? "page" : "infra"}
+        </span>
+        {touch.route && <span className="pr-row-route">{touch.route}</span>}
         {pr.labels.slice(0, 2).map((label) => (
           <span key={label} className="pr-row-label">
             {label}
@@ -120,6 +144,7 @@ export default function ImpactChart({
   sampleNote?: string;
 }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [view, setView] = useState<"all" | "page">("all");
   const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
   const selectedPoint = points.find((p) => p.date === selectedDate) ?? null;
 
@@ -130,6 +155,24 @@ export default function ImpactChart({
 
   return (
     <div className="impact-chart">
+      <div className="impact-chart-head">
+        <div className="impact-toggle" role="group" aria-label="Merge view">
+          <button
+            type="button"
+            aria-pressed={view === "all"}
+            onClick={() => setView("all")}
+          >
+            All PRs
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "page"}
+            onClick={() => setView("page")}
+          >
+            Page-touching only
+          </button>
+        </div>
+      </div>
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
@@ -154,16 +197,32 @@ export default function ImpactChart({
           <Tooltip content={<ImpactTooltip sampleNote={sampleNote} />} />
           <Bar
             yAxisId="signups"
-            dataKey="merges"
-            name="PRs merged"
+            dataKey="pageMerges"
+            stackId="merges"
+            name="PRs touching a page"
             fill="var(--primary)"
-            fillOpacity={0.28}
-            radius={[2, 2, 0, 0]}
+            fillOpacity={0.9}
+            radius={view === "all" ? [0, 0, 0, 0] : [2, 2, 0, 0]}
             barSize={9}
             isAnimationActive={false}
             onClick={handleBarClick}
             cursor="pointer"
           />
+          {view === "all" && (
+            <Bar
+              yAxisId="signups"
+              dataKey="otherMerges"
+              stackId="merges"
+              name="Other PRs"
+              fill="var(--surface-strong)"
+              fillOpacity={1}
+              radius={[2, 2, 0, 0]}
+              barSize={9}
+              isAnimationActive={false}
+              onClick={handleBarClick}
+              cursor="pointer"
+            />
+          )}
           <Area
             yAxisId="signups"
             type="monotone"
@@ -198,9 +257,15 @@ export default function ImpactChart({
           <span className="impact-dot impact-dot-rate" /> Signup rate (signups ÷ traffic)
         </span>
         <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-merges" /> PRs merged ({REPO}) — click a bar
-          to inspect
+          <span className="impact-dot impact-dot-merges" /> PRs touching a page (
+          {REPO})
         </span>
+        {view === "all" && (
+          <span className="impact-legend-item">
+            <span className="impact-dot impact-dot-other" /> Other PRs (infra,
+            deps, docs) — click a bar to inspect
+          </span>
+        )}
       </div>
 
       {selectedDate && (
@@ -230,7 +295,13 @@ export default function ImpactChart({
           {selectedDay && selectedDay.prs.length > 0 ? (
             <>
               <p className="impact-drilldown-count">
-                {selectedDay.prs.length} PR{selectedDay.prs.length > 1 ? "s" : ""} merged
+                {selectedDay.prs.length} PR{selectedDay.prs.length > 1 ? "s" : ""}{" "}
+                merged ·{" "}
+                {
+                  selectedDay.prs.filter((pr) => classifyPageTouch(pr).touchesPage)
+                    .length
+                }{" "}
+                touch a page
               </p>
               <ul className="pr-list">
                 {selectedDay.prs.map((pr) => (
