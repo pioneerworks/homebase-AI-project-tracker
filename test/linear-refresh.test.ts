@@ -38,10 +38,12 @@ function projectResponse(
 
 function projectUpdatesResponse(
   nodes: Array<Record<string, unknown>> = [],
+  description: string | null = null,
 ): Response {
   return Response.json({
     data: {
       project: {
+        description,
         projectUpdates: { nodes },
       },
     },
@@ -134,16 +136,34 @@ test("fetches each Linear project separately and follows pagination", async () =
         ]);
       }
       if (request.variables.project === ACTIVE_PROJECTS[0].id) {
-        return projectUpdatesResponse([
-          {
-            id: "active-project-update-test",
-            body: "Payload readiness is moving through the merge queue.",
-            health: "onTrack",
-            url: "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
-            createdAt: now,
-            updatedAt: now,
-          },
-        ]);
+        return projectUpdatesResponse(
+          [
+            {
+              id: "active-project-update-test",
+              body: "Payload readiness is moving through the merge queue.",
+              health: "onTrack",
+              url: "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+          "Take Payload from **just migrated** to marketing-ready.",
+        );
+      }
+      if (request.variables.project === ACTIVE_PROJECTS[1].id) {
+        return projectUpdatesResponse(
+          [],
+          [
+            "Agent-run execution on the marketing site across the",
+            "Atrium and Culina agent fleets.",
+            "",
+            "## Goals",
+            "- Ship page work, fixes, and experiments at scale.",
+          ].join("\n"),
+        );
+      }
+      if (request.variables.project === ACTIVE_PROJECTS[2].id) {
+        return projectUpdatesResponse([], "word ".repeat(50));
       }
       return projectUpdatesResponse();
     }
@@ -319,7 +339,34 @@ test("fetches each Linear project separately and follows pagination", async () =
     activeProject.latestUpdate?.url,
     "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
   );
-  assert.equal(requests.length, 27);
+  assert.equal(
+    activeProject.description,
+    "Take Payload from just migrated to marketing-ready.",
+  );
+  const noUpdateProject = snapshot.activeProjects.find(
+    (project) => project.id === ACTIVE_PROJECTS[1].key,
+  );
+  if (!noUpdateProject) throw new Error("active project missing from snapshot");
+  assert.equal(noUpdateProject.latestUpdate, null);
+  assert.equal(
+    noUpdateProject.description,
+    "Agent-run execution on the marketing site across the Atrium and Culina agent fleets. Ship page work, fixes, and experiments at scale.",
+  );
+  const truncatedProject = snapshot.activeProjects.find(
+    (project) => project.id === ACTIVE_PROJECTS[2].key,
+  );
+  if (!truncatedProject) throw new Error("active project missing from snapshot");
+  // 50 "word "s collapse to 249 chars; the cut at 238 lands mid-word ("wor|d"),
+  // so it backs up to the last word break instead of chopping the word.
+  assert.equal(
+    truncatedProject.description,
+    `${"word ".repeat(47).trimEnd()}…`,
+  );
+  const bareProject = snapshot.activeProjects.find(
+    (project) => project.id === ACTIVE_PROJECTS[3].key,
+  );
+  assert.equal(bareProject?.description, null);
+  assert.equal(requests.length, 29);
   assert.deepEqual(
     requests
       .filter((request) => request.after === null)

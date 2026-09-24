@@ -84,6 +84,15 @@ export const ACTIVE_PROJECTS: ProjectConfig[] = [
     shortName: "Feedback tool",
     url: "https://linear.app/joinhomebase/project/agent-friendly-feedback-tool-for-landing-pages-4ebbfc1e8d7b",
   },
+  {
+    // Linear's project(id:) lookup accepts the slugId as well as the UUID
+    // (see getProjectOverview in linear-projects.ts).
+    id: "098422f41fd9",
+    key: "payload-admin-rebuild",
+    name: "Payload admin rebuild — from stock Payload to Braveen's design",
+    shortName: "Admin rebuild",
+    url: "https://linear.app/joinhomebase/project/payload-admin-rebuild-from-stock-payload-to-braveens-design-098422f41fd9",
+  },
 ];
 
 export const DECISIONS_PROJECT: ProjectConfig = {
