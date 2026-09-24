@@ -1,5 +1,6 @@
 import AppShell from "@/components/app-shell";
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
+import { amplitudeConfig } from "@/lib/amplitude";
 import { getMergeDays, mergeStats, pageTouchCount } from "@/lib/merges";
 import { getSignupSeries } from "@/lib/omni";import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -17,6 +18,7 @@ export default async function OverviewPage() {
 
   const [{ days: mergeDayList, source: mergeSource }, signupSeries] =
     await Promise.all([getMergeDays(MERGE_REPO), getSignupSeries()]);
+  const signupEvent = amplitudeConfig()?.signupEvent ?? "Owner Account Created";
 
   const mergesByDay = new Map(mergeDayList.map((d) => [d.date, d.count]));
   const pageMergesByDay = new Map(
@@ -118,8 +120,10 @@ export default async function OverviewPage() {
             <code>page-touch</code> or <code>infra</code> GitHub label overrides
             the heuristic.
             {signupSeries.source === "amplitude"
-              ? " Signups (Owner Account Created) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot, which counts Owner Sign Up."
-              : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP); signups in this snapshot count Owner Sign Up; signup rate = signups ÷ traffic."}
+              ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot, which counts Owner Sign Up. Signup rate = signups ÷ traffic.`
+              : signupSeries.source === "omni"
+                ? " Signups and conversion rate are live from Omni."
+                : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP; signups count Owner Sign Up). Signup rate = signups ÷ traffic."}
           </p>
         </section>
 
