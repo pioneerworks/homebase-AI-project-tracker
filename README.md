@@ -122,6 +122,15 @@ landing-page feedback tool, and the Payload admin rebuild). Each hourly refresh
 pulls their full issue inventory, latest project updates, and project
 descriptions into the “Active projects” section.
 
+The AI project tracker (overview and `/projects/[key]`) reads each tracked
+project's lead, health, and Linear project milestones. Cards show the owner,
+health, and the next open milestone with its due date; project pages list every
+milestone with its progress and issues (state and assignee). A project with no
+update posted yet shows its full Linear brief (the project overview document).
+The overview also opens with yesterday's signups for daily standup, compared
+with the day before and the same weekday last week. Today's partial day is
+skipped. The signup definition is labelled as not yet agreed with V.
+
 Both dashboard tabs open with a stakeholder recap generated from the same Linear
 snapshot as the detailed tracker. Page Migration only uses the five page-pillar
 projects and migration decisions. Hosting Cutover only uses the dedicated Hosting

@@ -1,5 +1,6 @@
-import { getProjectOverview } from "@/lib/linear-projects";
+import { getProjectOverview, type ProjectHealth } from "@/lib/linear-projects";
 import { getSessionUser } from "@/lib/oidc-session";
+import { torontoToday } from "@/lib/standup";
 import { trackerProject, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -101,6 +102,32 @@ function UpdateBody({ body }: { body: string }) {
   return <div className="update-body">{blocks}</div>;
 }
 
+/** Date-only Linear values (YYYY-MM-DD) are UTC midnight; format them in UTC. */
+function formatDate(value: string, withYear = false): string {
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  return new Date(dateOnly ? `${value}T00:00:00Z` : value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(withYear ? { year: "numeric" } : {}),
+    ...(dateOnly ? { timeZone: "UTC" } : { timeZone: "America/Toronto" }),
+  });
+}
+
+function isOverdue(targetDate: string | null, progress: number): boolean {
+  return Boolean(targetDate && progress < 100 && targetDate < torontoToday());
+}
+
+const HEALTH_LABEL: Record<ProjectHealth, string> = {
+  onTrack: "On track",
+  atRisk: "At risk",
+  offTrack: "Off track",
+};
+
+function HealthPill({ health }: { health: ProjectHealth | null }) {
+  if (!health) return <span className="health-pill health-none">Not set</span>;
+  return <span className={`health-pill health-${health}`}>{HEALTH_LABEL[health]}</span>;
+}
+
 export default async function ProjectPage({
   params,
 }: {
@@ -123,6 +150,8 @@ export default async function ProjectPage({
 
   const purpose = overview?.description?.trim() || project.shortPurpose;
   const latest = overview?.updates[0];
+  // No project update posted yet: fall back to the brief its creators wrote.
+  const brief = overview?.content ?? overview?.description?.trim() ?? null;
 
   return (
     <div className="page">
@@ -164,31 +193,104 @@ export default async function ProjectPage({
               <span className="metric-delta">{overview.counts.unstarted} queued · {overview.counts.backlog} backlog</span>
             </div>
             <div className="metric">
-              <span className="metric-label">Linear status</span>
+              <span className="metric-label">Owner</span>
               <span className="metric-value metric-value-sm">
-                {overview.statusName ?? "—"}
+                {overview.lead ?? "No lead set"}
               </span>
               <span className="metric-delta">
+                {overview.statusName ?? "—"} ·{" "}
                 {overview.targetDate
-                  ? `target ${new Date(overview.targetDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+                  ? `target ${formatDate(overview.targetDate, true)}`
                   : "no target date"}
               </span>
             </div>
             <div className="metric">
-              <span className="metric-label">Latest update</span>
+              <span className="metric-label">Health</span>
               <span className="metric-value metric-value-sm">
-                {latest?.health ?? "—"}
+                <HealthPill health={overview.health} />
               </span>
               <span className="metric-delta">
                 {latest
-                  ? new Date(latest.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
+                  ? `last update ${formatDate(latest.createdAt)}`
                   : "no project updates"}
               </span>
             </div>
           </section>
+
+          <section className="section" aria-label="Milestones">
+            <div className="section-head">
+              <h2>Milestones</h2>
+            </div>
+            {overview.milestones.length === 0 ? (
+              <p className="empty-message">
+                No milestones set in Linear yet. Add them on the project so
+                progress and due dates show here.
+              </p>
+            ) : (
+              <ol className="milestone-list">
+                {overview.milestones.map((m) => (
+                  <li
+                    key={m.id}
+                    className={`milestone${m.progress >= 100 ? " milestone-done" : ""}${
+                      isOverdue(m.targetDate, m.progress) ? " milestone-overdue" : ""
+                    }`}
+                  >
+                    <div className="milestone-head">
+                      <strong>{m.name}</strong>
+                      <span className="milestone-meta">
+                        {m.targetDate ? `due ${formatDate(m.targetDate)}` : "no due date"}
+                        {isOverdue(m.targetDate, m.progress) && " · overdue"} · {m.progress}%
+                      </span>
+                    </div>
+                    <div
+                      className="milestone-bar"
+                      role="progressbar"
+                      aria-valuenow={m.progress}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${m.name} progress`}
+                    >
+                      <span style={{ width: `${m.progress}%` }} />
+                    </div>
+                    {m.description && <p className="milestone-description">{m.description}</p>}
+                    {m.issues.length > 0 && (
+                      <ul className="milestone-issues">
+                        {m.issues.map((issue) => (
+                          <li key={issue.identifier}>
+                            <a href={issue.url} target="_blank" rel="noreferrer">
+                              <span className="milestone-issue-id">{issue.identifier}</span>{" "}
+                              {issue.title}
+                            </a>
+                            <span className="milestone-issue-meta">
+                              {issue.stateName}
+                              {issue.assignee ? ` · ${issue.assignee}` : " · unassigned"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+
+          {!latest && brief && (
+            <section className="section" aria-label="Project brief">
+              <div className="section-head">
+                <h2>Project brief</h2>
+                <a href={project.linearUrl} target="_blank" rel="noreferrer">
+                  View in Linear ↗
+                </a>
+              </div>
+              <div className="recap-card">
+                <p className="brief-note">
+                  No project update posted yet, so this is the brief from Linear.
+                </p>
+                <UpdateBody body={brief} />
+              </div>
+            </section>
+          )}
 
           {latest && (
             <section className="section" aria-label="Latest Linear update">

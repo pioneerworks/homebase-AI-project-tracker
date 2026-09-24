@@ -1,6 +1,12 @@
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import { amplitudeConfig } from "@/lib/amplitude";
+import {
+  getProjectOverview,
+  nextMilestone,
+  type ProjectHealth,
+} from "@/lib/linear-projects";
 import { getMergeDays, mergeStats, pageTouchCount } from "@/lib/merges";
+import { dailySignupSummary, pctChange, torontoToday } from "@/lib/standup";
 import { getSignupSeries } from "@/lib/omni";
 import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -13,13 +19,66 @@ const MERGE_REPO = "marketing-site-payload";
 // Chart window: Jun 1 2026 onward
 const CHART_START = "2026-06-01";
 
+function formatDay(date: string): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function DeltaCell({
+  label,
+  delta,
+  detail,
+}: {
+  label: string;
+  delta: number | null;
+  detail: string | null;
+}) {
+  return (
+    <div className="metric">
+      <span className="metric-label">{label}</span>
+      <span
+        className={`metric-value${delta == null ? "" : delta >= 0 ? " metric-up" : " metric-down"}`}
+      >
+        {delta == null ? "—" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`}
+      </span>
+      <span className="metric-delta">{detail ?? "no data for that day"}</span>
+    </div>
+  );
+}
+
+const HEALTH_LABEL: Record<ProjectHealth, string> = {
+  onTrack: "On track",
+  atRisk: "At risk",
+  offTrack: "Off track",
+};
+
+function HealthPill({ health }: { health: ProjectHealth | null }) {
+  if (!health) return <span className="health-pill health-none">No health</span>;
+  return <span className={`health-pill health-${health}`}>{HEALTH_LABEL[health]}</span>;
+}
+
 export default async function OverviewPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login?callbackUrl=/");
 
-  const [{ days: mergeDayList, source: mergeSource }, signupSeries] =
-    await Promise.all([getMergeDays(MERGE_REPO), getSignupSeries()]);
-  const signupEvent = amplitudeConfig()?.signupEvent;
+  const [{ days: mergeDayList, source: mergeSource }, signupSeries, overviews] =
+    await Promise.all([
+      getMergeDays(MERGE_REPO),
+      getSignupSeries(),
+      Promise.all(
+        TRACKER_PROJECTS.map((p) =>
+          getProjectOverview(p.linearSlugId, p.key).catch(() => null),
+        ),
+      ),
+    ]);
+  const signupEvent = amplitudeConfig()?.signupEvent ?? "Owner Account Created";
+  const daily = dailySignupSummary(signupSeries.days, torontoToday());
+  const dayDelta = daily ? pctChange(daily.signups, daily.prevDay?.signups) : null;
+  const weekDelta = daily ? pctChange(daily.signups, daily.lastWeek?.signups) : null;
 
   const mergesByDay = new Map(mergeDayList.map((d) => [d.date, d.count]));
   const pageMergesByDay = new Map(
@@ -65,6 +124,48 @@ export default async function OverviewPage() {
           conversion.
         </p>
       </header>
+
+      {daily && (
+        <section className="section standup" aria-label="Daily signups for standup">
+          <div className="section-head">
+            <h2>Signups · {formatDay(daily.date)}</h2>
+            <span className="standup-caveat">
+              Definition: <code>{signupEvent}</code> in Amplitude, unique users.
+              Not yet agreed with V.
+            </span>
+          </div>
+          <div className="metric-band standup-band">
+            <div className="metric">
+              <span className="metric-label">Signups yesterday</span>
+              <span className="metric-value">{daily.signups}</span>
+              <span className="metric-delta">
+                {daily.rate != null
+                  ? `${(daily.rate * 100).toFixed(2)}% of site traffic`
+                  : "traffic not captured"}
+              </span>
+            </div>
+            <DeltaCell
+              label="vs day before"
+              delta={dayDelta}
+              detail={daily.prevDay && `${daily.prevDay.signups} on ${formatDay(daily.prevDay.date)}`}
+            />
+            <DeltaCell
+              label="vs same day last week"
+              delta={weekDelta}
+              detail={daily.lastWeek && `${daily.lastWeek.signups} on ${formatDay(daily.lastWeek.date)}`}
+            />
+            <div className="metric">
+              <span className="metric-label">7-day average</span>
+              <span className="metric-value">{avg(last7).toFixed(0)}</span>
+              <span
+                className={`metric-delta ${signupDelta >= 0 ? "metric-up" : "metric-down"}`}
+              >
+                {signupDelta >= 0 ? "▲" : "▼"} {Math.abs(signupDelta).toFixed(1)}% vs prior 7d
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="metric-band metric-band-five" aria-label="Last 7 days vs previous 7 days">
         <div className="metric">
@@ -132,15 +233,43 @@ export default async function OverviewPage() {
           <h2>Active projects</h2>
         </div>
         <div className="project-grid">
-          {TRACKER_PROJECTS.map((p) => (
-            <Link key={p.key} className="project-card" href={`/projects/${p.key}`}>
-              <span className="project-card-name">{p.name}</span>
-              <span className="project-card-purpose">{p.shortPurpose}</span>
-              <span className="project-card-meta">
-                Linear · {p.repos.length} repo{p.repos.length > 1 ? "s" : ""} tracked
-              </span>
-            </Link>
-          ))}
+          {TRACKER_PROJECTS.map((p, index) => {
+            const overview = overviews[index];
+            const next = overview ? nextMilestone(overview.milestones) : null;
+            const overdue = Boolean(
+              next?.targetDate && next.targetDate < torontoToday(),
+            );
+            return (
+              <Link key={p.key} className="project-card" href={`/projects/${p.key}`}>
+                <span className="project-card-top">
+                  <span className="project-card-name">{p.name}</span>
+                  {overview && <HealthPill health={overview.health} />}
+                </span>
+                <span className="project-card-purpose">{p.shortPurpose}</span>
+                {overview && (
+                  <span className={`project-card-next${overdue ? " project-card-overdue" : ""}`}>
+                    {next ? (
+                      <>
+                        Next: <strong>{next.name}</strong> · {next.progress}%
+                        {next.targetDate
+                          ? ` · due ${formatDay(next.targetDate)}${overdue ? " (overdue)" : ""}`
+                          : " · no due date"}
+                      </>
+                    ) : overview.milestones.length ? (
+                      "All milestones complete"
+                    ) : (
+                      "No milestones set in Linear"
+                    )}
+                  </span>
+                )}
+                <span className="project-card-meta">
+                  {overview
+                    ? `${overview.lead ?? "No lead"} · ${overview.counts.completionPct}% of issues done`
+                    : "Linear data unavailable"}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>
