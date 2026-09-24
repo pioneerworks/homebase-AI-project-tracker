@@ -1,5 +1,6 @@
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
-import { getMergeDays, mergeStats } from "@/lib/merges";
+import { amplitudeConfig } from "@/lib/amplitude";
+import { getMergeDays, mergeStats, pageTouchCount } from "@/lib/merges";
 import { getSignupSeries } from "@/lib/omni";
 import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -18,18 +19,28 @@ export default async function OverviewPage() {
 
   const [{ days: mergeDayList, source: mergeSource }, signupSeries] =
     await Promise.all([getMergeDays(MERGE_REPO), getSignupSeries()]);
+  const signupEvent = amplitudeConfig()?.signupEvent;
 
   const mergesByDay = new Map(mergeDayList.map((d) => [d.date, d.count]));
+  const pageMergesByDay = new Map(
+    mergeDayList.map((d) => [d.date, pageTouchCount(d.prs)]),
+  );
 
   // align both series on the signup calendar, chart window starts Jun 1 2026
   const points: ImpactPoint[] = signupSeries.days
     .filter((s) => s.date >= CHART_START)
-    .map((s) => ({
-      date: s.date,
-      signups: s.signups,
-      rate: s.rate,
-      merges: mergesByDay.get(s.date) ?? 0,
-    }));
+    .map((s) => {
+      const merges = mergesByDay.get(s.date) ?? 0;
+      const pageMerges = pageMergesByDay.get(s.date) ?? 0;
+      return {
+        date: s.date,
+        signups: s.signups,
+        rate: s.rate,
+        merges,
+        pageMerges,
+        otherMerges: merges - pageMerges,
+      };
+    });
 
   const stats = mergeStats(mergeDayList);
   const last7 = points.slice(-7);
@@ -41,6 +52,7 @@ export default async function OverviewPage() {
   const signupDelta = prev7.length ? (avg(last7) / avg(prev7) - 1) * 100 : 0;
   const rateDelta = prev7.length ? (rateAvg(last7) - rateAvg(prev7)) * 100 : 0;
   const mergesLast7 = last7.reduce((s, r) => s + (r.merges ?? 0), 0);
+  const pageMergesLast7 = last7.reduce((s, r) => s + (r.pageMerges ?? 0), 0);
 
   return (
     <div className="page">
@@ -54,7 +66,7 @@ export default async function OverviewPage() {
         </p>
       </header>
 
-      <section className="metric-band" aria-label="Last 7 days vs previous 7 days">
+      <section className="metric-band metric-band-five" aria-label="Last 7 days vs previous 7 days">
         <div className="metric">
           <span className="metric-label">Signups / day (7d avg)</span>
           <span className="metric-value">{avg(last7).toFixed(0)}</span>
@@ -76,7 +88,16 @@ export default async function OverviewPage() {
         <div className="metric">
           <span className="metric-label">PRs merged (7d)</span>
           <span className="metric-value">{mergesLast7}</span>
-          <span className="metric-delta">{stats.total} total since {stats.firstMergeDay}</span>
+          <span className="metric-delta">
+            {stats.total} total since {stats.firstMergeDay}
+          </span>
+        </div>
+        <div className="metric">
+          <span className="metric-label">Page-touching PRs (7d)</span>
+          <span className="metric-value">{pageMergesLast7}</span>
+          <span className="metric-delta">
+            {mergesLast7 - pageMergesLast7} infra · of {mergesLast7} merged (7d)
+          </span>
         </div>
         <div className="metric">
           <span className="metric-label">Active projects</span>
@@ -93,10 +114,16 @@ export default async function OverviewPage() {
         <p className="section-note">
           Bars show merged PRs per day from {MERGE_REPO} (
           {mergeSource === "github" ? "live from GitHub" : "seeded snapshot"}
-          ) — click a bar to see exactly which PRs merged that day.
+          ) — orange is PRs that touch a page (design, copy, or a route), gray
+          is infrastructure. Click a bar to see exactly which PRs merged that
+          day and how each was classified. An explicit{" "}
+          <code>page-touch</code> or <code>infra</code> GitHub label overrides
+          the heuristic.
           {signupSeries.source === "amplitude"
-            ? " Signups and traffic are live from the Amplitude Export API (unique users)."
-            : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP); signup rate = signups ÷ traffic."}
+            ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot, which counts Owner Sign Up. Signup rate = signups ÷ traffic.`
+            : signupSeries.source === "omni"
+              ? " Signups are live from Omni."
+              : " Signups and traffic are real Amplitude data (unique users, captured via Amplitude MCP; signups count Owner Sign Up). Signup rate = signups ÷ traffic."}
         </p>
       </section>
 

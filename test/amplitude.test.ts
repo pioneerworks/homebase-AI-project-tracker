@@ -10,7 +10,7 @@ import { mergeSignupSources } from "../src/lib/omni";
 import type { SignupDay } from "../src/lib/signup-data";
 
 const config = {
-  signupEvent: "Owner Sign Up",
+  signupEvent: "Owner Account Created",
   pageviewEvent: "Page Viewed",
   productAreaPrefix: "mw_",
 };
@@ -28,7 +28,7 @@ test("aggregateFromLines counts unique users per day with funnel filters", () =>
   const lines = [
     // qualifying pageview + signup for u1
     ev({ event_type: "Page Viewed" }),
-    ev({ event_type: "Owner Sign Up" }),
+    ev({ event_type: "Owner Account Created" }),
     // same user again — must not double count
     ev({ event_type: "Page Viewed", event_time: "2026-09-01T20:00:00Z" }),
     // second user pageview only
@@ -38,7 +38,7 @@ test("aggregateFromLines counts unique users per day with funnel filters", () =>
     // non-mw product area excluded
     ev({ user_id: "u4", event_properties: { product_area: "blog", device_family: "Mac" } }),
     // signup without pageview counts toward signups only
-    ev({ user_id: "u5", event_type: "Owner Sign Up" }),
+    ev({ user_id: "u5", event_type: "Owner Account Created" }),
     // next day pageview
     ev({ user_id: "u2", event_time: "2026-09-02T10:00:00Z", event_type: "Page Viewed" }),
     // other event types ignored
@@ -82,11 +82,19 @@ test("amplitudeConfig ignores masked or missing credentials", () => {
     {
       apiKey: "k",
       secret: "s",
-      signupEvent: "Owner Sign Up",
+      signupEvent: "Owner Account Created",
       pageviewEvent: "Page Viewed",
       productAreaPrefix: "mw_",
       windowDays: 30,
     },
+  );
+  assert.equal(
+    amplitudeConfig({
+      AMPLITUDE_API_KEY: "k",
+      AMPLITUDE_SECRET: "s",
+      AMPLITUDE_SIGNUP_EVENT: "Custom Event",
+    })?.signupEvent,
+    "Custom Event",
   );
 });
 

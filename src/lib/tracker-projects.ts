@@ -75,6 +75,17 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
       "Make Figma the front door to the agent pipeline, with a master brand-safe design file as the source of truth for agent work.",
     repos: ["marketing-site-payload"],
   },
+  {
+    key: "payload-admin-rebuild",
+    name: "Payload admin rebuild — from stock Payload to Braveen's design",
+    linearSlugId: "098422f41fd9",
+    linearUrl:
+      "https://linear.app/joinhomebase/project/payload-admin-rebuild-from-stock-payload-to-braveens-design-098422f41fd9/overview",
+    status: "active",
+    shortPurpose:
+      "Rebuild the Payload admin panel from the stock CMS to Braveen's design so editors get a purpose-built workspace.",
+    repos: ["marketing-site-payload"],
+  },
 ];
 
 export const DONE_PROJECTS = [
