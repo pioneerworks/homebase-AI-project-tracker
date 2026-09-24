@@ -162,6 +162,9 @@ test("fetches each Linear project separately and follows pagination", async () =
           ].join("\n"),
         );
       }
+      if (request.variables.project === ACTIVE_PROJECTS[2].id) {
+        return projectUpdatesResponse([], "word ".repeat(50));
+      }
       return projectUpdatesResponse();
     }
     if (
@@ -347,10 +350,20 @@ test("fetches each Linear project separately and follows pagination", async () =
   assert.equal(noUpdateProject.latestUpdate, null);
   assert.equal(
     noUpdateProject.description,
-    "Agent-run execution on the marketing site across the Atrium and Culina agent fleets. Goals Ship page work, fixes, and experiments at scale.",
+    "Agent-run execution on the marketing site across the Atrium and Culina agent fleets. Ship page work, fixes, and experiments at scale.",
+  );
+  const truncatedProject = snapshot.activeProjects.find(
+    (project) => project.id === ACTIVE_PROJECTS[2].key,
+  );
+  if (!truncatedProject) throw new Error("active project missing from snapshot");
+  // 50 "word "s collapse to 249 chars; the cut at 238 lands mid-word ("wor|d"),
+  // so it backs up to the last word break instead of chopping the word.
+  assert.equal(
+    truncatedProject.description,
+    `${"word ".repeat(47).trimEnd()}…`,
   );
   const bareProject = snapshot.activeProjects.find(
-    (project) => project.id === ACTIVE_PROJECTS[2].key,
+    (project) => project.id === ACTIVE_PROJECTS[3].key,
   );
   assert.equal(bareProject?.description, null);
   assert.equal(requests.length, 29);

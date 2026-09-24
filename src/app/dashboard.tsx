@@ -10,8 +10,13 @@ import type {
   TrackedIssue,
 } from "@/lib/types";
 import type { SessionUser } from "@/lib/auth-core";
+import { ACTIVE_PROJECTS } from "@/lib/projects";
 
 const pollInterval = 60_000;
+const activeProjectList = (() => {
+  const names = ACTIVE_PROJECTS.map((project) => project.shortName);
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+})();
 const statusLabels: Record<PageStatus, string> = {
   done: "Done",
   active: "Active",
@@ -631,11 +636,9 @@ export default function Dashboard({
                 <span className="section-kicker">Next phase</span>
                 <h2>Active projects</h2>
                 <p>
-                  The Linear projects carrying the site’s next phase of work:
-                  Payload CMS readiness, execution agents, internal linking,
-                  self-serve site changes, the marketing context layer, the
-                  landing-page feedback tool, and the Payload admin rebuild.
-                  Polled hourly, along with their latest project updates.
+                  The Linear projects carrying the site’s next phase of work:{" "}
+                  {activeProjectList}. Polled hourly, along with their latest
+                  project updates and briefs.
                 </p>
               </div>
             </div>
@@ -673,7 +676,7 @@ export default function Dashboard({
                     ) : (
                       project.description && (
                         <p className="active-project-brief">
-                          <span className="brief-kicker">From the brief</span>
+                          <span className="brief-kicker">From the brief</span>{" "}
                           {project.description}
                         </p>
                       )

@@ -61,7 +61,7 @@ interface LinearProjectUpdate {
 
 interface LinearProjectUpdatesResult {
   updates: LinearProjectUpdate[];
-  description: string | null;
+  description?: string | null;
 }
 
 interface LinearSnapshotData {
@@ -609,19 +609,43 @@ function latestProjectUpdate(
 /**
  * Plain-text summary of the project description written by its creators in
  * Linear. Shown for active projects that have not posted an update yet.
+ * Unlike cleanMarkdownLine (built for one-line excerpts), this keeps inline
+ * punctuation like underscores intact across multi-line briefs.
  */
 function projectBrief(description: string | null | undefined): string | null {
   if (!description) return null;
   const text = description
     .split("\n")
-    .map((line) => cleanMarkdownLine(line))
+    .filter((line) => !/^\s*#{1,6}\s/.test(line))
+    .map(briefLine)
     .filter(Boolean)
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
   if (!text) return null;
   if (text.length <= 240) return text;
-  return `${text.slice(0, 237).replace(/\s+\S*$/, "").trim()}…`;
+  // Cut at 238, but only back up to the previous word break when the cut
+  // lands mid-word, so whole words are not dropped at a boundary.
+  const cut = text.slice(0, 238);
+  const clipped = /\S/.test(text[238] ?? "")
+    ? cut.replace(/\s+\S*$/, "")
+    : cut;
+  return `${clipped.trimEnd()}…`;
+}
+
+/** Clean one line of a project brief without mangling inline underscores. */
+function briefLine(line: string): string {
+  return line
+    .replace(/!\[[^\]]*]\([^)]*\)/g, "") // images: drop entirely
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1") // links: keep the label
+    .replace(/\*\*([^*]+)\*\*/g, "$1") // bold
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1") // italic
+    .replace(/(^|[\s(])_([^_]+)_(?=$|[\s).,;:!?])/, "$1$2")
+    .replace(/`([^`]+)`/g, "$1") // inline code
+    .replace(/^\s*(?:[-*+]|\d+[.)])\s+/, "") // list marker
+    .replace(/^\s*>\s?/, "") // blockquote marker
+    .trim();
 }
 
 function recapDetail(issue: LinearIssue): string | null {
@@ -1509,7 +1533,6 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
     mainUpdates,
     pageUpdates: {
       updates: pageUpdateResults.flatMap((result) => result.updates),
-      description: null,
     },
     hostingUpdates,
     activeProjectUpdates: activeUpdateResults,
