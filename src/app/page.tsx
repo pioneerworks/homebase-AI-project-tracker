@@ -1,9 +1,11 @@
 import AppShell from "@/components/app-shell";
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import { getMergeDays, mergeStats } from "@/lib/merges";
-import { getSignupSeries } from "@/lib/omni";import { getSessionUser } from "@/lib/oidc-session";
+import { getSignupSeries } from "@/lib/omni";
+import { getSessionUser } from "@/lib/oidc-session";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -106,13 +108,13 @@ export default async function OverviewPage() {
           </div>
           <div className="project-grid">
             {TRACKER_PROJECTS.map((p) => (
-              <a key={p.key} className="project-card" href={`/projects/${p.key}`}>
+              <Link key={p.key} className="project-card" href={`/projects/${p.key}`}>
                 <span className="project-card-name">{p.name}</span>
                 <span className="project-card-purpose">{p.shortPurpose}</span>
                 <span className="project-card-meta">
                   Linear · {p.repos.length} repo{p.repos.length > 1 ? "s" : ""} tracked
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
