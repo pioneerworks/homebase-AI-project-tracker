@@ -2,10 +2,10 @@
  * Amplitude funnel series via the Export API.
  *
  * Reproduces the team's Amplitude funnel chart ("Page Viewed" filtered to
- * product_area mw_* and device != Linux → "Owner Sign Up", unique users,
- * conversion over time) as a daily series:
+ * product_area mw_* and device != Linux → "Owner Account Created", unique
+ * users, conversion over time) as a daily series:
  *   traffic = unique users with a qualifying Page Viewed that day
- *   signups = unique users with Owner Sign Up that day
+ *   signups = unique users with Owner Account Created that day
  *   rate    = signups / traffic
  *
  * Uses the Export API (Basic auth with the project API key + secret) which
@@ -43,7 +43,7 @@ export function amplitudeConfig(
   return {
     apiKey,
     secret,
-    signupEvent: env.AMPLITUDE_SIGNUP_EVENT?.trim() || "Owner Sign Up",
+    signupEvent: env.AMPLITUDE_SIGNUP_EVENT?.trim() || "Owner Account Created",
     pageviewEvent: env.AMPLITUDE_PAGEVIEW_EVENT?.trim() || "Page Viewed",
     productAreaPrefix: env.AMPLITUDE_PRODUCT_AREA_PREFIX?.trim() || "mw_",
     windowDays: Number(env.AMPLITUDE_WINDOW_DAYS?.trim() || 30),
