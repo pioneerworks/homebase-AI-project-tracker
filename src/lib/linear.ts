@@ -61,6 +61,7 @@ interface LinearProjectUpdate {
 
 interface LinearProjectUpdatesResult {
   updates: LinearProjectUpdate[];
+  description: string | null;
 }
 
 interface LinearSnapshotData {
@@ -96,6 +97,7 @@ interface LinearProjectPageResponse {
 interface LinearProjectUpdatesResponse {
   data?: {
     project: {
+      description: string | null;
       projectUpdates: {
         nodes: LinearProjectUpdate[];
       };
@@ -139,6 +141,7 @@ const projectIssuesQuery = `
 const projectUpdatesQuery = `
   query ProjectUpdates($project: String!) {
     project(id: $project) {
+      description
       projectUpdates(first: 10) {
         nodes {
           id
@@ -601,6 +604,24 @@ function latestProjectUpdate(
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )[0] ?? null
   );
+}
+
+/**
+ * Plain-text summary of the project description written by its creators in
+ * Linear. Shown for active projects that have not posted an update yet.
+ */
+function projectBrief(description: string | null | undefined): string | null {
+  if (!description) return null;
+  const text = description
+    .split("\n")
+    .map((line) => cleanMarkdownLine(line))
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return null;
+  if (text.length <= 240) return text;
+  return `${text.slice(0, 237).replace(/\s+\S*$/, "").trim()}…`;
 }
 
 function recapDetail(issue: LinearIssue): string | null {
@@ -1270,6 +1291,9 @@ function buildSnapshot(data: LinearSnapshotData): Snapshot {
         name: project.name,
         shortName: project.shortName,
         url: project.url,
+        description: projectBrief(
+          data.activeProjectUpdates[index]?.description,
+        ),
         counts,
         recent: tracked.slice(0, 4),
         latestUpdate,
@@ -1434,7 +1458,10 @@ async function fetchProjectUpdates(
     );
   }
 
-  return { updates: payload.data.project.projectUpdates.nodes };
+  return {
+    updates: payload.data.project.projectUpdates.nodes,
+    description: payload.data.project.description ?? null,
+  };
 }
 
 async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
@@ -1482,6 +1509,7 @@ async function getLiveSnapshot(apiKey: string): Promise<Snapshot> {
     mainUpdates,
     pageUpdates: {
       updates: pageUpdateResults.flatMap((result) => result.updates),
+      description: null,
     },
     hostingUpdates,
     activeProjectUpdates: activeUpdateResults,

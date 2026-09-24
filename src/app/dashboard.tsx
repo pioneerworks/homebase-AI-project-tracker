@@ -633,9 +633,9 @@ export default function Dashboard({
                 <p>
                   The Linear projects carrying the site’s next phase of work:
                   Payload CMS readiness, execution agents, internal linking,
-                  self-serve site changes, the marketing context layer, and the
-                  landing-page feedback tool. Polled hourly, along with their
-                  latest project updates.
+                  self-serve site changes, the marketing context layer, the
+                  landing-page feedback tool, and the Payload admin rebuild.
+                  Polled hourly, along with their latest project updates.
                 </p>
               </div>
             </div>
@@ -659,7 +659,7 @@ export default function Dashboard({
                         backlog · {project.counts.done} done
                       </span>
                     </div>
-                    {project.latestUpdate && (
+                    {project.latestUpdate ? (
                       <a
                         className="active-project-update"
                         href={project.latestUpdate.url}
@@ -670,6 +670,13 @@ export default function Dashboard({
                         {formatShortDate(project.latestUpdate.createdAt)} —{" "}
                         {project.latestUpdate.excerpt}
                       </a>
+                    ) : (
+                      project.description && (
+                        <p className="active-project-brief">
+                          <span className="brief-kicker">From the brief</span>
+                          {project.description}
+                        </p>
+                      )
                     )}
                     <IssueList
                       issues={project.recent}

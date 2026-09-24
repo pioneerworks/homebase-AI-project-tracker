@@ -84,6 +84,7 @@ export interface ActiveProjectProgress {
   name: string;
   shortName: string;
   url: string;
+  description: string | null;
   counts: StatusCounts;
   recent: TrackedIssue[];
   latestUpdate: ActiveProjectUpdate | null;
