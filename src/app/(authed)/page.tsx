@@ -157,8 +157,8 @@ export default async function OverviewPage() {
             <DeltaCell
               label="Site traffic"
               delta={null}
-              value={daily.traffic.toLocaleString("en-US")}
-              detail="unique visitors that day"
+              value={daily.traffic > 0 ? daily.traffic.toLocaleString("en-US") : "—"}
+              detail={daily.traffic > 0 ? "unique visitors that day" : "traffic not captured"}
             />
           </div>
         </section>
