@@ -208,6 +208,39 @@ export default async function ProjectPage({
             </div>
           </section>
 
+          {!latest && brief && (
+            <section className="section" aria-label="Project brief">
+              <div className="section-head">
+                <h2>Project brief</h2>
+                <a href={project.linearUrl} target="_blank" rel="noreferrer">
+                  View in Linear ↗
+                </a>
+              </div>
+              <div className="recap-card">
+                <p className="brief-note">
+                  No project update posted yet, so this is the brief from Linear.
+                </p>
+                <UpdateBody body={brief} />
+              </div>
+            </section>
+          )}
+
+          {latest && (
+            <section className="section" aria-label="Latest Linear update">
+              <div className="section-head">
+                <h2>Latest update</h2>
+                {latest.url && (
+                  <a href={latest.url} target="_blank" rel="noreferrer">
+                    View in Linear ↗
+                  </a>
+                )}
+              </div>
+              <div className="recap-card">
+                <UpdateBody body={latest.body} />
+              </div>
+            </section>
+          )}
+
           <section className="section" aria-label="Milestones">
             <div className="section-head">
               <h2>Milestones</h2>
@@ -250,39 +283,6 @@ export default async function ProjectPage({
               </ol>
             )}
           </section>
-
-          {!latest && brief && (
-            <section className="section" aria-label="Project brief">
-              <div className="section-head">
-                <h2>Project brief</h2>
-                <a href={project.linearUrl} target="_blank" rel="noreferrer">
-                  View in Linear ↗
-                </a>
-              </div>
-              <div className="recap-card">
-                <p className="brief-note">
-                  No project update posted yet, so this is the brief from Linear.
-                </p>
-                <UpdateBody body={brief} />
-              </div>
-            </section>
-          )}
-
-          {latest && (
-            <section className="section" aria-label="Latest Linear update">
-              <div className="section-head">
-                <h2>Latest update</h2>
-                {latest.url && (
-                  <a href={latest.url} target="_blank" rel="noreferrer">
-                    View in Linear ↗
-                  </a>
-                )}
-              </div>
-              <div className="recap-card">
-                <UpdateBody body={latest.body} />
-              </div>
-            </section>
-          )}
 
           <section className="section" aria-label="Recently completed">
             <div className="section-head">
