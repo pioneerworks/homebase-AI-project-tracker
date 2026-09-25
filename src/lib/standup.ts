@@ -56,6 +56,58 @@ export function pctChange(current: number, baseline: number | null | undefined):
   return (current / baseline - 1) * 100;
 }
 
+export type LinearTrend = {
+  /** Fitted value per position; null where the input is null or no fit exists. */
+  values: (number | null)[];
+  /** Change per position (per day for a daily series); null when there is no fit. */
+  slope: number | null;
+  /** Number of points the fit used. */
+  n: number;
+};
+
+/**
+ * Least-squares linear trend of `values` over their positions. Positions are
+ * array indexes, so the series must have one entry per day. Positions that
+ * `exclude` rejects are left out of the fit but still get a fitted value.
+ * Needs at least two points to fit.
+ */
+export function linearTrend(
+  values: (number | null)[],
+  exclude: (index: number) => boolean = () => false,
+): LinearTrend {
+  const fitted = values
+    .map((y, x) => ({ x, y }))
+    .filter((p): p is { x: number; y: number } => p.y != null && !exclude(p.x));
+  const n = fitted.length;
+  if (n < 2) return { values: values.map(() => null), slope: null, n };
+  const meanX = fitted.reduce((s, p) => s + p.x, 0) / n;
+  const meanY = fitted.reduce((s, p) => s + p.y, 0) / n;
+  const sxx = fitted.reduce((s, p) => s + (p.x - meanX) ** 2, 0);
+  const sxy = fitted.reduce((s, p) => s + (p.x - meanX) * (p.y - meanY), 0);
+  const slope = sxx === 0 ? 0 : sxy / sxx;
+  return {
+    values: values.map((y, x) => (y == null ? null : meanY + slope * (x - meanX))),
+    slope,
+    n,
+  };
+}
+
+// Below two weeks the weekday/weekend cycle dominates a straight-line fit.
+const SHORT_FIT_DAYS = 14;
+
+/** Legend/summary text for a signup trend; `spoken` swaps arrows for words. */
+export function trendLabel(slope: number | null, n: number, spoken = false): string {
+  if (slope == null) return "Signup trend: not enough days to fit";
+  const rounded = Math.round(slope * 10) / 10;
+  const magnitude = `${Math.abs(rounded).toFixed(1)}/day`;
+  let direction: string;
+  if (rounded > 0) direction = spoken ? "rising " : "▲ +";
+  else if (rounded < 0) direction = spoken ? "falling " : "▼ −";
+  else direction = spoken ? "flat at " : "▶ ±";
+  const caveat = n < SHORT_FIT_DAYS ? "; weekends skew it" : "";
+  return `Signup trend: ${direction}${magnitude} (${n}-day fit${caveat})`;
+}
+
 export type RangePreset = "7d" | "30d" | "90d" | "all" | "custom";
 
 /** Inclusive date window for a chart preset, anchored on the latest data point. */
