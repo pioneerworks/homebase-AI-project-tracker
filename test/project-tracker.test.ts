@@ -123,6 +123,20 @@ test("torontoToday uses the Toronto calendar", () => {
   assert.equal(torontoToday(new Date("2026-09-24T02:00:00Z")), "2026-09-23");
 });
 
+test("linearTrend fits a least-squares line, skipping nulls and excluded points", async () => {
+  const { linearTrend } = await import("../src/lib/standup");
+  assert.deepEqual(linearTrend([1, 2, 3, 4]), [1, 2, 3, 4]);
+  // null stays null and is not part of the fit
+  assert.deepEqual(linearTrend([2, null, 6]), [2, null, 6]);
+  // an excluded point (today's partial count) doesn't pull the line down, but still gets a fitted value
+  assert.deepEqual(linearTrend([10, 20, 30, 0], (i) => i === 3), [10, 20, 30, 40]);
+  // flat input gives a flat line
+  assert.deepEqual(linearTrend([5, 5, 5]), [5, 5, 5]);
+  // fewer than two usable points: no trend
+  assert.deepEqual(linearTrend([7]), [null]);
+  assert.deepEqual(linearTrend([7, 3], (i) => i === 1), [null, null]);
+});
+
 test("presetRange anchors on the latest day and clamps to the first", async () => {
   const { presetRange } = await import("../src/lib/standup");
   assert.deepEqual(presetRange("7d", "2026-06-01", "2026-09-22"), { from: "2026-09-16", to: "2026-09-22" });

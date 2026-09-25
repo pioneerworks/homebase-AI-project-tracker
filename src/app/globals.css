@@ -2106,6 +2106,16 @@ footer {
   background: var(--success);
 }
 
+.impact-dash {
+  width: 14px;
+  height: 0;
+  display: inline-block;
+}
+
+.impact-dash-trend {
+  border-top: 2px dashed var(--success);
+}
+
 .impact-dot-rate {
   background: var(--warning);
 }

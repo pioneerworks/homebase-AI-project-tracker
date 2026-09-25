@@ -15,7 +15,7 @@ import {
 
 import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/merges";
 import type { SignupDay } from "@/lib/signup-data";
-import { presetRange, type RangePreset } from "@/lib/standup";
+import { linearTrend, presetRange, type RangePreset } from "@/lib/standup";
 
 const REPO = "marketing-site-payload";
 
@@ -27,6 +27,8 @@ export type ImpactPoint = {
   pageMerges: number | null;
   otherMerges: number | null;
 };
+
+type ChartPoint = ImpactPoint & { signupTrend: number | null };
 
 const dayLabel = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
@@ -150,21 +152,29 @@ export default function ImpactChart({
   points: allPoints,
   mergeDays,
   sampleNote,
+  today,
 }: {
   points: ImpactPoint[];
   mergeDays: MergeDay[];
   sampleNote?: string;
+  /** Today's date; its partial signup count is left out of the trend fit. */
+  today?: string;
 }) {
   const firstDate = allPoints[0]?.date ?? "";
   const lastDate = allPoints.at(-1)?.date ?? "";
-  const [preset, setPreset] = useState<RangePreset>("all");
+  const [preset, setPreset] = useState<RangePreset>("7d");
   const [customFrom, setCustomFrom] = useState(firstDate);
   const [customTo, setCustomTo] = useState(lastDate);
   const range =
     preset === "custom"
       ? orderRange(customFrom || firstDate, customTo || lastDate)
       : presetRange(preset, firstDate, lastDate);
-  const points = allPoints.filter((p) => p.date >= range.from && p.date <= range.to);
+  const visible = allPoints.filter((p) => p.date >= range.from && p.date <= range.to);
+  const trend = linearTrend(
+    visible.map((p) => p.signups),
+    (i) => visible[i].date === today,
+  );
+  const points: ChartPoint[] = visible.map((p, i) => ({ ...p, signupTrend: trend[i] }));
 
   const [pickedDate, setSelectedDate] = useState<string | null>(null);
   const selectedDate =
@@ -319,6 +329,19 @@ export default function ImpactChart({
             isAnimationActive={false}
           />
           <Line
+            yAxisId="signups"
+            type="linear"
+            dataKey="signupTrend"
+            name="Signup trend"
+            stroke="var(--success)"
+            strokeWidth={1.5}
+            strokeDasharray="6 4"
+            dot={false}
+            activeDot={false}
+            connectNulls
+            isAnimationActive={false}
+          />
+          <Line
             yAxisId="rate"
             type="monotone"
             dataKey="rate"
@@ -336,6 +359,10 @@ export default function ImpactChart({
       <div className="impact-legend">
         <span className="impact-legend-item">
           <span className="impact-dot impact-dot-signups" /> Signups
+        </span>
+        <span className="impact-legend-item">
+          <span className="impact-dash impact-dash-trend" /> Signup trend (linear fit
+          of the range)
         </span>
         <span className="impact-legend-item">
           <span className="impact-dot impact-dot-rate" /> Signup rate (signups ÷ traffic)
