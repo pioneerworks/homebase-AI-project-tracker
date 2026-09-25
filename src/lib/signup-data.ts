@@ -1,12 +1,14 @@
 /**
- * Captured signup history from Amplitude (MCP query, 2026-09-23).
- * Daily unique users: signups = "Owner Sign Up", traffic = "Page Viewed" with
- * product_area mw_* and device_type != Linux. rate = signups / traffic.
- * Today's incomplete interval is excluded.
- *
- * The funnel's conversion event is now "Owner Account Created" (the live
- * Amplitude query uses it). This snapshot predates that change and needs a
- * re-capture with the new event.
+ * Captured signup history from the Amplitude MCP (Cross-Platform project
+ * 677513, queried 2026-09-25), reproducing the team's funnel chart:
+ *   traffic = unique users with Page Viewed, device_type != Linux and
+ *             product_area contains "mw_"
+ *   signups = users who completed that Page Viewed → Owner Account Created
+ *             funnel within one day (daily conversion × traffic)
+ *   rate    = signups / traffic
+ * Days are UTC. Owner Account Created only fired from 2026-06-26, so the
+ * series starts on its first full day, 2026-06-27. Today's incomplete
+ * interval is excluded.
  *
  * When the AMPLITUDE_* Export keys work or OMNI_* lands, a live query
  * supersedes this snapshot; until then this is the real series.

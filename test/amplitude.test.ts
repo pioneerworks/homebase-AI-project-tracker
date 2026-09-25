@@ -37,7 +37,7 @@ test("aggregateFromLines counts unique users per day with funnel filters", () =>
     ev({ user_id: "u3", event_properties: { product_area: "mw_home", device_family: "Linux" } }),
     // non-mw product area excluded
     ev({ user_id: "u4", event_properties: { product_area: "blog", device_family: "Mac" } }),
-    // signup without pageview counts toward signups only
+    // signup without a pageview is not a funnel conversion
     ev({ user_id: "u5", event_type: "Owner Account Created" }),
     // next day pageview
     ev({ user_id: "u2", event_time: "2026-09-02T10:00:00Z", event_type: "Page Viewed" }),
@@ -53,10 +53,10 @@ test("aggregateFromLines counts unique users per day with funnel filters", () =>
   assert.equal(days.length, 2);
   const d1 = days.find((d) => d.date === "2026-09-01")!;
   const d2 = days.find((d) => d.date === "2026-09-02")!;
-  // u1, u5 (signup only, no pageview) signed up; u1, u2 viewed
-  assert.equal(d1.signups, 2);
+  // u1 viewed and signed up; u5 signed up without viewing; u1, u2 viewed
+  assert.equal(d1.signups, 1);
   assert.equal(d1.traffic, 2);
-  assert.equal(d1.rate, 1); // 2 signups / 2 viewers in this tiny fixture
+  assert.equal(d1.rate, 0.5);
   assert.equal(d2.traffic, 1);
   assert.equal(d2.signups, 0);
   assert.equal(d2.rate, 0);
