@@ -150,10 +150,11 @@ test("linearTrend fits a least-squares line, skipping nulls and excluded points"
 
 test("trendLabel states direction, per-day change and fit size", async () => {
   const { trendLabel } = await import("../src/lib/standup");
-  assert.equal(trendLabel(1.68, 7), "Signup trend: ▲ +1.7/day (7-day fit, weekends skew short ranges)");
+  assert.equal(trendLabel(1.68, 7), "Signup trend: ▲ +1.7/day (7-day fit; weekends skew it)");
   assert.equal(trendLabel(-2.44, 30), "Signup trend: ▼ −2.4/day (30-day fit)");
   // tiny slopes round to flat instead of showing "▲ +0.0"
   assert.equal(trendLabel(0.04, 30), "Signup trend: ▶ ±0.0/day (30-day fit)");
+  assert.equal(trendLabel(-0.04, 30), "Signup trend: ▶ ±0.0/day (30-day fit)");
   assert.equal(trendLabel(null, 1), "Signup trend: not enough days to fit");
   // spoken form for the screen-reader summary uses words, not arrows
   assert.equal(trendLabel(1.68, 14, true), "Signup trend: rising 1.7/day (14-day fit)");

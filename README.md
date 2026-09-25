@@ -129,7 +129,9 @@ milestone with its progress and issues (state and assignee). A project with no
 update posted yet shows its full Linear brief (the project overview document).
 The overview also opens with yesterday's signups for daily standup, compared
 with the day before and the same weekday last week. Today's partial day is
-skipped. The impact chart has a date range picker (presets or custom dates).
+skipped. The impact chart opens on the last 7 days and has a date range picker
+(presets or custom dates). A dashed line shows a straight-line signup trend over
+the selected range, leaving out today's partial day. PR bars use their own scale.
 
 Both dashboard tabs open with a stakeholder recap generated from the same Linear
 snapshot as the detailed tracker. Page Migration only uses the five page-pillar

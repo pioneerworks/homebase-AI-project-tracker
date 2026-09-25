@@ -112,7 +112,7 @@ function ImpactTooltip({
         <div className="impact-tooltip-row">
           <span className="impact-dot impact-dot-merges" aria-hidden="true" /> PRs merged:{" "}
           <strong>{point.merges}</strong>
-          <span className="impact-tooltip-hint">click for details</span>
+          <span className="impact-tooltip-hint">click or Enter for details</span>
         </div>
       )}
       {point.pageMerges != null && point.pageMerges > 0 && (
@@ -205,7 +205,8 @@ export default function ImpactChart({
     visible.map((p) => p.signups),
     (i) => visible[i].date === today,
   );
-  // a steep fall can extrapolate below zero at today's edge; signups can't
+  // only the drawn line is clamped (a steep fall can extrapolate below zero
+  // at today's edge); the legend slope is the raw fit
   const points: ChartPoint[] = visible.map((p, i) => {
     const t = trend.values[i];
     return { ...p, signupTrend: t == null ? null : Math.max(0, t) };
@@ -231,15 +232,16 @@ export default function ImpactChart({
       setSelectedDate((current) => (current === date ? null : date));
     }
   };
-  // the whole day column is the click target, not just the thin bar
   const handleDayClick = (state: { activeLabel?: string | number | null } | null) =>
     toggleDay(state?.activeLabel);
-  // recharts moves the active day with the arrow keys; Enter/Space opens it
+  // recharts moves the active day with the arrow keys and uses Enter to hide
+  // its tooltip; capture Enter/Space first so they open the day instead
   const summaryId = useId();
   const activeDay = useRef<string | null>(null);
   const handleDayKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if ((event.key === "Enter" || event.key === " ") && activeDay.current) {
       event.preventDefault();
+      event.stopPropagation();
       toggleDay(activeDay.current);
     }
   };
@@ -298,7 +300,6 @@ export default function ImpactChart({
           ) : (
             <span className="impact-range-label">
               {range.from && `${dayLabel(range.from)} – ${dayLabel(range.to)}`}
-              {points.length > 0 && " · click a day for its PRs"}
             </span>
           )}
         </div>
@@ -328,11 +329,11 @@ export default function ImpactChart({
           role="figure"
           aria-label="Signups and merged PRs by day"
           aria-describedby={summaryId}
-          onKeyDown={handleDayKey}
+          onKeyDownCapture={handleDayKey}
         >
           <p id={summaryId} className="sr-only">
-            {chartSummary} Use the arrow keys to move between days and Enter to list
-            that day&apos;s PRs.
+            {chartSummary} Use the arrow keys to move between days, and Enter or
+            Space to list that day&apos;s PRs.
           </p>
           <div className="impact-axis-captions" aria-hidden="true">
             <span>Signups / day</span>
@@ -449,7 +450,8 @@ export default function ImpactChart({
           </span>
           <span className="impact-legend-item">
             <span className="impact-dash impact-dash-trend" aria-hidden="true" />
-            {trendLabel(trend.slope, trend.n)}
+            <span aria-hidden="true">{trendLabel(trend.slope, trend.n)}</span>
+            <span className="sr-only">{trendLabel(trend.slope, trend.n, true)}</span>
           </span>
           <span className="impact-legend-item">
             <span className="impact-dash impact-dash-rate" aria-hidden="true" /> Signup rate

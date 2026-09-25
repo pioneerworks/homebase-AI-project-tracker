@@ -100,10 +100,11 @@ export function trendLabel(slope: number | null, n: number, spoken = false): str
   if (slope == null) return "Signup trend: not enough days to fit";
   const rounded = Math.round(slope * 10) / 10;
   const magnitude = `${Math.abs(rounded).toFixed(1)}/day`;
-  const direction = spoken
-    ? rounded > 0 ? "rising " : rounded < 0 ? "falling " : "flat at "
-    : rounded > 0 ? "▲ +" : rounded < 0 ? "▼ −" : "▶ ±";
-  const caveat = n < SHORT_FIT_DAYS ? ", weekends skew short ranges" : "";
+  let direction: string;
+  if (rounded > 0) direction = spoken ? "rising " : "▲ +";
+  else if (rounded < 0) direction = spoken ? "falling " : "▼ −";
+  else direction = spoken ? "flat at " : "▶ ±";
+  const caveat = n < SHORT_FIT_DAYS ? "; weekends skew it" : "";
   return `Signup trend: ${direction}${magnitude} (${n}-day fit${caveat})`;
 }
 

@@ -2139,8 +2139,19 @@ footer {
   background: var(--accent);
 }
 
-.impact-plot {
-  position: relative;
+.impact-plot,
+.impact-legend-item {
+  position: relative; /* anchors .sr-only text */
+}
+
+.impact-plot .recharts-surface:focus {
+  outline: none;
+}
+
+.impact-plot .recharts-surface:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .impact-axis-captions {
