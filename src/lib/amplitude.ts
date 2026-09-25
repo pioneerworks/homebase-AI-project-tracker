@@ -16,8 +16,8 @@
  *  - day bucketing uses UTC, the Amplitude UI uses the project timezone
  *  - identity = user_id, falling back to device_id (cross-platform stitching
  *    may differ slightly from Amplitude's identity resolution)
- *  - signups count every unique user with the conversion event that day; the
- *    chart only counts users who also completed the Page Viewed step first
+ *  - signups count users with a qualifying Page Viewed and the conversion
+ *    event on the same day; the chart's 1-day window can span midnight
  */
 import { gunzipSync, unzipSync } from "fflate";
 
@@ -128,7 +128,9 @@ export function toSignupDays(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, day]) => {
       const traffic = day.pageview.size;
-      const signups = day.signup.size;
+      // funnel: only users who also had a qualifying Page Viewed that day
+      let signups = 0;
+      for (const identity of day.signup) if (day.pageview.has(identity)) signups++;
       return {
         date,
         signups,

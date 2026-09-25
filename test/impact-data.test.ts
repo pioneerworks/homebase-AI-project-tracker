@@ -150,7 +150,7 @@ test("captured signup history is well-formed and rate = signups/traffic", () => 
     if (day.traffic > 0) {
       // derived traffic must reproduce the rate within rounding tolerance
       assert.ok(
-        Math.abs(day.rate! - day.signups / day.traffic) < 0.001,
+        Math.abs(day.rate! - day.signups / day.traffic) < 1e-4,
         day.date + " rate mismatch",
       );
     } else {

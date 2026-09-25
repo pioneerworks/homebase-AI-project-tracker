@@ -13,8 +13,9 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 const MERGE_REPO = "marketing-site-payload";
-// Chart window: Jun 1 2026 onward
-const CHART_START = "2026-06-01";
+// Chart window: Owner Account Created was first tracked Jun 26 2026; the
+// first full day is Jun 27
+const CHART_START = "2026-06-27";
 
 function formatDay(date: string): string {
   return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
@@ -80,7 +81,7 @@ export default async function OverviewPage() {
     mergeDayList.map((d) => [d.date, pageTouchCount(d.prs)]),
   );
 
-  // align both series on the signup calendar, chart window starts Jun 1 2026
+  // align both series on the signup calendar, from CHART_START
   const points: ImpactPoint[] = signupSeries.days
     .filter((s) => s.date >= CHART_START)
     .map((s) => {
@@ -127,7 +128,7 @@ export default async function OverviewPage() {
           <div className="section-head">
             <h2>Signups · {formatDay(daily.date)}</h2>
             <span className="standup-caveat">
-              Definition: <code>{signupEvent}</code> in Amplitude, unique users.
+              Definition: Page Viewed → <code>{signupEvent}</code> funnel in Amplitude, unique users.
               {!dailyIsYesterday &&
                 " Latest complete day in the data; the live feed is behind."}
             </span>
@@ -218,10 +219,10 @@ export default async function OverviewPage() {
           <code>page-touch</code> or <code>infra</code> GitHub label overrides
           the heuristic.
           {signupSeries.source === "amplitude"
-            ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot. Signup rate = signups ÷ traffic.`
+            ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot. Live days count users with a qualifying Page Viewed and the signup event on the same day. Signup rate = signups ÷ traffic.`
             : signupSeries.source === "omni"
               ? " Signups are live from Omni."
-              : " Signups and traffic come from the Amplitude funnel (Page Viewed on marketing pages → Owner Account Created, unique users, captured via Amplitude MCP). Owner Account Created was first tracked on Jun 26, so the signup line starts there. Signup rate = signups ÷ traffic."}
+              : " Signups and traffic come from the Amplitude funnel (Page Viewed with product_area mw_ → Owner Account Created, unique users, captured via Amplitude MCP). Owner Account Created was first tracked on Jun 26, so the series starts Jun 27, its first full day. Signup rate = signups ÷ traffic."}
         </p>
       </section>
 
