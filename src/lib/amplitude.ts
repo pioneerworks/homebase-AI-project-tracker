@@ -5,7 +5,8 @@
  * product_area mw_* and device != Linux → "Owner Account Created", unique
  * users, conversion over time) as a daily series:
  *   traffic = unique users with a qualifying Page Viewed that day
- *   signups = unique users with Owner Account Created that day
+ *   signups = users with a qualifying Page Viewed and Owner Account Created
+ *             that day
  *   rate    = signups / traffic
  *
  * Uses the Export API (Basic auth with the project API key + secret) which
@@ -17,7 +18,8 @@
  *  - identity = user_id, falling back to device_id (cross-platform stitching
  *    may differ slightly from Amplitude's identity resolution)
  *  - signups count users with a qualifying Page Viewed and the conversion
- *    event on the same day; the chart's 1-day window can span midnight
+ *    event on the same day (event order not checked); the chart's 1-day
+ *    window can span midnight
  */
 import { gunzipSync, unzipSync } from "fflate";
 
@@ -100,9 +102,9 @@ export function aggregateFromLines(
       // chart filter: Device type != Linux
       const device = String(props.device_family ?? "").toLowerCase();
       if (device === "linux") continue;
-      // chart filter: product_area starts with mw_
+      // chart filter: product_area contains mw_
       const productArea = String(props.product_area ?? "");
-      if (!productArea.startsWith(config.productAreaPrefix)) continue;
+      if (!productArea.includes(config.productAreaPrefix)) continue;
     }
 
     const identity = event.user_id || event.device_id;
