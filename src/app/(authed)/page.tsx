@@ -213,9 +213,9 @@ export default async function OverviewPage() {
         <p className="section-note">
           Bars show merged PRs per day from {MERGE_REPO} (
           {mergeSource === "github" ? "live from GitHub" : "seeded snapshot"}
-          ) — orange is PRs that touch a page (design, copy, or a route), gray
-          is infrastructure. Click a bar to see exactly which PRs merged that
-          day and how each was classified. An explicit{" "}
+          ) on their own scale — orange is PRs that touch a page (design, copy,
+          or a route), gray is infrastructure. Click a day to see exactly which
+          PRs merged and how each was classified. An explicit{" "}
           <code>page-touch</code> or <code>infra</code> GitHub label overrides
           the heuristic.
           {signupSeries.source === "amplitude"

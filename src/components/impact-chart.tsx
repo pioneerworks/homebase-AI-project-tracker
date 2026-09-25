@@ -46,7 +46,25 @@ const longDayLabel = (iso: string) =>
     timeZone: "UTC",
   });
 
+const shortDayLabel = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+
+// Below two weeks the weekday/weekend cycle dominates a straight-line fit.
+const SHORT_FIT_DAYS = 14;
+
+function trendLabel(slope: number | null, n: number): string {
+  if (slope == null) return "Signup trend: not enough days to fit";
+  const arrow = slope > 0 ? "▲" : slope < 0 ? "▼" : "▶";
+  const sign = slope > 0 ? "+" : slope < 0 ? "−" : "±";
+  const caveat = n < SHORT_FIT_DAYS ? ", weekends skew short ranges" : "";
+  return `Signup trend: ${arrow} ${sign}${Math.abs(slope).toFixed(1)}/day (${n}-day fit${caveat})`;
+}
 
 type TooltipEntry = { name?: string; value?: number | string; payload?: ImpactPoint };
 
@@ -54,10 +72,12 @@ function ImpactTooltip({
   active,
   payload,
   sampleNote,
+  today,
 }: {
   active?: boolean;
   payload?: TooltipEntry[];
   sampleNote?: string;
+  today?: string;
 }) {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload as ImpactPoint | undefined;
@@ -65,28 +85,31 @@ function ImpactTooltip({
   return (
     <div className="impact-tooltip">
       <span className="impact-tooltip-date">{dayLabel(point.date)}</span>
+      {point.date === today && (
+        <div className="impact-tooltip-note">Today so far, a partial day</div>
+      )}
       {point.signups != null && (
         <div className="impact-tooltip-row">
-          <span className="impact-dot impact-dot-signups" /> Signups:{" "}
+          <span className="impact-dot impact-dot-signups" aria-hidden="true" /> Signups:{" "}
           <strong>{point.signups}</strong>
         </div>
       )}
       {point.rate != null && (
         <div className="impact-tooltip-row">
-          <span className="impact-dot impact-dot-rate" /> Signup rate:{" "}
+          <span className="impact-dot impact-dot-rate" aria-hidden="true" /> Signup rate:{" "}
           <strong>{pct(point.rate)}</strong>
         </div>
       )}
       {point.merges != null && point.merges > 0 && (
         <div className="impact-tooltip-row">
-          <span className="impact-dot impact-dot-merges" /> PRs merged:{" "}
+          <span className="impact-dot impact-dot-merges" aria-hidden="true" /> PRs merged:{" "}
           <strong>{point.merges}</strong>
           <span className="impact-tooltip-hint">click for details</span>
         </div>
       )}
       {point.pageMerges != null && point.pageMerges > 0 && (
         <div className="impact-tooltip-row">
-          <span className="impact-dot impact-dot-page" /> Touching a page:{" "}
+          <span className="impact-dot impact-dot-page" aria-hidden="true" /> Touching a page:{" "}
           <strong>{point.pageMerges}</strong>
         </div>
       )}
@@ -174,7 +197,20 @@ export default function ImpactChart({
     visible.map((p) => p.signups),
     (i) => visible[i].date === today,
   );
-  const points: ChartPoint[] = visible.map((p, i) => ({ ...p, signupTrend: trend[i] }));
+  // a steep fall can extrapolate below zero at today's edge; signups can't
+  const points: ChartPoint[] = visible.map((p, i) => {
+    const t = trend.values[i];
+    return { ...p, signupTrend: t == null ? null : Math.max(0, t) };
+  });
+  const maxMerges = Math.max(0, ...points.map((p) => p.merges ?? 0));
+  const totalMerges = points.reduce((s, p) => s + (p.merges ?? 0), 0);
+  const tickLabel = points.length <= SHORT_FIT_DAYS ? dayLabel : shortDayLabel;
+  const chartSummary = range.from
+    ? `Signups ${dayLabel(range.from)} to ${dayLabel(range.to)}. ${trendLabel(
+        trend.slope,
+        trend.n,
+      )}. ${totalMerges} PRs merged.`
+    : "No data";
 
   const [pickedDate, setSelectedDate] = useState<string | null>(null);
   const selectedDate =
@@ -183,9 +219,12 @@ export default function ImpactChart({
   const selectedDay = mergeDays.find((d) => d.date === selectedDate) ?? null;
   const selectedPoint = points.find((p) => p.date === selectedDate) ?? null;
 
-  const handleBarClick = (data: { payload?: ImpactPoint }) => {
-    const date = data?.payload?.date;
-    if (date) setSelectedDate((current) => (current === date ? null : date));
+  // the whole day column is the click target, not just the thin bar
+  const handleDayClick = (state: { activeLabel?: string | number | null } | null) => {
+    const date = state?.activeLabel;
+    if (typeof date === "string") {
+      setSelectedDate((current) => (current === date ? null : date));
+    }
   };
 
   return (
@@ -242,6 +281,7 @@ export default function ImpactChart({
           ) : (
             <span className="impact-range-label">
               {range.from && `${dayLabel(range.from)} – ${dayLabel(range.to)}`}
+              {points.length > 0 && " · click a day for its PRs"}
             </span>
           )}
         </div>
@@ -266,18 +306,35 @@ export default function ImpactChart({
         <p className="empty-message">No data in this date range.</p>
       )}
       {points.length > 0 && (
+      <div className="impact-plot" role="img" aria-label={chartSummary}>
+      <div className="impact-axis-captions" aria-hidden="true">
+        <span>Signups / day</span>
+        <span>Signup rate</span>
+      </div>
       <ResponsiveContainer width="100%" height={340}>
-        <ComposedChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+        <ComposedChart
+          data={points}
+          margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
+          barCategoryGap="30%"
+          onClick={handleDayClick}
+          style={{ cursor: "pointer" }}
+        >
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
           <XAxis
             dataKey="date"
-            tickFormatter={dayLabel}
+            tickFormatter={tickLabel}
             tick={{ fontSize: 11, fill: "var(--muted)" }}
             tickLine={false}
             axisLine={{ stroke: "var(--chart-grid)" }}
-            minTickGap={36}
+            minTickGap={24}
           />
-          <YAxis yAxisId="signups" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
+          <YAxis
+            yAxisId="signups"
+            domain={[0, "auto"]}
+            tick={{ fontSize: 11, fill: "var(--muted)" }}
+            tickLine={false}
+            axisLine={false}
+          />
           <YAxis
             yAxisId="rate"
             orientation="right"
@@ -287,33 +344,33 @@ export default function ImpactChart({
             axisLine={false}
             width={52}
           />
-          <Tooltip content={<ImpactTooltip sampleNote={sampleNote} />} />
+          {/* merges get their own hidden scale so bars stay readable next to
+              hundreds of signups; they fill roughly the bottom third */}
+          <YAxis yAxisId="merges" hide domain={[0, Math.max(4, maxMerges * 3)]} />
+          <Tooltip content={<ImpactTooltip sampleNote={sampleNote} today={today} />} />
           <Bar
-            yAxisId="signups"
+            yAxisId="merges"
             dataKey="pageMerges"
             stackId="merges"
-            name="PRs touching a page"
+            name="Page-touching PRs"
             fill="var(--primary)"
             fillOpacity={0.9}
             radius={view === "all" ? [0, 0, 0, 0] : [2, 2, 0, 0]}
-            barSize={9}
+            maxBarSize={28}
             isAnimationActive={false}
-            onClick={handleBarClick}
-            cursor="pointer"
           />
           {view === "all" && (
             <Bar
-              yAxisId="signups"
+              yAxisId="merges"
               dataKey="otherMerges"
               stackId="merges"
               name="Other PRs"
               fill="var(--surface-strong)"
+              stroke="var(--line)"
               fillOpacity={1}
               radius={[2, 2, 0, 0]}
-              barSize={9}
+              maxBarSize={28}
               isAnimationActive={false}
-              onClick={handleBarClick}
-              cursor="pointer"
             />
           )}
           <Area
@@ -333,7 +390,7 @@ export default function ImpactChart({
             type="linear"
             dataKey="signupTrend"
             name="Signup trend"
-            stroke="var(--success)"
+            stroke="var(--success-dark)"
             strokeWidth={1.5}
             strokeDasharray="6 4"
             dot={false}
@@ -346,7 +403,7 @@ export default function ImpactChart({
             type="monotone"
             dataKey="rate"
             name="Signup rate"
-            stroke="var(--warning)"
+            stroke="var(--accent)"
             strokeWidth={2}
             dot={false}
             connectNulls={false}
@@ -354,30 +411,33 @@ export default function ImpactChart({
           />
         </ComposedChart>
       </ResponsiveContainer>
+      </div>
       )}
 
-      <div className="impact-legend">
-        <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-signups" /> Signups
-        </span>
-        <span className="impact-legend-item">
-          <span className="impact-dash impact-dash-trend" /> Signup trend (linear fit
-          of the range)
-        </span>
-        <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-rate" /> Signup rate (signups ÷ traffic)
-        </span>
-        <span className="impact-legend-item">
-          <span className="impact-dot impact-dot-merges" /> PRs touching a page (
-          {REPO})
-        </span>
-        {view === "all" && (
+      {points.length > 0 && (
+        <div className="impact-legend">
           <span className="impact-legend-item">
-            <span className="impact-dot impact-dot-other" /> Other PRs (infra,
-            deps, docs) — click a bar to inspect
+            <span className="impact-dot impact-dot-signups" aria-hidden="true" /> Signups
           </span>
-        )}
-      </div>
+          <span className="impact-legend-item">
+            <span className="impact-dash impact-dash-trend" aria-hidden="true" />
+            {trendLabel(trend.slope, trend.n)}
+          </span>
+          <span className="impact-legend-item">
+            <span className="impact-dash impact-dash-rate" aria-hidden="true" /> Signup rate
+            (signups ÷ traffic)
+          </span>
+          <span className="impact-legend-item">
+            <span className="impact-dot impact-dot-merges" aria-hidden="true" /> Page-touching PRs
+          </span>
+          {view === "all" && (
+            <span className="impact-legend-item">
+              <span className="impact-dot impact-dot-other" aria-hidden="true" /> Other PRs
+              (infra, deps, docs)
+            </span>
+          )}
+        </div>
+      )}
 
       {selectedDate && (
         <div className="impact-drilldown">

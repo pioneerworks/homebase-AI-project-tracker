@@ -14,6 +14,7 @@
   --accent-soft: oklch(0.94 0.035 305);
   --success: oklch(0.55 0.135 152);
   --success-soft: oklch(0.95 0.035 152);
+  --success-dark: oklch(0.4 0.1 152);
   --warning: oklch(0.65 0.15 75);
   --warning-soft: oklch(0.96 0.04 75);
   --danger: oklch(0.55 0.16 25);
@@ -2074,6 +2075,13 @@ footer {
   border-left: 1px solid var(--line);
 }
 
+@media (max-width: 680px) {
+  .impact-toggle button {
+    min-height: 44px;
+    padding: 0 14px;
+  }
+}
+
 .impact-toggle button[aria-pressed="true"] {
   background: var(--surface-strong);
   color: var(--ink);
@@ -2107,17 +2115,41 @@ footer {
 }
 
 .impact-dash {
-  width: 14px;
-  height: 0;
+  width: 16px;
   display: inline-block;
+  flex: none;
 }
 
+/* matches the SVG line: 1.5px, dash 6 gap 4 */
 .impact-dash-trend {
-  border-top: 2px dashed var(--success);
+  height: 1.5px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--success-dark) 0 6px,
+    transparent 6px 10px
+  );
+}
+
+.impact-dash-rate {
+  height: 2px;
+  background: var(--accent);
 }
 
 .impact-dot-rate {
-  background: var(--warning);
+  background: var(--accent);
+}
+
+.impact-plot {
+  position: relative;
+}
+
+.impact-axis-captions {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 4px;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--muted);
 }
 
 .impact-dot-merges {

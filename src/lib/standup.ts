@@ -56,27 +56,40 @@ export function pctChange(current: number, baseline: number | null | undefined):
   return (current / baseline - 1) * 100;
 }
 
+export type LinearTrend = {
+  /** Fitted value per position; null where the input is null or no fit exists. */
+  values: (number | null)[];
+  /** Change per position (per day for a daily series); null when there is no fit. */
+  slope: number | null;
+  /** Number of points the fit used. */
+  n: number;
+};
+
 /**
- * Least-squares linear trend of `values` over their positions. Returns the
- * fitted value per position, or null where the input is null. Positions that
+ * Least-squares linear trend of `values` over their positions. Positions are
+ * array indexes, so the series must have one entry per day. Positions that
  * `exclude` rejects are left out of the fit but still get a fitted value.
- * Needs at least two points to fit; otherwise every value is null.
+ * Needs at least two points to fit.
  */
 export function linearTrend(
   values: (number | null)[],
   exclude: (index: number) => boolean = () => false,
-): (number | null)[] {
+): LinearTrend {
   const fitted = values
     .map((y, x) => ({ x, y }))
     .filter((p): p is { x: number; y: number } => p.y != null && !exclude(p.x));
-  if (fitted.length < 2) return values.map(() => null);
   const n = fitted.length;
+  if (n < 2) return { values: values.map(() => null), slope: null, n };
   const meanX = fitted.reduce((s, p) => s + p.x, 0) / n;
   const meanY = fitted.reduce((s, p) => s + p.y, 0) / n;
   const sxx = fitted.reduce((s, p) => s + (p.x - meanX) ** 2, 0);
   const sxy = fitted.reduce((s, p) => s + (p.x - meanX) * (p.y - meanY), 0);
   const slope = sxx === 0 ? 0 : sxy / sxx;
-  return values.map((y, x) => (y == null ? null : meanY + slope * (x - meanX)));
+  return {
+    values: values.map((y, x) => (y == null ? null : meanY + slope * (x - meanX))),
+    slope,
+    n,
+  };
 }
 
 export type RangePreset = "7d" | "30d" | "90d" | "all" | "custom";
