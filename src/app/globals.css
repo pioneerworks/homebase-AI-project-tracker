@@ -2152,10 +2152,7 @@ footer {
   color: var(--muted);
 }
 
-.impact-dot-merges {
-  background: var(--primary);
-}
-
+.impact-dot-merges,
 .impact-dot-page {
   background: var(--primary);
 }

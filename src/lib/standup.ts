@@ -92,6 +92,21 @@ export function linearTrend(
   };
 }
 
+// Below two weeks the weekday/weekend cycle dominates a straight-line fit.
+const SHORT_FIT_DAYS = 14;
+
+/** Legend/summary text for a signup trend; `spoken` swaps arrows for words. */
+export function trendLabel(slope: number | null, n: number, spoken = false): string {
+  if (slope == null) return "Signup trend: not enough days to fit";
+  const rounded = Math.round(slope * 10) / 10;
+  const magnitude = `${Math.abs(rounded).toFixed(1)}/day`;
+  const direction = spoken
+    ? rounded > 0 ? "rising " : rounded < 0 ? "falling " : "flat at "
+    : rounded > 0 ? "▲ +" : rounded < 0 ? "▼ −" : "▶ ±";
+  const caveat = n < SHORT_FIT_DAYS ? ", weekends skew short ranges" : "";
+  return `Signup trend: ${direction}${magnitude} (${n}-day fit${caveat})`;
+}
+
 export type RangePreset = "7d" | "30d" | "90d" | "all" | "custom";
 
 /** Inclusive date window for a chart preset, anchored on the latest data point. */

@@ -148,6 +148,19 @@ test("linearTrend fits a least-squares line, skipping nulls and excluded points"
   assert.deepEqual(linearTrend([7, 3], (i) => i === 1), { values: [null, null], slope: null, n: 1 });
 });
 
+test("trendLabel states direction, per-day change and fit size", async () => {
+  const { trendLabel } = await import("../src/lib/standup");
+  assert.equal(trendLabel(1.68, 7), "Signup trend: ▲ +1.7/day (7-day fit, weekends skew short ranges)");
+  assert.equal(trendLabel(-2.44, 30), "Signup trend: ▼ −2.4/day (30-day fit)");
+  // tiny slopes round to flat instead of showing "▲ +0.0"
+  assert.equal(trendLabel(0.04, 30), "Signup trend: ▶ ±0.0/day (30-day fit)");
+  assert.equal(trendLabel(null, 1), "Signup trend: not enough days to fit");
+  // spoken form for the screen-reader summary uses words, not arrows
+  assert.equal(trendLabel(1.68, 14, true), "Signup trend: rising 1.7/day (14-day fit)");
+  assert.equal(trendLabel(-3, 14, true), "Signup trend: falling 3.0/day (14-day fit)");
+  assert.equal(trendLabel(0, 14, true), "Signup trend: flat at 0.0/day (14-day fit)");
+});
+
 test("presetRange anchors on the latest day and clamps to the first", async () => {
   const { presetRange } = await import("../src/lib/standup");
   assert.deepEqual(presetRange("7d", "2026-06-01", "2026-09-22"), { from: "2026-09-16", to: "2026-09-22" });
