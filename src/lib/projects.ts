@@ -43,13 +43,6 @@ export const PILLAR_PROJECTS: ProjectConfig[] = [
 
 export const ACTIVE_PROJECTS: ProjectConfig[] = [
   {
-    id: "414a5123-e910-428f-b761-30b156b2dd7f",
-    key: "payload-cms",
-    name: "Payload CMS — from just a migrated to marketing-ready",
-    shortName: "Payload CMS",
-    url: "https://linear.app/joinhomebase/project/payload-cms-from-just-a-migrated-to-marketing-ready-14729364d08d",
-  },
-  {
     id: "01dbdbcb-19e4-448f-b774-0b50bbd953c3",
     key: "execution-agents",
     name: "Marketing Site Execution agents",
@@ -62,13 +55,6 @@ export const ACTIVE_PROJECTS: ProjectConfig[] = [
     name: "Internal Linking Infrastructure (Payload CMS)",
     shortName: "Internal linking",
     url: "https://linear.app/joinhomebase/project/internal-linking-infrastructure-payload-cms-678361d6ebf9",
-  },
-  {
-    id: "20f71cb2-8396-44d0-b54f-112745894ff0",
-    key: "self-serve",
-    name: "Self-serve site changes",
-    shortName: "Self-serve changes",
-    url: "https://linear.app/joinhomebase/project/self-serve-site-changes-eab631bd2f63",
   },
   {
     id: "55d85f87-4449-4b54-a408-1af3b1e55468",
