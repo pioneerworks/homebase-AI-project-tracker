@@ -202,7 +202,7 @@ export default async function OverviewPage() {
           <div className="metric-band">
             {runningExperiments.map((experiment) => {
               const dayText =
-                experiment.day != null && experiment.durationDays != null
+                experiment.day != null && experiment.durationDays
                   ? `Day ${experiment.day} of ${experiment.durationDays}`
                   : experiment.day != null
                     ? `Day ${experiment.day}`
@@ -215,46 +215,66 @@ export default async function OverviewPage() {
                 experiment.controlRate != null && experiment.testRate != null
                   ? `${(experiment.controlRate * 100).toFixed(2)}% → ${(experiment.testRate * 100).toFixed(2)}%`
                   : null;
-              const significant = experiment.pValue != null && experiment.pValue < 0.05;
+              const significant = experiment.significant && experiment.percentChange !== null;
+              // significant results always carry a winning/losing verdict, so the
+              // arrow and accessible label follow the verdict, not the raw sign
+              const fmt = (value: number) =>
+                `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}%`;
+              const pValueText =
+                experiment.pValue != null && experiment.pValue < 0.0005
+                  ? "p<0.001"
+                  : `p=${experiment.pValue?.toFixed(3)}`;
               return (
                 <div className="metric" key={experiment.id}>
                   <span className="metric-label">
-                    <a href={experiment.permalink ?? undefined} target="_blank" rel="noreferrer">
-                      {experiment.title}
-                    </a>
+                    {experiment.permalink ? (
+                      <a href={experiment.permalink} target="_blank" rel="noreferrer">
+                        {experiment.title}
+                      </a>
+                    ) : (
+                      experiment.title
+                    )}
                     {dayText ? ` · ${dayText}` : ""}
                   </span>
                   {experiment.percentChange == null ? (
                     <span className="metric-value">—</span>
-                  ) : significant ? (
-                    <span
-                      className={experiment.verdict === "winning" ? "metric-up" : "metric-down"}
-                    >
-                      <span aria-hidden="true">{experiment.verdict === "winning" ? "▲" : "▼"}</span>{" "}
-                      {(experiment.percentChange) >= 0 ? "+" : "−"}
-                      {Math.abs(experiment.percentChange).toFixed(1)}%{" "}
-                      <span className="sr-only">
-                        {experiment.verdict === "winning" ? "winning" : "losing"}
-                      </span>
-                    </span>
                   ) : (
-                    <span className="metric-value">
-                      {(experiment.percentChange) >= 0 ? "+" : "−"}
-                      {Math.abs(experiment.percentChange).toFixed(1)}%
+                    <span
+                      className={
+                        significant
+                          ? `metric-value ${experiment.verdict === "winning" ? "metric-up" : "metric-down"}`
+                          : "metric-value"
+                      }
+                    >
+                      {significant && (
+                        <>
+                          <span aria-hidden="true">
+                            {experiment.verdict === "winning" ? "▲" : "▼"}
+                          </span>{" "}
+                          <span className="sr-only">
+                            {experiment.verdict === "winning" ? "winning:" : "losing:"}
+                          </span>
+                        </>
+                      )}
+                      {fmt(experiment.percentChange)}
                     </span>
                   )}
                   <span className="metric-delta">
                     {experiment.verdict === "no-data"
                       ? "Not enough data yet"
                       : `${experiment.primaryMetric ?? "Primary metric"} · ${
-                          significant
-                            ? `p=${experiment.pValue?.toFixed(3)}`
-                            : "not yet significant"
+                          significant ? pValueText : "not yet significant"
                         }`}
                   </span>
                   <span className="metric-delta metric-delta-quiet">
-                    {rates ? `Control→test: ${rates}` : experiment.hypothesis ?? ""}
+                    {experiment.ci && significant
+                      ? `CI ${fmt(experiment.ci[0])} to ${fmt(experiment.ci[1])}`
+                      : rates
+                        ? "Control→test:"
+                        : ""}
+                    {rates ? ` ${rates}` : ""}
                     {units ? ` · ${units}` : ""}
+                    {experiment.started ? ` · started ${formatDay(experiment.started)}` : ""}
                   </span>
                 </div>
               );
