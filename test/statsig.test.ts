@@ -59,6 +59,42 @@ test("verdictFromPrimary: significant lift decides winning/losing", () => {
     percentConfidenceInterval: { lower: -75, upper: -22.6 },
   });
   assert.equal(losing.verdict, "losing");
+  assert.equal(losing.significant, true);
+
+  // a significant zero lift must not be scored losing
+  const flatButSignificant = verdictFromPrimary({
+    metricID: "m::user_warehouse",
+    metricName: "m",
+    directionality: "increase",
+    percentChange: 0,
+    pValue: 0.04,
+    adjustedAlpha: 0.05,
+  });
+  assert.equal(flatButSignificant.verdict, "no-signal");
+  assert.equal(flatButSignificant.significant, true);
+
+  // directionality=decrease: a negative lift is a win
+  const decreaseWin = verdictFromPrimary({
+    metricID: "Errors::user_warehouse",
+    metricName: "Errors",
+    directionality: "decrease",
+    percentChange: -30,
+    pValue: 0.02,
+    adjustedAlpha: 0.05,
+  });
+  assert.equal(decreaseWin.verdict, "winning");
+
+  // significant against a stricter adjusted alpha is not significant at alpha=0.01
+  const stricterAlpha = verdictFromPrimary({
+    metricID: "m::user_warehouse",
+    metricName: "m",
+    directionality: "increase",
+    percentChange: 12,
+    pValue: 0.04,
+    adjustedAlpha: 0.01,
+  });
+  assert.equal(stricterAlpha.verdict, "no-signal");
+  assert.equal(stricterAlpha.significant, false);
 
   const noisy = verdictFromPrimary({
     metricID: "m::user_warehouse",
@@ -69,9 +105,8 @@ test("verdictFromPrimary: significant lift decides winning/losing", () => {
     adjustedAlpha: 0.05,
   });
   assert.equal(noisy.verdict, "no-signal");
-});
+  assert.equal(noisy.significant, false);
 
-test("verdictFromPrimary: machine-read errors become no-data", () => {
   const noData = verdictFromPrimary({
     metricID: "Week1-2D7::user_warehouse",
     metricName: "Week1-2D7",
@@ -79,6 +114,7 @@ test("verdictFromPrimary: machine-read errors become no-data", () => {
     error: "no_data",
   });
   assert.equal(noData.verdict, "no-data");
+  assert.equal(noData.significant, false);
   assert.equal(noData.noDataReason, "no_data");
   assert.equal(noData.percentChange, null);
 });
@@ -133,6 +169,7 @@ test("toExperimentCards flattens experiment + pulse into a card", () => {
   assert.equal(card.durationDays, 28);
   assert.equal(card.primaryMetric, "Owner Signups");
   assert.equal(card.verdict, "losing");
+  assert.equal(card.significant, true);
   assert.equal(card.controlUnits, 1683);
   assert.equal(card.testUnits, 1720);
   assert.ok(Math.abs((card.controlRate ?? 0) - 0.02495) < 0.001);

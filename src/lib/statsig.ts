@@ -42,7 +42,9 @@ export interface ExperimentCard {
   /** Percent-change CI bounds, [low, high]. */
   ci: [number, number] | null;
   pValue: number | null;
-  /** Per-unit conversion rate of each arm (fraction, e.g. 0.025). */
+  /** True when the p-value clears Statsig's adjusted alpha for this experiment. */
+  significant: boolean;
+  /** Per-unit mean of each arm (conversion rate when the metric is binomial). */
   controlRate: number | null;
   testRate: number | null;
   controlUnits: number | null;
@@ -71,7 +73,7 @@ export function experimentTitle(id: string): string {
     .replace(/\bai\b/gi, "AI")
     .split(" ")
     .map((word) =>
-      /[LPURL]/.test(word) || word === word.toUpperCase()
+      /^(LP|URL|ID)$/.test(word) || word === word.toUpperCase()
         ? word
         : word.charAt(0).toUpperCase() + word.slice(1),
     )
@@ -83,6 +85,9 @@ export function experimentDay(
   now: number = Date.now(),
 ): number | null {
   if (!startTimeMs) return null;
+  // Counts elapsed 24h periods like a stopwatch; Statsig's own day counter can
+  // differ by one when an experiment started mid-day UTC (documented like the
+  // UTC day bucketing note in amplitude.ts).
   return Math.max(1, Math.floor((now - startTimeMs) / 86400000) + 1);
 }
 
@@ -92,10 +97,11 @@ export function experimentDay(
  */
 export function verdictFromPrimary(
   metric: ExperimentPulseResultsDto["primaryMetrics"][number],
-): Pick<ExperimentCard, "verdict" | "noDataReason" | "percentChange" | "ci" | "pValue"> {
+): Pick<ExperimentCard, "verdict" | "significant" | "noDataReason" | "percentChange" | "ci" | "pValue"> {
   if (metric.error) {
     return {
       verdict: "no-data",
+      significant: false,
       noDataReason: metric.error,
       percentChange: null,
       ci: null,
@@ -109,13 +115,12 @@ export function verdictFromPrimary(
   const desired = metric.directionality === "decrease" ? -1 : 1;
   const lift = metric.percentChange ?? null;
   let verdict: ExperimentVerdict = "no-signal";
-  if (significant && lift != null) {
+  if (significant && lift != null && lift !== 0) {
     verdict = lift * desired > 0 ? "winning" : "losing";
-  } else if (significant && lift != null && lift === 0) {
-    verdict = "no-signal";
   }
   return {
     verdict,
+    significant,
     noDataReason: null,
     percentChange: lift,
     ci: ci && ci.lower != null && ci.upper != null ? [ci.lower, ci.upper] : null,
@@ -138,6 +143,22 @@ async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
   return body.data;
 }
 
+/**
+ * Pick the control and (first) test group for an experiment's pulse query.
+ * Multi-arm experiments: Statsig's pulse endpoint compares one test group
+ * against control, so we surface the first non-control arm today rather than
+ * issuing one call per arm.
+ */
+export function pickArms(
+  experiment: ExternalExperimentDto,
+): { controlId: string | null; testId: string | null } {
+  const control =
+    experiment.groups.find((g) => g.id && g.id === experiment.controlGroupID) ??
+    experiment.groups.find((g) => g.isControl);
+  const test = experiment.groups.find((g) => g.id && g.id !== control?.id);
+  return { controlId: control?.id ?? null, testId: test?.id ?? null };
+}
+
 /** Group DTOs plus pulse results, flattened into dashboard cards. */
 export function toExperimentCards(
   experiments: ExternalExperimentDto[],
@@ -145,14 +166,11 @@ export function toExperimentCards(
   now: number = Date.now(),
 ): ExperimentCard[] {
   return experiments.map((experiment) => {
-    const control = experiment.groups.find((g) => g.id === experiment.controlGroupID)
-      ?? experiment.groups.find((g) => g.isControl);
-    const test = experiment.groups.find((g) => g.id !== control?.id);
     const pulse = pulses.get(experiment.id);
     const primaryRow = pulse?.primaryMetrics?.[0];
     const verdict = primaryRow
       ? verdictFromPrimary(primaryRow)
-      : { verdict: "no-data" as const, noDataReason: "no pull yet", percentChange: null, ci: null, pValue: null };
+      : { verdict: "no-data" as const, significant: false, noDataReason: "no pull yet", percentChange: null, ci: null, pValue: null };
 
     return {
       id: experiment.id,
@@ -168,6 +186,7 @@ export function toExperimentCards(
       percentChange: verdict.percentChange,
       ci: verdict.ci,
       pValue: verdict.pValue,
+      significant: verdict.significant,
       controlRate: primaryRow?.controlMean ?? null,
       testRate: primaryRow?.testMean ?? null,
       controlUnits: primaryRow?.controlUnits ?? null,
@@ -207,16 +226,14 @@ export async function getRunningExperiments(
   const pulses = new Map<string, ExperimentPulseResultsDto>();
   await Promise.all(
     experiments.map(async (experiment) => {
-      const control = experiment.controlGroupID
-        ?? experiment.groups.find((g) => g.isControl)?.id;
-      const test = experiment.groups.find((g) => g.id !== control)?.id;
-      if (!control || !test) return;
+      const { controlId, testId } = pickArms(experiment);
+      if (!controlId || !testId) return;
       try {
         pulses.set(
           experiment.id,
           await consoleGet<ExperimentPulseResultsDto>(
             config.apiKey,
-            `/experiments/${experiment.id}/pulse_results?control=${control}&test=${test}`,
+            `/experiments/${experiment.id}/pulse_results?control=${controlId}&test=${testId}`,
           ),
         );
       } catch {

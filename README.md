@@ -137,7 +137,7 @@ the selected range, leaving out today's partial day. PR bars use their own scale
 A Statsig-driven "Experiments" section sits between the standup and shipped-work
 bands when `STATSIG_CONSOLE_API_KEY` is configured. It lists experiments in
 `active` status with their elapsed day count, exposures, control-vs-test
-conversion rates, and the primary metric's percent change with significance
+conversion rates of binomial primary metrics (per-unit means otherwise), and the primary metric's percent change with significance
 verdict (winning / losing / no-signal / no-data), each linking to its Statsig
 console permalink.
 
