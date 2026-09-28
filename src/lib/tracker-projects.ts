@@ -1,6 +1,8 @@
 export type TrackerProject = {
   key: string;
   name: string;
+  /** Sidebar and alert label */
+  shortName: string;
   linearSlugId: string;
   linearUrl: string;
   status: "active" | "done";
@@ -11,6 +13,7 @@ export type TrackerProject = {
 export const TRACKER_PROJECTS: TrackerProject[] = [
   {
     key: "marketing-site-execution-agents",
+    shortName: "Marketing site agents",
     name: "Marketing site execution agents",
     linearSlugId: "c5b9ca95167e",
     linearUrl:
@@ -22,6 +25,7 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
   },
   {
     key: "ab-testing",
+    shortName: "A/B testing",
     name: "A/B testing | Experimentation",
     linearSlugId: "d9f5d074ffc1",
     linearUrl:
@@ -33,6 +37,7 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
   },
   {
     key: "launch-more-tool-pages",
+    shortName: "Tool pages",
     name: "Launch more tool pages",
     linearSlugId: "d03b951404ed",
     linearUrl:
@@ -44,6 +49,7 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
   },
   {
     key: "unlock-agentic-design-content",
+    shortName: "Agentic design",
     name: "Unlock agentic design/content capabilities",
     linearSlugId: "b12b50221653",
     linearUrl:
@@ -55,6 +61,7 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
   },
   {
     key: "payload-admin-rebuild",
+    shortName: "Payload admin rebuild",
     name: "Payload admin rebuild — from stock Payload to Braveen's design",
     linearSlugId: "098422f41fd9",
     linearUrl:
@@ -71,6 +78,9 @@ export const DONE_PROJECTS = [
     key: "migration",
     name: "Marketing site migration",
     href: "/migration",
+    shortName: "Marketing site migration",
+    lead: "Brian Nguyen",
+    summary: "Webflow → Payload migration of joinhomebase.com",
     blurb:
       "joinhomebase.com migration progress, URL parity, and hosting cutover — completed. Kept for reference.",
   },

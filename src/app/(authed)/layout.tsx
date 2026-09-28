@@ -1,5 +1,9 @@
 import AppShell from "@/components/app-shell";
 import { getSessionUser } from "@/lib/oidc-session";
+import { projectState, type ProjectStateKey } from "@/lib/overview";
+import { torontoToday } from "@/lib/standup";
+import { getTrackerOverviews } from "@/lib/tracker-overviews";
+import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import type { ReactNode } from "react";
 
 /**
@@ -9,6 +13,9 @@ import type { ReactNode } from "react";
  * instead of unmounting the sidebar. Unauthenticated requests fall through
  * bare: each page still runs its own session check and redirects to /login
  * with its own callback URL.
+ *
+ * The sidebar's project-state dots stream in: the promise is handed to the
+ * client unresolved so Linear latency never blocks the shell.
  */
 export default async function AuthedLayout({
   children,
@@ -17,5 +24,15 @@ export default async function AuthedLayout({
 }) {
   const user = await getSessionUser();
   if (!user) return children;
-  return <AppShell user={user}>{children}</AppShell>;
+  const projectStates = getTrackerOverviews().then((overviews) => {
+    const today = torontoToday();
+    return Object.fromEntries(
+      TRACKER_PROJECTS.map((p, i) => [p.key, projectState(overviews[i], today).key]),
+    ) as Record<string, ProjectStateKey>;
+  });
+  return (
+    <AppShell user={user} projectStates={projectStates}>
+      {children}
+    </AppShell>
+  );
 }
