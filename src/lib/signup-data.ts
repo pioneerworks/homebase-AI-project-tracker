@@ -1,6 +1,6 @@
 /**
  * Captured signup history from the Amplitude MCP (Cross-Platform project
- * 677513, queried 2026-09-25), reproducing the team's funnel chart:
+ * 677513, queried 2026-09-28), reproducing the team's funnel chart:
  *   traffic = unique users with Page Viewed, device_type != Linux and
  *             product_area contains "mw_"
  *   signups = users who completed that Page Viewed → Owner Account Created
