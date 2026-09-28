@@ -2547,21 +2547,6 @@ footer {
   overflow-wrap: anywhere;
 }
 
-/* overview: five-metric band (page-touching PRs gets its own cell) */
-.shell-layout .metric-band-five {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-@media (max-width: 900px) {
-  .shell-layout .metric-band-five {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .metric-band-five > div:last-child {
-    grid-column: 1 / -1;
-  }
-}
-
 /* health pills (project cards + project page) */
 .health-pill,
 .metric-band span.health-pill {
@@ -2734,24 +2719,85 @@ footer {
   font-size: 12px;
 }
 
-/* daily standup signups */
-.standup {
-  padding-bottom: 0;
-}
-
+/* overview signups + shipped bands */
 .standup .section-head {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 6px 16px;
 }
 
-.standup-caveat {
+/* warning amber is too light for small text (WCAG AA), so the stale note
+   uses muted ink with an amber dot as the non-text cue */
+.standup-stale {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.standup-stale::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warning);
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.metric-band > .metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-band > .metric > span {
+  margin-top: 0;
+}
+
+.metric-band .metric-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.metric-band .metric-value {
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 32px;
+  font-weight: 720;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-band .metric-value.metric-value-sm {
+  font-size: 18px;
+}
+
+.metric-band .metric-delta {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-band .metric-delta-quiet {
   color: var(--muted);
   font-size: 12px;
 }
 
-.standup-caveat code {
-  font-size: 11.5px;
+.metric-band .metric-change {
+  display: inline;
+  margin: 0;
+  font-weight: 700;
+  color: inherit;
+}
+
+.metric-band .metric-change > span {
+  display: inline;
+  margin: 0;
+  color: inherit;
 }
 
 .metric-band .metric-up {
@@ -2760,6 +2806,46 @@ footer {
 
 .metric-band .metric-down {
   color: var(--danger);
+}
+
+.shell-layout .metric-band-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* when the daily snapshot is missing, only the two 7d cells render —
+   stretch them across the band instead of leaving the right half empty */
+.shell-layout .metric-band.standup-band-no-daily {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* shell-layout pins .metric-band to 4 columns (see the override above), so
+   restore the small-screen collapse here, after it, to win the cascade */
+@media (max-width: 680px) {
+  .shell-layout .metric-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shell-layout .metric-band > div + div {
+    border-left: 0;
+  }
+
+  .shell-layout .metric-band > div:nth-child(even) {
+    border-left: 1px solid var(--line);
+  }
+
+  .shell-layout .metric-band > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .shell-layout .metric-band-three {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-band-three > div + div,
+  .metric-band-three > div:nth-child(even) {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
 }
 
 /* impact chart date range */

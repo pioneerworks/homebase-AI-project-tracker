@@ -26,27 +26,30 @@ function formatDay(date: string): string {
   });
 }
 
-function DeltaCell({
-  label,
-  delta,
-  detail,
+function weekdayOf(date: string): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "long",
+    timeZone: "UTC",
+  });
+}
+
+function Delta({
   value,
+  unit = "%",
+  digits = 1,
 }: {
-  label: string;
-  delta: number | null;
-  detail: string | null;
-  value?: string;
+  value: number | null;
+  unit?: string;
+  digits?: number;
 }) {
+  if (value == null || value === 0) return <span className="metric-change">—</span>;
+  const up = value >= 0;
   return (
-    <div className="metric">
-      <span className="metric-label">{label}</span>
-      <span
-        className={`metric-value${delta == null ? "" : delta >= 0 ? " metric-up" : " metric-down"}`}
-      >
-        {value ?? (delta == null ? "—" : `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`)}
-      </span>
-      <span className="metric-delta">{detail ?? "no data for that day"}</span>
-    </div>
+    <span className={`metric-change ${up ? "metric-up" : "metric-down"}`}>
+      <span aria-hidden="true">{up ? "▲" : "▼"}</span>
+      <span className="sr-only">{up ? "up" : "down"}</span> {Math.abs(value).toFixed(digits)}
+      {unit}
+    </span>
   );
 }
 
@@ -123,85 +126,92 @@ export default async function OverviewPage() {
         </p>
       </header>
 
-      {daily && (
-        <section className="section standup" aria-label="Daily signups for standup">
-          <div className="section-head">
-            <h2>Signups · {formatDay(daily.date)}</h2>
-            <span className="standup-caveat">
-              Definition: Page Viewed → <code>{signupEvent}</code> funnel in Amplitude, unique users.
-              {!dailyIsYesterday &&
-                " Latest complete day in the data; the live feed is behind."}
+      <section className="section standup" aria-label="Signups">
+        <div className="section-head">
+          <h2>Signups</h2>
+          {daily && !dailyIsYesterday && (
+            <span className="standup-stale">
+              Latest complete day is {formatDay(daily.date)}; the live feed is behind
+            </span>
+          )}
+        </div>
+        <div className={`metric-band standup-band${daily ? "" : " standup-band-no-daily"}`}>
+          {daily && (
+            <>
+              <div className="metric">
+                <span className="metric-label">
+                  {dailyIsYesterday ? "Yesterday" : formatDay(daily.date)}
+                </span>
+                <span className="metric-value">{daily.signups.toLocaleString("en-US")}</span>
+                <span className="metric-delta">
+                  <Delta value={weekDelta} /> vs {daily.lastWeek ? `${daily.lastWeek.signups} last ${weekdayOf(daily.lastWeek.date)}` : "last week"}
+                </span>
+                <span className="metric-delta metric-delta-quiet">
+                  <Delta value={dayDelta} /> vs {daily.prevDay ? `${daily.prevDay.signups} the day before` : "the day before"}
+                </span>
+              </div>
+              <div className="metric">
+                <span className="metric-label">Signup rate · {dailyIsYesterday ? "yesterday" : "that day"}</span>
+                <span className="metric-value">
+                  {daily.rate != null ? `${(daily.rate * 100).toFixed(2)}%` : "—"}
+                </span>
+                <span className="metric-delta">
+                  {daily.traffic > 0
+                    ? `of ${daily.traffic.toLocaleString("en-US")} unique visitors`
+                    : "traffic not captured"}
+                </span>
+              </div>
+            </>
+          )}
+          <div className="metric">
+            <span className="metric-label">Signups / day · last 7 days</span>
+            <span className="metric-value">{avg(last7).toFixed(0)}</span>
+            <span className="metric-delta">
+              <Delta value={prev7.length ? signupDelta : null} /> vs prior 7 days
             </span>
           </div>
-          <div className="metric-band standup-band">
-            <div className="metric">
-              <span className="metric-label">
-                {dailyIsYesterday ? "Signups yesterday" : "Signups"}
-              </span>
-              <span className="metric-value">{daily.signups}</span>
-              <span className="metric-delta">
-                {daily.rate != null
-                  ? `${(daily.rate * 100).toFixed(2)}% of site traffic`
-                  : "traffic not captured"}
-              </span>
-            </div>
-            <DeltaCell
-              label="vs day before"
-              delta={dayDelta}
-              detail={daily.prevDay && `${daily.prevDay.signups} on ${formatDay(daily.prevDay.date)}`}
-            />
-            <DeltaCell
-              label="vs same day last week"
-              delta={weekDelta}
-              detail={daily.lastWeek && `${daily.lastWeek.signups} on ${formatDay(daily.lastWeek.date)}`}
-            />
-            <DeltaCell
-              label="Site traffic"
-              delta={null}
-              value={daily.traffic > 0 ? daily.traffic.toLocaleString("en-US") : "—"}
-              detail={daily.traffic > 0 ? "unique visitors that day" : "traffic not captured"}
-            />
+          <div className="metric">
+            <span className="metric-label">Signup rate · last 7 days</span>
+            <span className="metric-value">{(rateAvg(last7) * 100).toFixed(2)}%</span>
+            <span className="metric-delta">
+              <Delta value={prev7.length ? rateDelta : null} unit="pp" digits={2} /> vs prior 7 days
+            </span>
           </div>
-        </section>
-      )}
+        </div>
+        <p className="section-note">
+          Unique users who viewed a migrated page (Page Viewed) and then fired{" "}
+          <code>{signupEvent}</code>, from Amplitude. Rate = signups ÷ unique visitors.
+          Day-over-day swings follow the weekday cycle, so the headline compares
+          against the same weekday last week.
+        </p>
+      </section>
 
-      <section className="metric-band metric-band-five" aria-label="Last 7 days vs previous 7 days">
-        <div className="metric">
-          <span className="metric-label">Signups / day (7d avg)</span>
-          <span className="metric-value">{avg(last7).toFixed(0)}</span>
-          <span
-            className={`metric-delta ${signupDelta >= 0 ? "metric-up" : "metric-down"}`}
-          >
-            {signupDelta >= 0 ? "▲" : "▼"} {Math.abs(signupDelta).toFixed(1)}% vs prior 7d
-          </span>
+      <section className="section" aria-label="Shipped work">
+        <div className="section-head">
+          <h2>Shipped · last 7 days</h2>
         </div>
-        <div className="metric">
-          <span className="metric-label">Signup rate (7d avg)</span>
-          <span className="metric-value">{(rateAvg(last7) * 100).toFixed(2)}%</span>
-          <span
-            className={`metric-delta ${rateDelta >= 0 ? "metric-up" : "metric-down"}`}
-          >
-            {rateDelta >= 0 ? "▲" : "▼"} {Math.abs(rateDelta).toFixed(2)}pp vs prior 7d
-          </span>
-        </div>
-        <div className="metric">
-          <span className="metric-label">PRs merged (7d)</span>
-          <span className="metric-value">{mergesLast7}</span>
-          <span className="metric-delta">
-            {stats.total} total since {stats.firstMergeDay}
-          </span>
-        </div>
-        <div className="metric">
-          <span className="metric-label">Page-touching PRs (7d)</span>
-          <span className="metric-value">{pageMergesLast7}</span>
-          <span className="metric-delta">
-            {mergesLast7 - pageMergesLast7} infra · of {mergesLast7} merged (7d)
-          </span>
-        </div>
-        <div className="metric">
-          <span className="metric-label">Active projects</span>
-          <span className="metric-value">{TRACKER_PROJECTS.length}</span>
-          <span className="metric-delta">tracked in Linear</span>
+        <div className="metric-band metric-band-three">
+          <div className="metric">
+            <span className="metric-label">PRs merged</span>
+            <span className="metric-value">{mergesLast7}</span>
+            <span className="metric-delta">
+              {stats.total.toLocaleString("en-US")} total
+              {stats.firstMergeDay ? ` since ${formatDay(stats.firstMergeDay)}` : ""}
+            </span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Touched a page</span>
+            <span className="metric-value">{pageMergesLast7}</span>
+            <span className="metric-delta">
+              {mergesLast7 ? `${Math.round((pageMergesLast7 / mergesLast7) * 100)}% of merged PRs` : "no merges"}
+              {" "}· design, copy, or a route
+            </span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Infrastructure</span>
+            <span className="metric-value">{mergesLast7 - pageMergesLast7}</span>
+            <span className="metric-delta">no visitor-facing change</span>
+          </div>
         </div>
       </section>
 
