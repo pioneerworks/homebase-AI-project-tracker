@@ -366,7 +366,7 @@ test("fetches each Linear project separately and follows pagination", async () =
     (project) => project.id === ACTIVE_PROJECTS[3].key,
   );
   assert.equal(bareProject?.description, null);
-  assert.equal(requests.length, 29);
+  assert.equal(requests.length, 25);
   assert.deepEqual(
     requests
       .filter((request) => request.after === null)

@@ -32,28 +32,6 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
     repos: ["marketing-site-payload"],
   },
   {
-    key: "self-serve-site-changes",
-    name: "Self-serve site changes",
-    linearSlugId: "eab631bd2f63",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/self-serve-site-changes-eab631bd2f63/overview",
-    status: "active",
-    shortPurpose:
-      "Let marketing teams make site changes themselves without engineering round-trips.",
-    repos: ["marketing-site-payload"],
-  },
-  {
-    key: "payload-cms",
-    name: "Payload CMS",
-    linearSlugId: "14729364d08d",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/payload-cms-from-just-a-migrated-to-marketing-ready-14729364d08d/overview",
-    status: "active",
-    shortPurpose:
-      "Take Payload from 'just migrated' to marketing-ready: authoring experience, content ops, and site features on the new CMS.",
-    repos: ["marketing-site-payload"],
-  },
-  {
     key: "launch-more-tool-pages",
     name: "Launch more tool pages",
     linearSlugId: "d03b951404ed",
