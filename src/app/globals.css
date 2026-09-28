@@ -2726,10 +2726,23 @@ footer {
   gap: 6px 16px;
 }
 
+/* warning amber is too light for small text (WCAG AA), so the stale note
+   uses muted ink with an amber dot as the non-text cue */
 .standup-stale {
-  color: var(--warning);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 650;
+}
+
+.standup-stale::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warning);
+  margin-right: 6px;
+  vertical-align: 1px;
 }
 
 .metric-band > .metric {
@@ -2770,7 +2783,7 @@ footer {
 }
 
 .metric-band .metric-delta-quiet {
-  color: var(--faint);
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -2799,12 +2812,37 @@ footer {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* when the daily snapshot is missing, only the two 7d cells render —
+   stretch them across the band instead of leaving the right half empty */
+.shell-layout .metric-band.standup-band-no-daily {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* shell-layout pins .metric-band to 4 columns (see the override above), so
+   restore the small-screen collapse here, after it, to win the cascade */
 @media (max-width: 680px) {
+  .shell-layout .metric-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shell-layout .metric-band > div + div {
+    border-left: 0;
+  }
+
+  .shell-layout .metric-band > div:nth-child(even) {
+    border-left: 1px solid var(--line);
+  }
+
+  .shell-layout .metric-band > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
   .shell-layout .metric-band-three {
     grid-template-columns: 1fr;
   }
 
-  .metric-band-three > div + div {
+  .metric-band-three > div + div,
+  .metric-band-three > div:nth-child(even) {
     border-left: 0;
     border-top: 1px solid var(--line);
   }

@@ -42,7 +42,7 @@ function Delta({
   unit?: string;
   digits?: number;
 }) {
-  if (value == null) return <span className="metric-change">—</span>;
+  if (value == null || value === 0) return <span className="metric-change">—</span>;
   const up = value >= 0;
   return (
     <span className={`metric-change ${up ? "metric-up" : "metric-down"}`}>
@@ -135,7 +135,7 @@ export default async function OverviewPage() {
             </span>
           )}
         </div>
-        <div className="metric-band standup-band">
+        <div className={`metric-band standup-band${daily ? "" : " standup-band-no-daily"}`}>
           {daily && (
             <>
               <div className="metric">
