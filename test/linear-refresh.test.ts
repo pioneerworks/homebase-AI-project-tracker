@@ -140,25 +140,25 @@ test("fetches each Linear project separately and follows pagination", async () =
           [
             {
               id: "active-project-update-test",
-              body: "Payload readiness is moving through the merge queue.",
+              body: "Agent-run execution is moving through the merge queue.",
               health: "onTrack",
-              url: "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
+              url: "https://linear.app/joinhomebase/project/execution-agents/activity#active-project-update-test",
               createdAt: now,
               updatedAt: now,
             },
           ],
-          "Take Payload from **just migrated** to marketing-ready.",
+          "Ship page work, fixes, and experiments at scale.",
         );
       }
       if (request.variables.project === ACTIVE_PROJECTS[1].id) {
         return projectUpdatesResponse(
           [],
           [
-            "Agent-run execution on the marketing site across the",
-            "Atrium and Culina agent fleets.",
+            "Build internal linking infrastructure across the",
+            "marketing site on the new CMS.",
             "",
             "## Goals",
-            "- Ship page work, fixes, and experiments at scale.",
+            "- Ship automatic related-page links at scale.",
           ].join("\n"),
         );
       }
@@ -333,15 +333,15 @@ test("fetches each Linear project separately and follows pagination", async () =
   assert.equal(activeProject.recent[0]?.id, "AIA-TEST-ACTIVE");
   assert.equal(
     activeProject.latestUpdate?.excerpt,
-    "Payload readiness is moving through the merge queue.",
+    "Agent-run execution is moving through the merge queue.",
   );
   assert.equal(
     activeProject.latestUpdate?.url,
-    "https://linear.app/joinhomebase/project/payload/activity#active-project-update-test",
+    "https://linear.app/joinhomebase/project/execution-agents/activity#active-project-update-test",
   );
   assert.equal(
     activeProject.description,
-    "Take Payload from just migrated to marketing-ready.",
+    "Ship page work, fixes, and experiments at scale.",
   );
   const noUpdateProject = snapshot.activeProjects.find(
     (project) => project.id === ACTIVE_PROJECTS[1].key,
@@ -350,7 +350,7 @@ test("fetches each Linear project separately and follows pagination", async () =
   assert.equal(noUpdateProject.latestUpdate, null);
   assert.equal(
     noUpdateProject.description,
-    "Agent-run execution on the marketing site across the Atrium and Culina agent fleets. Ship page work, fixes, and experiments at scale.",
+    "Build internal linking infrastructure across the marketing site on the new CMS. Ship automatic related-page links at scale.",
   );
   const truncatedProject = snapshot.activeProjects.find(
     (project) => project.id === ACTIVE_PROJECTS[2].key,
