@@ -6,6 +6,7 @@ import { getMergeDays, mergeStats, pageTouchCount } from "@/lib/merges";
 import { dailySignupSummary, pctChange, shiftDate, torontoToday } from "@/lib/standup";
 import { getSignupSeries } from "@/lib/omni";
 import { getSessionUser } from "@/lib/oidc-session";
+import { getRunningExperiments } from "@/lib/statsig";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -57,10 +58,17 @@ export default async function OverviewPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login?callbackUrl=/");
 
-  const [{ days: mergeDayList, source: mergeSource }, signupSeries, overviews] =
+  const [{ days: mergeDayList, source: mergeSource }, signupSeries, runningExperiments, overviews] =
     await Promise.all([
       getMergeDays(MERGE_REPO),
       getSignupSeries(),
+      getRunningExperiments().catch((error) => {
+        console.log(
+          "[overview] Statsig fetch failed:",
+          error instanceof Error ? error.message : error,
+        );
+        return null;
+      }),
       Promise.all(
         TRACKER_PROJECTS.map((p) =>
           getProjectOverview(p.linearSlugId, p.key).catch((error) => {
@@ -185,6 +193,81 @@ export default async function OverviewPage() {
           against the same weekday last week.
         </p>
       </section>
+
+      {runningExperiments && runningExperiments.length > 0 && (
+        <section className="section" aria-label="Experiments">
+          <div className="section-head">
+            <h2>Experiments</h2>
+          </div>
+          <div className="metric-band">
+            {runningExperiments.map((experiment) => {
+              const dayText =
+                experiment.day != null && experiment.durationDays != null
+                  ? `Day ${experiment.day} of ${experiment.durationDays}`
+                  : experiment.day != null
+                    ? `Day ${experiment.day}`
+                    : null;
+              const units =
+                experiment.controlUnits != null && experiment.testUnits != null
+                  ? `${experiment.controlUnits.toLocaleString("en-US")} control vs ${experiment.testUnits.toLocaleString("en-US")} test`
+                  : null;
+              const rates =
+                experiment.controlRate != null && experiment.testRate != null
+                  ? `${(experiment.controlRate * 100).toFixed(2)}% → ${(experiment.testRate * 100).toFixed(2)}%`
+                  : null;
+              const significant = experiment.pValue != null && experiment.pValue < 0.05;
+              return (
+                <div className="metric" key={experiment.id}>
+                  <span className="metric-label">
+                    <a href={experiment.permalink ?? undefined} target="_blank" rel="noreferrer">
+                      {experiment.title}
+                    </a>
+                    {dayText ? ` · ${dayText}` : ""}
+                  </span>
+                  {experiment.percentChange == null ? (
+                    <span className="metric-value">—</span>
+                  ) : significant ? (
+                    <span
+                      className={experiment.verdict === "winning" ? "metric-up" : "metric-down"}
+                    >
+                      <span aria-hidden="true">{experiment.verdict === "winning" ? "▲" : "▼"}</span>{" "}
+                      {(experiment.percentChange) >= 0 ? "+" : "−"}
+                      {Math.abs(experiment.percentChange).toFixed(1)}%{" "}
+                      <span className="sr-only">
+                        {experiment.verdict === "winning" ? "winning" : "losing"}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="metric-value">
+                      {(experiment.percentChange) >= 0 ? "+" : "−"}
+                      {Math.abs(experiment.percentChange).toFixed(1)}%
+                    </span>
+                  )}
+                  <span className="metric-delta">
+                    {experiment.verdict === "no-data"
+                      ? "Not enough data yet"
+                      : `${experiment.primaryMetric ?? "Primary metric"} · ${
+                          significant
+                            ? `p=${experiment.pValue?.toFixed(3)}`
+                            : "not yet significant"
+                        }`}
+                  </span>
+                  <span className="metric-delta metric-delta-quiet">
+                    {rates ? `Control→test: ${rates}` : experiment.hypothesis ?? ""}
+                    {units ? ` · ${units}` : ""}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="section-note">
+            A/B tests currently running in Statsig, with the primary metric&apos;s percent change
+            (test vs control) and significance from the Statsig Console API. ▲/▼ mark statistically
+            significant wins and losses on the primary metric; otherwise the raw lift is shown.
+            Open an experiment in Statsig for the full scorecard.
+          </p>
+        </section>
+      )}
 
       <section className="section" aria-label="Shipped work">
         <div className="section-head">
