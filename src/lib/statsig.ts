@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Running Statsig experiments via the Console API.
  *

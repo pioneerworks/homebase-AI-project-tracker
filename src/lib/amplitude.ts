@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Amplitude funnel series via the Export API.
  *

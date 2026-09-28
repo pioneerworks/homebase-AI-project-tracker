@@ -1,4 +1,5 @@
-import { nextMilestone, type ProjectOverview } from "@/lib/linear-projects";
+import type { ProjectOverview } from "@/lib/linear-projects";
+import { nextMilestone } from "@/lib/milestones";
 import type { ExperimentCard } from "@/lib/statsig";
 
 export type ProjectStateKey = "done" | "overdue" | "offTrack" | "atRisk" | "onTrack" | "none";
@@ -10,7 +11,7 @@ export type ProjectState = {
   lateDays: number;
 };
 
-const LABELS: Record<ProjectStateKey, string> = {
+export const STATE_LABELS: Record<ProjectStateKey, string> = {
   done: "Done",
   overdue: "Overdue",
   offTrack: "Off track",
@@ -27,9 +28,7 @@ export const ATTENTION_STATES: ReadonlySet<ProjectStateKey> = new Set([
 ]);
 
 function daysBetween(from: string, to: string): number {
-  return Math.round(
-    (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000,
-  );
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
 }
 
 /**
@@ -40,15 +39,14 @@ export function projectState(
   overview: Pick<ProjectOverview, "health" | "milestones"> | null,
   today: string,
 ): ProjectState {
-  if (!overview) return { key: "none", label: LABELS.none, lateDays: 0 };
+  if (!overview) return { key: "none", label: STATE_LABELS.none, lateDays: 0 };
   const next = nextMilestone(overview.milestones);
   const lateDays = next?.targetDate ? daysBetween(next.targetDate, today) : 0;
-  const key: ProjectStateKey =
-    lateDays > 0 ? "overdue" : overview.health ?? "none";
-  return { key, label: LABELS[key], lateDays: key === "overdue" ? lateDays : 0 };
+  const key: ProjectStateKey = lateDays > 0 ? "overdue" : (overview.health ?? "none");
+  return { key, label: STATE_LABELS[key], lateDays: key === "overdue" ? lateDays : 0 };
 }
 
-export const DONE_STATE: ProjectState = { key: "done", label: LABELS.done, lateDays: 0 };
+export const DONE_STATE: ProjectState = { key: "done", label: STATE_LABELS.done, lateDays: 0 };
 
 export type AttentionItem = {
   kind: "experiment" | "overdue" | "health";
@@ -65,8 +63,7 @@ export type AttentionProject = {
   state: ProjectState;
 };
 
-const signed = (value: number) =>
-  `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}%`;
+const signed = (value: number) => `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}%`;
 
 export function formatPValue(p: number | null): string {
   if (p == null) return "p unavailable";

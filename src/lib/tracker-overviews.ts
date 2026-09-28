@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cache } from "react";
 
 import { getProjectOverview, type ProjectOverview } from "@/lib/linear-projects";

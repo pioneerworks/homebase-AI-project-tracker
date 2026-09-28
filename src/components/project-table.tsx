@@ -131,6 +131,11 @@ export default function ProjectTable({ rows }: { rows: ProjectRow[] }) {
                   onClick={(event) => {
                     // let real links (and modified clicks) behave normally
                     if ((event.target as HTMLElement).closest("a")) return;
+                    if (window.getSelection()?.toString()) return;
+                    if (event.metaKey || event.ctrlKey) {
+                      window.open(row.href, "_blank", "noopener");
+                      return;
+                    }
                     router.push(row.href);
                   }}
                 >
@@ -146,7 +151,7 @@ export default function ProjectTable({ rows }: { rows: ProjectRow[] }) {
                         <span className="avatar avatar-sm" aria-hidden="true">
                           {initials(row.owner)}
                         </span>
-                        {row.owner}
+                        <span className="owner-name">{row.owner}</span>
                       </span>
                     ) : (
                       <span className="is-empty">{row.available ? "No lead" : "—"}</span>

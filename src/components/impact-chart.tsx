@@ -24,7 +24,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/merges";
+import { classifyPageTouch, type MergeDay, type MergedPr } from "@/lib/pr-classify";
 import { linearTrend, presetRange, trendLabel, type RangePreset } from "@/lib/standup";
 
 const REPO = "marketing-site-payload";
@@ -108,7 +108,9 @@ function ImpactTooltip({
   sampleNote,
   today,
   previous,
+  view = "all",
 }: {
+  view?: "all" | "page";
   active?: boolean;
   payload?: TooltipEntry[];
   sampleNote?: string;
@@ -121,7 +123,7 @@ function ImpactTooltip({
   if (!point) return null;
   const prev = previous?.get(point.date);
   const dayChange =
-    point.signups != null && prev ? Math.round((point.signups / prev - 1) * 100) : null;
+    point.signups != null && prev && point.date !== today ? Math.round((point.signups / prev - 1) * 100) : null;
   return (
     <div className="impact-tooltip">
       <span className="impact-tooltip-date">{dayLabel(point.date)}</span>
@@ -134,7 +136,8 @@ function ImpactTooltip({
           {dayChange != null && (
             <span className="impact-tooltip-change">
               {" "}
-              {dayChange >= 0 ? "▲" : "▼"}
+              <span aria-hidden="true">{dayChange >= 0 ? "▲" : "▼"}</span>
+              <span className="sr-only">{dayChange >= 0 ? "up" : "down"} </span>
               {Math.abs(dayChange)}% d/d
             </span>
           )}
@@ -148,22 +151,26 @@ function ImpactTooltip({
       <TooltipRow dot="page" label="Page PRs">
         {point.pageMerges ?? 0}
       </TooltipRow>
-      <TooltipRow dot="other" label="Other PRs">
-        {point.otherMerges ?? 0}
-      </TooltipRow>
+      {view === "all" && (
+        <TooltipRow dot="other" label="Other PRs">
+          {point.otherMerges ?? 0}
+        </TooltipRow>
+      )}
       {point.merges != null && point.merges > 0 && (
-        <div className="impact-tooltip-hint">Click to see which PRs merged →</div>
+        <div className="impact-tooltip-hint">Click or press Enter to see which PRs merged →</div>
       )}
       {sampleNote && <div className="impact-tooltip-note">{sampleNote}</div>}
     </div>
   );
 }
 
-/** Vertical hover guide at the centre of the active day's band. */
-function DayGuide(props: { x?: number; y?: number; width?: number; height?: number }) {
-  const { x = 0, y = 0, width = 0, height = 0 } = props;
-  const cx = x + width / 2;
-  return <line x1={cx} x2={cx} y1={y} y2={y + height} stroke="var(--chart-guide)" strokeWidth={1} />;
+/** Vertical hover guide at the active day; recharts passes its top and bottom points. */
+function DayGuide({ points }: { points?: { x: number; y: number }[] }) {
+  if (!points || points.length < 2) return null;
+  const [top, bottom] = points;
+  return (
+    <line x1={top.x} x2={top.x} y1={top.y} y2={bottom.y} stroke="var(--chart-guide)" strokeWidth={1} />
+  );
 }
 
 const isWeekend = (iso: string) => {
@@ -266,8 +273,9 @@ export default function ImpactChart({
       barTotal: view === "all" ? (p.merges ?? 0) : (p.pageMerges ?? 0),
     };
   });
+  const signupsByDate = new Map(allPoints.map((p) => [p.date, p.signups]));
   const previousSignups = new Map(
-    allPoints.map((p, i) => [p.date, i > 0 ? allPoints[i - 1].signups : null]),
+    allPoints.map((p) => [p.date, signupsByDate.get(shiftDay(p.date, -1)) ?? null]),
   );
   const weekendDays = points.filter((p) => isWeekend(p.date)).map((p) => p.date);
   // weekend shading only reads at day-level zoom
@@ -479,6 +487,7 @@ export default function ImpactChart({
                     sampleNote={sampleNote}
                     today={today}
                     previous={previousSignups}
+                    view={view}
                   />
                 }
               />
@@ -492,7 +501,7 @@ export default function ImpactChart({
                 maxBarSize={28}
                 isAnimationActive={false}
               >
-                {view === "page" && <BarTotals />}
+                <BarTotals points={points} segment="page" view={view} />
               </Bar>
               {view === "all" && (
                 <Bar
@@ -505,7 +514,7 @@ export default function ImpactChart({
                   maxBarSize={28}
                   isAnimationActive={false}
                 >
-                  <BarTotals />
+                  <BarTotals points={points} segment="other" view={view} />
                 </Bar>
               )}
               <Area
@@ -634,8 +643,20 @@ const shiftDay = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** Total merged PRs above the top bar segment; hidden on days with none. */
-function BarTotals() {
+/**
+ * Total merged PRs above the topmost drawn segment. recharts drops zero-height
+ * bars (and their labels), so the page segment carries the total on days with
+ * no other PRs.
+ */
+function BarTotals({
+  points,
+  segment,
+  view,
+}: {
+  points: ChartPoint[];
+  segment: "page" | "other";
+  view: "all" | "page";
+}) {
   return (
     <LabelList
       dataKey="barTotal"
@@ -645,6 +666,23 @@ function BarTotals() {
       fontSize={11}
       fontWeight={800}
       formatter={(value: unknown) => (typeof value === "number" && value > 0 ? value : "")}
+      content={(props) => {
+        const index = typeof props.index === "number" ? props.index : -1;
+        const point = points[index];
+        if (!point || point.barTotal <= 0) return null;
+        const onTop =
+          segment === "other"
+            ? (point.otherMerges ?? 0) > 0
+            : view === "page" || (point.otherMerges ?? 0) === 0;
+        if (!onTop) return null;
+        const x = Number(props.x ?? 0) + Number(props.width ?? 0) / 2;
+        const y = Number(props.y ?? 0) - 6;
+        return (
+          <text x={x} y={y} textAnchor="middle" fill="var(--pr-page-text)" fontSize={11} fontWeight={800}>
+            {point.barTotal}
+          </text>
+        );
+      }}
     />
   );
 }

@@ -117,3 +117,18 @@ test("initials", () => {
   assert.equal(initials("Loki"), "L");
   assert.equal(initials(null), "?");
 });
+
+test("projectState: a dated open milestone wins over an undated one", () => {
+  const milestones = [
+    milestone({ id: "u", name: "Undated", targetDate: null, progress: 10 }),
+    milestone({ id: "d", name: "Dated", targetDate: "2026-09-20", progress: 50 }),
+  ];
+  const state = projectState(overview({ milestones }), "2026-09-28");
+  assert.equal(state.key, "overdue");
+  assert.equal(state.lateDays, 8);
+});
+
+test("projectState: tolerates a relay payload without milestones", () => {
+  const legacy = { health: "onTrack", milestones: undefined } as unknown as ProjectOverview;
+  assert.equal(projectState(legacy, "2026-09-28").key, "onTrack");
+});

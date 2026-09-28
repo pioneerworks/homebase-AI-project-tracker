@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, use, useState } from "react";
 
 import type { ProjectStateKey } from "@/lib/overview";
-import { initials } from "@/lib/overview";
+import { initials, STATE_LABELS } from "@/lib/overview";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
 type Props = {
@@ -23,7 +23,12 @@ function StateDot({
   states: Promise<Record<string, ProjectStateKey>>;
 }) {
   const key = use(states)[projectKey] ?? "none";
-  return <span className={`state-dot state-dot-${key}`} aria-hidden="true" />;
+  return (
+    <>
+      <span className={`state-dot state-dot-${key}`} aria-hidden="true" title={STATE_LABELS[key]} />
+      <span className="sr-only">{STATE_LABELS[key]}: </span>
+    </>
+  );
 }
 
 export default function AppShell({
@@ -55,54 +60,59 @@ export default function AppShell({
             AI Hub
           </Link>
 
-          <nav className="sidebar-nav" aria-label="Primary">
-            <Link
-              href="/"
-              className="sidebar-nav-item"
-              aria-current={pathname === "/" ? "page" : undefined}
-              onClick={() => setOpen(false)}
-            >
-              <LayoutDashboard size={18} aria-hidden="true" />
-              Overview
-            </Link>
-          </nav>
-
-          <nav className="sidebar-shortcuts" aria-labelledby="sidebar-active-label">
-            <p className="sidebar-heading" id="sidebar-active-label">
-              Active projects
-            </p>
-            {TRACKER_PROJECTS.map((p) => (
+          <nav className="sidebar-top" aria-label="Primary">
+            <div className="sidebar-nav">
               <Link
-                key={p.key}
-                href={`/projects/${p.key}`}
-                className="sidebar-shortcut"
-                aria-current={isActive(`/projects/${p.key}`) ? "page" : undefined}
+                href="/"
+                className="sidebar-nav-item"
+                aria-current={pathname === "/" ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
-                <Suspense fallback={<span className="state-dot state-dot-none" aria-hidden="true" />}>
-                  <StateDot projectKey={p.key} states={projectStates} />
-                </Suspense>
-                {p.shortName}
+                <LayoutDashboard size={18} aria-hidden="true" />
+                Overview
               </Link>
-            ))}
-          </nav>
+            </div>
 
-          <nav className="sidebar-shortcuts" aria-labelledby="sidebar-done-label">
-            <p className="sidebar-heading" id="sidebar-done-label">
-              Done
-            </p>
-            {DONE_PROJECTS.map((p) => (
-              <Link
-                key={p.key}
-                href={p.href}
-                className="sidebar-shortcut"
-                aria-current={isActive(p.href) ? "page" : undefined}
-                onClick={() => setOpen(false)}
-              >
-                <span className="state-dot state-dot-done" aria-hidden="true" />
-                {p.shortName}
-              </Link>
-            ))}
+            <div className="sidebar-shortcuts" role="group" aria-labelledby="sidebar-active-label">
+              <p className="sidebar-heading" id="sidebar-active-label">
+                Active projects
+              </p>
+              {TRACKER_PROJECTS.map((p) => (
+                <Link
+                  key={p.key}
+                  href={`/projects/${p.key}`}
+                  className="sidebar-shortcut"
+                  aria-current={isActive(`/projects/${p.key}`) ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  <Suspense
+                    fallback={<span className="state-dot state-dot-none" aria-hidden="true" />}
+                  >
+                    <StateDot projectKey={p.key} states={projectStates} />
+                  </Suspense>
+                  {p.shortName}
+                </Link>
+              ))}
+            </div>
+
+            <div className="sidebar-shortcuts" role="group" aria-labelledby="sidebar-done-label">
+              <p className="sidebar-heading" id="sidebar-done-label">
+                Done
+              </p>
+              {DONE_PROJECTS.map((p) => (
+                <Link
+                  key={p.key}
+                  href={p.href}
+                  className="sidebar-shortcut"
+                  aria-current={isActive(p.href) ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="state-dot state-dot-done" aria-hidden="true" />
+                  <span className="sr-only">Done: </span>
+                  {p.shortName}
+                </Link>
+              ))}
+            </div>
           </nav>
         </div>
 
@@ -116,7 +126,12 @@ export default function AppShell({
               <span className="sidebar-user-team">AI team</span>
             </span>
             <form action="/api/auth/logout" method="post">
-              <button type="submit" className="sidebar-signout" aria-label="Sign out" title="Sign out">
+              <button
+                type="submit"
+                className="sidebar-signout"
+                aria-label="Sign out"
+                title="Sign out"
+              >
                 <LogOut size={16} aria-hidden="true" />
               </button>
             </form>

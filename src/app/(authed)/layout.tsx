@@ -29,6 +29,10 @@ export default async function AuthedLayout({
     return Object.fromEntries(
       TRACKER_PROJECTS.map((p, i) => [p.key, projectState(overviews[i], today).key]),
     ) as Record<string, ProjectStateKey>;
+  }).catch((error) => {
+    // dots fall back to grey rather than taking down the shell
+    console.log("[sidebar] project states failed:", error instanceof Error ? error.message : error);
+    return {} as Record<string, ProjectStateKey>;
   });
   return (
     <AppShell user={user} projectStates={projectStates}>

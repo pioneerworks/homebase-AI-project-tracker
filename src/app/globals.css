@@ -14,7 +14,7 @@
   --cream: #c0bda2;
   --border: #e2ddee;
   --pr-page: #f0961b;
-  --pr-page-text: #b8650a;
+  --pr-page-text: #9e5706;
 
   /* Semantic aliases used across every page */
   --bg: var(--white);
@@ -23,7 +23,7 @@
   --surface-strong: #eeebf3;
   --ink: var(--deep-purple);
   --muted: #6b6b6b;
-  --faint: #8e88a0;
+  --faint: #6f6985;
   --line: var(--border);
   --primary: var(--pr-page);
   --primary-dark: var(--pr-page-text);
@@ -50,6 +50,10 @@
   --shadow-seg: 0 1px 3px rgb(30 11 58 / 0.12);
   --shadow-tip: 0 6px 16px rgb(30 11 58 / 0.2);
   --focus: 0 0 0 3px rgb(126 61 212 / 0.3);
+
+  --chart-grid: rgb(226 221 238 / 0.6);
+  --chart-guide: rgb(30 11 58 / 0.25);
+  --chart-weekend: rgb(30 11 58 / 0.03);
 }
 
 * {
@@ -77,8 +81,8 @@ a {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
+  outline: 2px solid var(--brand-purple);
+  outline-offset: 2px;
 }
 
 button,
@@ -112,7 +116,7 @@ button {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: oklch(0.995 0.002 65 / 0.93);
+  background: rgb(255 254 254 / 0.93);
   backdrop-filter: blur(12px);
 }
 
@@ -149,7 +153,7 @@ button {
   color: var(--muted);
   cursor: pointer;
   font-size: 12px;
-  font-weight: 720;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -168,7 +172,7 @@ button {
   align-items: center;
   gap: 10px;
   color: var(--ink);
-  font-weight: 740;
+  font-weight: 700;
   letter-spacing: -0.015em;
   text-decoration: none;
 }
@@ -177,8 +181,7 @@ button {
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  background: var(--primary);
-  box-shadow: inset 0 0 0 1px oklch(0.45 0.13 62 / 0.25);
+  background: var(--brand-purple);
 }
 
 .nav {
@@ -193,7 +196,7 @@ button {
   border-radius: var(--radius-small);
   color: var(--muted);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -211,7 +214,7 @@ button {
   border-left: 1px solid var(--line);
   color: var(--faint);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -256,7 +259,7 @@ button {
   gap: 9px;
   color: var(--ink);
   font-size: 14px;
-  font-weight: 780;
+  font-weight: 800;
   letter-spacing: -0.02em;
   text-decoration: none;
 }
@@ -274,7 +277,7 @@ button {
   margin-top: 38px;
   color: var(--accent);
   font-size: 11px;
-  font-weight: 780;
+  font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -316,7 +319,7 @@ button {
   background: var(--accent);
   color: white;
   cursor: pointer;
-  font-weight: 740;
+  font-weight: 700;
   text-decoration: none;
   transition:
     background 160ms ease,
@@ -392,7 +395,7 @@ button {
   gap: 8px;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -436,7 +439,7 @@ button {
   margin-top: 22px;
   color: var(--faint);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .text-button {
@@ -446,7 +449,7 @@ button {
   background: transparent;
   color: var(--accent);
   cursor: pointer;
-  font-weight: 720;
+  font-weight: 700;
 }
 
 .text-button:disabled {
@@ -535,7 +538,7 @@ button {
 }
 
 .stakeholder-recap {
-  --recap-deep: #260052;
+  --recap-deep: var(--deep-purple);
   --recap-lilac: #a783e9;
   background: oklch(0.965 0.012 305);
 }
@@ -559,7 +562,7 @@ button {
   flex: none;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 720;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -574,7 +577,7 @@ button {
 .recap-label {
   color: var(--progress);
   font-size: 12px;
-  font-weight: 790;
+  font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -668,7 +671,7 @@ button {
 .recap-source {
   color: var(--accent);
   font-size: 10px;
-  font-weight: 780;
+  font-weight: 800;
   letter-spacing: 0.035em;
   text-decoration: none;
 }
@@ -710,7 +713,7 @@ button {
   flex: none;
   color: var(--accent);
   font-size: 13px;
-  font-weight: 720;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -767,7 +770,7 @@ button {
   margin-top: 8px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .metric-band .metric-recent {
@@ -825,7 +828,7 @@ button {
   gap: 12px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 720;
+  font-weight: 700;
 }
 
 .bar-track {
@@ -900,7 +903,7 @@ button {
   flex-shrink: 0;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .active-project-update {
@@ -981,7 +984,7 @@ button {
 .blog-notice-links a {
   color: var(--accent);
   font-size: 12px;
-  font-weight: 720;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -1059,7 +1062,7 @@ button {
   width: max-content;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 740;
+  font-weight: 700;
 }
 
 .status i {
@@ -1182,7 +1185,7 @@ button {
   color: var(--muted);
   cursor: pointer;
   font-size: 12px;
-  font-weight: 680;
+  font-weight: 700;
 }
 
 .filter:hover {
@@ -1222,7 +1225,7 @@ button {
   background: var(--surface);
   color: var(--muted);
   font-size: 10px;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1243,7 +1246,7 @@ button {
 .cutover-work {
   overflow: hidden;
   font-size: 13px;
-  font-weight: 680;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1262,7 +1265,7 @@ button {
   background: var(--surface);
   color: var(--muted);
   font-size: 10px;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1309,7 +1312,7 @@ button {
 .ticket-link {
   color: var(--accent);
   font-size: 12px;
-  font-weight: 730;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -1345,7 +1348,7 @@ button {
 .issue-id {
   color: var(--accent);
   font-size: 12px;
-  font-weight: 740;
+  font-weight: 700;
 }
 
 .issue-heading {
@@ -1363,7 +1366,7 @@ button {
   flex: none;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 680;
+  font-weight: 700;
 }
 
 .issue-row p {
@@ -1797,9 +1800,6 @@ footer {
 }
 
 /* ===== App shell: sidebar layout for the multi-project tracker ===== */
-:root {
-  --chart-grid: oklch(0.9 0.01 305);
-}
 
 .shell-layout {
   display: flex;
@@ -1916,7 +1916,7 @@ footer {
 
 .sidebar a:focus-visible,
 .sidebar button:focus-visible {
-  box-shadow: 0 0 0 2px var(--purple-rain);
+  outline-color: var(--purple-rain);
 }
 
 .state-dot {
@@ -1979,10 +1979,12 @@ footer {
 }
 
 .sidebar-user-name {
+  overflow: hidden;
   color: var(--white);
   font-size: 14px;
   font-weight: 700;
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-user-team {
@@ -2086,7 +2088,8 @@ footer {
   }
 }
 
-.hero-eyebrow {
+.hero .hero-eyebrow {
+  max-width: none;
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -2131,15 +2134,10 @@ footer {
   background: var(--success);
 }
 
-.impact-dot-rate {
-  background: var(--brand-purple);
-}
-
 .impact-dot-rate-light {
   background: var(--purple-rain);
 }
 
-.impact-dot-merges,
 .impact-dot-page {
   background: var(--pr-page);
 }
@@ -2260,22 +2258,6 @@ footer {
   font-size: 11px;
 }
 
-.metric-value-sm {
-  font-size: 18px;
-}
-
-.section-note {
-  font-size: 12.5px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-
-.recap-paragraph {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-}
-
 .update-body {
   font-size: 14px;
   line-height: 1.55;
@@ -2292,7 +2274,7 @@ footer {
 .update-body h3 {
   margin: 18px 0 8px;
   font-size: 13px;
-  font-weight: 720;
+  font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--muted);
@@ -2584,11 +2566,6 @@ footer {
   text-align: right;
 }
 
-/* chart can never force width */
-.impact-chart {
-  min-width: 0;
-}
-
 /* PR drill-down: chips wrap, long titles wrap */
 .pr-row {
   min-width: 0;
@@ -2620,22 +2597,22 @@ footer {
 
 .health-onTrack {
   background: var(--success-soft);
-  color: var(--success);
+  color: var(--success-text);
 }
 
 .health-atRisk {
   background: var(--warning-soft);
-  color: var(--primary-dark);
+  color: var(--warning-text);
 }
 
 .health-offTrack {
-  background: oklch(0.95 0.035 25);
-  color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger-text);
 }
 
 .health-none {
   border-color: var(--line);
-  color: var(--faint);
+  color: var(--muted);
 }
 
 /* milestones (project page) */
@@ -2673,7 +2650,7 @@ footer {
 .milestone-meta {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .milestone-overdue .milestone-meta {
@@ -2755,32 +2732,6 @@ footer {
   font-size: 12px;
 }
 
-/* overview signups + shipped bands */
-.standup .section-head {
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-}
-
-/* warning amber is too light for small text (WCAG AA), so the stale note
-   uses muted ink with an amber dot as the non-text cue */
-.standup-stale {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.standup-stale::before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--warning);
-  margin-right: 6px;
-  vertical-align: 1px;
-}
-
 .metric-band > .metric {
   display: flex;
   flex-direction: column;
@@ -2794,14 +2745,14 @@ footer {
 .metric-band .metric-label {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .metric-band .metric-value {
   margin-top: 2px;
   color: var(--ink);
   font-size: 32px;
-  font-weight: 720;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
@@ -2816,42 +2767,6 @@ footer {
   font-size: 13px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-}
-
-.metric-band .metric-delta-quiet {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.metric-band .metric-change {
-  display: inline;
-  margin: 0;
-  font-weight: 700;
-  color: inherit;
-}
-
-.metric-band .metric-change > span {
-  display: inline;
-  margin: 0;
-  color: inherit;
-}
-
-.metric-band .metric-up {
-  color: var(--success);
-}
-
-.metric-band .metric-down {
-  color: var(--danger);
-}
-
-.shell-layout .metric-band-three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-/* when the daily snapshot is missing, only the two 7d cells render —
-   stretch them across the band instead of leaving the right half empty */
-.shell-layout .metric-band.standup-band-no-daily {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* shell-layout pins .metric-band to 4 columns (see the override above), so
@@ -2873,15 +2788,6 @@ footer {
     border-top: 1px solid var(--line);
   }
 
-  .shell-layout .metric-band-three {
-    grid-template-columns: 1fr;
-  }
-
-  .metric-band-three > div + div,
-  .metric-band-three > div:nth-child(even) {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-  }
 }
 
 /* milestone "view more" */
@@ -2893,7 +2799,7 @@ footer {
   color: var(--accent);
   font: inherit;
   font-size: 12.5px;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -2902,8 +2808,8 @@ footer {
 }
 
 .milestone-more:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
+  outline: 2px solid var(--brand-purple);
+  outline-offset: 2px;
   border-radius: 4px;
 }
 
@@ -3160,6 +3066,7 @@ footer {
 }
 
 .attention-title {
+  margin: 0;
   font-size: 14px;
   font-weight: 800;
 }
@@ -3207,8 +3114,6 @@ footer {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  align-items: flex-start;
-  gap: 6px;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
@@ -3310,6 +3215,7 @@ footer {
 
 /* chart card */
 .impact-chart {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -3325,7 +3231,7 @@ footer {
 }
 
 .impact-chart-title {
-  flex: 1 1 320px;
+  flex: 1 1 420px;
   min-width: 0;
 }
 
@@ -3372,8 +3278,8 @@ footer {
 }
 
 .impact-range-inputs input:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
+  outline: 2px solid var(--brand-purple);
+  outline-offset: 2px;
 }
 
 .impact-chart-footnote {
@@ -3384,11 +3290,6 @@ footer {
   line-height: 1.55;
 }
 
-:root {
-  --chart-grid: rgb(226 221 238 / 0.6);
-  --chart-guide: rgb(30 11 58 / 0.25);
-  --chart-weekend: rgb(30 11 58 / 0.03);
-}
 
 /* experiments */
 .exp-card {
@@ -3596,7 +3497,7 @@ a.exp-name:hover {
 
 .project-table {
   width: 100%;
-  min-width: 880px;
+  min-width: 1040px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -3637,7 +3538,9 @@ a.exp-name:hover {
   background: #fbfafd;
 }
 
-.project-table tbody tr.is-done {
+.project-table tbody tr.is-done .track,
+.project-table tbody tr.is-done .ring,
+.project-table tbody tr.is-done .avatar {
   opacity: 0.72;
 }
 
@@ -3670,10 +3573,18 @@ a.exp-name:hover {
 }
 
 .owner {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
+}
+
+.owner-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .avatar-sm {
@@ -3751,8 +3662,14 @@ a.exp-name:hover {
     flex: 1 1 220px;
   }
 
+  .exps {
+    grid-template-columns: 1fr;
+  }
+
   .exp + .exp {
+    padding-top: 24px;
     padding-left: 0;
+    border-top: 1px solid var(--border);
     border-left: 0;
   }
 }

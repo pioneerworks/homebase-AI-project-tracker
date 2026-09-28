@@ -79,19 +79,22 @@ function Delta({
   unit?: string;
   digits?: number;
 }) {
-  if (value == null || value === 0) return <b className="flat">—</b>;
-  const up = value >= 0;
+  const rounded = value == null ? 0 : Number(value.toFixed(digits));
+  if (value == null || !Number.isFinite(value) || rounded === 0) return <b className="flat">—</b>;
+  const up = rounded > 0;
   return (
     <b className={up ? "up" : "down"}>
       <span aria-hidden="true">{up ? "▲" : "▼"}</span>
-      <span className="sr-only">{up ? "up" : "down"}</span> {Math.abs(value).toFixed(digits)}
+      <span className="sr-only">{up ? "up" : "down"}</span> {Math.abs(rounded).toFixed(digits)}
       {unit}
     </b>
   );
 }
 
-const dirOf = (value: number | null): Dir =>
-  value == null || value === 0 ? "flat" : value > 0 ? "up" : "down";
+const dirOf = (value: number | null, digits = 1): Dir => {
+  const rounded = value == null || !Number.isFinite(value) ? 0 : Number(value.toFixed(digits));
+  return rounded === 0 ? "flat" : rounded > 0 ? "up" : "down";
+};
 
 function Spark({ values, dir }: { values: number[]; dir: Dir }) {
   const max = Math.max(0, ...values) || 1;
@@ -140,7 +143,7 @@ function AttentionStrip({ items, summary }: { items: AttentionItem[]; summary: s
         <span className="attention-chip attention-chip-ok">
           <CircleCheck size={18} aria-hidden="true" />
         </span>
-        <span className="attention-title">Nothing needs attention</span>
+        <h2 className="attention-title">Nothing needs attention</h2>
       </section>
     );
   }
@@ -151,9 +154,9 @@ function AttentionStrip({ items, summary }: { items: AttentionItem[]; summary: s
           <TriangleAlert size={18} aria-hidden="true" />
         </span>
         <div>
-          <div className="attention-title" id="attention-title">
+          <h2 className="attention-title" id="attention-title">
             {items.length} need{items.length === 1 ? "s" : ""} attention
-          </div>
+          </h2>
           <div className="attention-sub">{summary}</div>
         </div>
       </div>
@@ -207,7 +210,7 @@ function Experiment({ experiment }: { experiment: ExperimentCard }) {
   const metric = experiment.primaryMetric ?? "Primary metric";
   const detail =
     experiment.verdict === "no-data"
-      ? "Not enough data yet"
+      ? `Not enough data yet${experiment.noDataReason ? ` (${experiment.noDataReason.replace(/_/g, " ")})` : ""}`
       : significant
         ? `${formatPValue(experiment.pValue)}${
             experiment.ci
@@ -322,12 +325,31 @@ export default async function OverviewPage() {
   const prev7 = completePoints.slice(-14, -7);
   const avg = (rows: ImpactPoint[]) =>
     rows.length ? rows.reduce((s, r) => s + (r.signups ?? 0), 0) / rows.length : 0;
-  const rateAvg = (rows: ImpactPoint[]) =>
-    rows.length ? rows.reduce((s, r) => s + (r.rate ?? 0), 0) / rows.length : 0;
-  const signupDelta = prev7.length ? (avg(last7) / avg(prev7) - 1) * 100 : null;
-  const rateDelta = prev7.length ? (rateAvg(last7) - rateAvg(prev7)) * 100 : null;
-  const mergesLast7 = last7.reduce((s, r) => s + (r.merges ?? 0), 0);
-  const pageMergesLast7 = last7.reduce((s, r) => s + (r.pageMerges ?? 0), 0);
+  // pooled rate (Σsignups ÷ Σvisitors) when traffic is captured, so a
+  // low-traffic day can't skew it; otherwise the mean of the known daily rates
+  const pooledRate = (rows: ImpactPoint[]): number | null => {
+    const traffic = rows.reduce((s, r) => s + (trafficByDay.get(r.date) ?? 0), 0);
+    if (traffic > 0) {
+      const signups = rows.reduce(
+        (s, r) => s + ((trafficByDay.get(r.date) ?? 0) > 0 ? (r.signups ?? 0) : 0),
+        0,
+      );
+      return signups / traffic;
+    }
+    const rates = rows.map((r) => r.rate).filter((r): r is number => r != null);
+    return rates.length ? rates.reduce((a, b) => a + b, 0) / rates.length : null;
+  };
+  const rate7 = pooledRate(last7);
+  const ratePrev7 = pooledRate(prev7);
+  const signupDelta = avg(prev7) > 0 ? (avg(last7) / avg(prev7) - 1) * 100 : null;
+  const rateDelta = rate7 != null && ratePrev7 != null ? (rate7 - ratePrev7) * 100 : null;
+  // PR counts come from the merge calendar itself, so a lagging signup feed
+  // can't hide recent merges
+  const weekStart = shiftDate(today, -7);
+  const mergeWeek = mergeDayList.filter((d) => d.date >= weekStart && d.date < today);
+  const mergesLast7 = mergeWeek.reduce((s, d) => s + d.count, 0);
+  const pageMergesLast7 = mergeWeek.reduce((s, d) => s + pageTouchCount(d.prs), 0);
+  const mergeSpark = Array.from({ length: 7 }, (_, i) => mergesByDay.get(shiftDate(today, i - 7)) ?? 0);
   const visitorsLast7 = last7.reduce((s, r) => s + (trafficByDay.get(r.date) ?? 0), 0);
 
   // yesterday's card compares against the same weekday, so its spark shows
@@ -355,7 +377,7 @@ export default async function OverviewPage() {
         key: p.key,
         href: `/projects/${p.key}`,
         name: p.name,
-        description: overview?.description || p.shortPurpose,
+        description: p.shortPurpose,
         owner: overview ? overview.lead : null,
         state: projects[index].state,
         available: Boolean(overview),
@@ -420,8 +442,7 @@ export default async function OverviewPage() {
               </span>
               {dayDelta != null && daily.prevDay && (
                 <span className="kpi-delta-quiet">
-                  {dayDelta >= 0 ? "▲" : "▼"} {Math.abs(dayDelta).toFixed(1)}% vs{" "}
-                  {daily.prevDay.signups} the day before
+                  <Delta value={dayDelta} /> vs {daily.prevDay.signups} the day before
                 </span>
               )}
             </Kpi>
@@ -443,9 +464,9 @@ export default async function OverviewPage() {
           </Kpi>
           <Kpi
             label="Signup rate · 7d"
-            value={`${(rateAvg(last7) * 100).toFixed(2)}%`}
+            value={rate7 != null ? `${(rate7 * 100).toFixed(2)}%` : "—"}
             spark={last7.map((p) => p.rate ?? 0)}
-            dir={dirOf(rateDelta)}
+            dir={dirOf(rateDelta, 2)}
           >
             <Delta value={rateDelta} unit="pp" digits={2} />
             <span>
@@ -457,7 +478,7 @@ export default async function OverviewPage() {
           <Kpi
             label="PRs merged · 7d"
             value={String(mergesLast7)}
-            spark={last7.map((p) => p.merges ?? 0)}
+            spark={mergeSpark}
             dir="flat"
           >
             <b className="flat">{pageMergesLast7} page-touching</b>
