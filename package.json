@@ -7,15 +7,17 @@
     "build": "next build",
     "start": "next start",
     "check": "tsc --noEmit",
-    "test": "tsx --test test/**/*.test.ts"
+    "test": "tsx --conditions=react-server --test test/**/*.test.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",
     "jose": "6.2.3",
+    "lucide-react": "^1.48.0",
     "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

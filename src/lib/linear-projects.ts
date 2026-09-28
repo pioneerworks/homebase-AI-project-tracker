@@ -1,3 +1,10 @@
+import "server-only";
+
+import type { ProjectMilestoneSummary } from "@/lib/milestones";
+
+export { nextMilestone } from "@/lib/milestones";
+export type { MilestoneIssue, ProjectMilestoneSummary } from "@/lib/milestones";
+
 const LINEAR_API = "https://api.linear.app/graphql";
 
 const CACHE_TTL = 3600;
@@ -11,25 +18,6 @@ const RELAY_ORIGIN =
   process.env.DASHBOARD_RELAY_ORIGIN ?? "https://homebase-ai-project-tracker.vercel.app";
 
 export type ProjectHealth = "onTrack" | "atRisk" | "offTrack";
-
-export type MilestoneIssue = {
-  identifier: string;
-  title: string;
-  url: string;
-  stateName: string;
-  stateType: string;
-  assignee: string | null;
-};
-
-export type ProjectMilestoneSummary = {
-  id: string;
-  name: string;
-  description: string | null;
-  targetDate: string | null;
-  /** 0–100, Linear's own milestone progress */
-  progress: number;
-  issues: MilestoneIssue[];
-};
 
 export type ProjectOverview = {
   id: string;
@@ -302,20 +290,6 @@ export function toProjectOverview(project: ProjectNode): ProjectOverview {
     recentCompletions,
     updates: project.projectUpdates.nodes,
   };
-}
-
-/**
- * The next milestone still in flight: the earliest-dated one below 100%,
- * falling back to the first undated open milestone.
- */
-export function nextMilestone(
-  milestones: ProjectMilestoneSummary[],
-): ProjectMilestoneSummary | null {
-  const open = milestones.filter((m) => m.progress < 100);
-  const dated = open
-    .filter((m) => m.targetDate)
-    .sort((a, b) => a.targetDate!.localeCompare(b.targetDate!));
-  return dated[0] ?? open[0] ?? null;
 }
 
 export async function getProjectOverview(slugId: string, key?: string): Promise<ProjectOverview> {

@@ -1,9 +1,11 @@
+import "server-only";
+
 /**
  * GitHub merged-PR fetch for impact tracking.
  * Requires GITHUB_TOKEN (repo scope is enough). When the token is missing or
  * masked, callers fall back to the committed seed data (src/data/pr-merges.json).
  */
-import type { MergedPr } from "@/lib/merges";
+import type { MergedPr } from "@/lib/pr-classify";
 
 const GITHUB_API = "https://api.github.com";
 
