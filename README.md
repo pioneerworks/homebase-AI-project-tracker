@@ -78,6 +78,7 @@ redirect URI if Okta sign-in must work on ephemeral preview domains.
 | Variable | Purpose |
 | --- | --- |
 | `LINEAR_API_KEY` | Read-only Linear personal API key |
+| `STATSIG_CONSOLE_API_KEY` | Read-only Statsig Console API key powering the overview Experiments section; omit to hide the section |
 | `OKTA_ISSUER` | Okta authorization server, normally `https://joinhomebase.okta.com/oauth2/default` |
 | `OKTA_CLIENT_ID` | Client ID for the dashboard's Okta OIDC web application |
 | `OKTA_CLIENT_SECRET` | Client secret used only by the server-side token exchange |
@@ -132,6 +133,13 @@ with the day before and the same weekday last week. Today's partial day is
 skipped. The impact chart opens on the last 7 days and has a date range picker
 (presets or custom dates). A dashed line shows a straight-line signup trend over
 the selected range, leaving out today's partial day. PR bars use their own scale.
+
+A Statsig-driven "Experiments" section sits between the standup and shipped-work
+bands when `STATSIG_CONSOLE_API_KEY` is configured. It lists experiments in
+`active` status with their elapsed day count, exposures, control-vs-test
+conversion rates, and the primary metric's percent change with significance
+verdict (winning / losing / no-signal / no-data), each linking to its Statsig
+console permalink.
 
 Both dashboard tabs open with a stakeholder recap generated from the same Linear
 snapshot as the detailed tracker. Page Migration only uses the five page-pillar
