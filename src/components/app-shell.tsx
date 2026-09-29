@@ -3,7 +3,7 @@
 import { LayoutDashboard, LogOut, Menu, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 
 import type { ProjectStateKey } from "@/lib/overview";
 import { initials, STATE_LABELS } from "@/lib/overview";
@@ -41,17 +41,30 @@ export default function AppShell({
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <div className="shell-layout">
       <button
         className="sidebar-toggle"
         aria-label="Toggle navigation"
         aria-expanded={open}
+        aria-controls="app-sidebar"
         onClick={() => setOpen((v) => !v)}
       >
         <Menu size={18} aria-hidden="true" />
       </button>
-      <aside className={`sidebar${open ? " sidebar-open" : ""}`}>
+      {open && (
+        <div className="sidebar-backdrop" aria-hidden="true" onClick={() => setOpen(false)} />
+      )}
+      <aside id="app-sidebar" className={`sidebar${open ? " sidebar-open" : ""}`}>
         <div className="sidebar-top">
           <Link href="/" className="sidebar-brand" onClick={() => setOpen(false)}>
             <span className="sidebar-brand-mark">

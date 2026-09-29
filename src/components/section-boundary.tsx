@@ -23,7 +23,7 @@ export default class SectionBoundary extends Component<
   render() {
     if (this.state.failed) {
       return (
-        <p className="card card-empty card-error section-error">
+        <p className="card card-empty card-error section-error" role="alert">
           Couldn&apos;t load {this.props.label}. Reload to retry.
         </p>
       );

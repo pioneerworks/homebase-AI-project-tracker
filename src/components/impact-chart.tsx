@@ -105,7 +105,6 @@ function TooltipRow({
 function ImpactTooltip({
   active,
   payload,
-  sampleNote,
   today,
   previous,
   view = "all",
@@ -113,7 +112,6 @@ function ImpactTooltip({
   view?: "all" | "page";
   active?: boolean;
   payload?: TooltipEntry[];
-  sampleNote?: string;
   today?: string;
   /** Signups on the day before each date, for the d/d change. */
   previous?: Map<string, number | null>;
@@ -159,7 +157,6 @@ function ImpactTooltip({
       {point.merges != null && point.merges > 0 && (
         <div className="impact-tooltip-hint">Click or press Enter to see which PRs merged →</div>
       )}
-      {sampleNote && <div className="impact-tooltip-note">{sampleNote}</div>}
     </div>
   );
 }
@@ -234,14 +231,12 @@ const PRESETS: { key: Exclude<RangePreset, "custom">; label: string }[] = [
 export default function ImpactChart({
   points: allPoints,
   mergeDays,
-  sampleNote,
   today,
   title,
   footnote,
 }: {
   points: ImpactPoint[];
   mergeDays: MergeDay[];
-  sampleNote?: string;
   /** Today's date; its partial signup count is left out of the trend fit. */
   today?: string;
   title: string;
@@ -307,7 +302,18 @@ export default function ImpactChart({
   const summaryId = useId();
   const gradientId = `${summaryId.replace(/:/g, "")}-area`;
   const activeDay = useRef<string | null>(null);
+  const plotRef = useRef<HTMLDivElement>(null);
+  const closeDay = () => {
+    setSelectedDate(null);
+    // return keyboard focus to the chart instead of dropping it on <body>
+    plotRef.current?.querySelector<SVGElement>(".recharts-surface")?.focus();
+  };
   const handleDayKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && selectedDate) {
+      event.preventDefault();
+      closeDay();
+      return;
+    }
     if ((event.key === "Enter" || event.key === " ") && activeDay.current) {
       event.preventDefault();
       event.stopPropagation();
@@ -398,6 +404,7 @@ export default function ImpactChart({
       )}
       {points.length > 0 && (
         <div
+          ref={plotRef}
           className="impact-plot"
           role="figure"
           aria-label="Signups and merged PRs by day"
@@ -484,7 +491,6 @@ export default function ImpactChart({
                 cursor={<DayGuide />}
                 content={
                   <ImpactTooltip
-                    sampleNote={sampleNote}
                     today={today}
                     previous={previousSignups}
                     view={view}
@@ -587,7 +593,13 @@ export default function ImpactChart({
       )}
 
       {selectedDate && (
-        <div className="impact-drilldown">
+        <div
+          className="impact-drilldown"
+          aria-live="polite"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") closeDay();
+          }}
+        >
           <div className="impact-drilldown-head">
             <div>
               <span className="impact-drilldown-title">
@@ -605,7 +617,7 @@ export default function ImpactChart({
               type="button"
               className="impact-drilldown-close"
               aria-label="Close PR details"
-              onClick={() => setSelectedDate(null)}
+              onClick={closeDay}
             >
               ✕
             </button>
@@ -646,7 +658,8 @@ const shiftDay = (iso: string, days: number) => {
 /**
  * Total merged PRs above the topmost drawn segment. recharts drops zero-height
  * bars (and their labels), so the page segment carries the total on days with
- * no other PRs.
+ * no other PRs. Labels are keyed by date: after skipped bars, the label index
+ * no longer lines up with the day.
  */
 function BarTotals({
   points,
@@ -659,16 +672,10 @@ function BarTotals({
 }) {
   return (
     <LabelList
-      dataKey="barTotal"
+      dataKey={(entry: ChartPoint) => entry.date}
       position="top"
-      offset={6}
-      fill="var(--pr-page-text)"
-      fontSize={11}
-      fontWeight={800}
-      formatter={(value: unknown) => (typeof value === "number" && value > 0 ? value : "")}
       content={(props) => {
-        const index = typeof props.index === "number" ? props.index : -1;
-        const point = points[index];
+        const point = points.find((p) => p.date === props.value);
         if (!point || point.barTotal <= 0) return null;
         const onTop =
           segment === "other"

@@ -7,8 +7,9 @@ type Entry<T> = { at: number; value: T };
  *  - fresh for `ttlMs`; after that the next caller refreshes it
  *  - concurrent callers share one in-flight refresh (no stampede on cold start)
  *  - a failed refresh serves the last good value when there is one
- *  - after a failure with nothing cached, callers skip the upstream for
- *    `failureTtlMs` instead of paying for the same failing call again
+ *  - after a failure, callers skip the upstream for `failureTtlMs` (serving
+ *    the last good value if there is one) instead of paying for the same
+ *    failing call again
  *
  * Every refresh runs in the foreground under the caller's own fetch deadline,
  * unlike Next's `next.revalidate`, which refreshes stale entries in the
@@ -29,23 +30,32 @@ export function ttlCache<K, T>(
     if (hit && now - hit.at < options.ttlMs) return hit.value;
 
     const failed = failures.get(id);
-    if (!hit && failed && now - failed.at < options.failureTtlMs) throw failed.error;
+    if (failed && now - failed.at < options.failureTtlMs) {
+      if (hit) return hit.value;
+      throw failed.error;
+    }
 
     const pending = inflight.get(id);
     if (pending) return pending;
 
-    const run = load(key)
+    // a load that outlives clear() must not write its result back
+    const current = () => inflight.get(id) === run;
+    const run: Promise<T> = load(key)
       .then((value) => {
-        entries.set(id, { at: now, value });
-        failures.delete(id);
+        if (current()) {
+          entries.set(id, { at: now, value });
+          failures.delete(id);
+        }
         return value;
       })
       .catch((error: unknown) => {
-        failures.set(id, { at: now, error });
+        if (current()) failures.set(id, { at: now, error });
         if (hit) return hit.value;
         throw error;
       })
-      .finally(() => inflight.delete(id));
+      .finally(() => {
+        if (current()) inflight.delete(id);
+      });
     inflight.set(id, run);
     return run;
   }
@@ -54,10 +64,12 @@ export function ttlCache<K, T>(
     if (key === undefined) {
       entries.clear();
       failures.clear();
+      inflight.clear();
       return;
     }
     entries.delete(keyOf(key));
     failures.delete(keyOf(key));
+    inflight.delete(keyOf(key));
   }
 
   return { get, clear };

@@ -9,6 +9,7 @@ import { SNAPSHOT_TAG } from "@/lib/projects";
 import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.DASHBOARD_REFRESH_SECRET;
@@ -22,23 +23,20 @@ export async function POST(request: NextRequest) {
   }
 
   revalidateTag(SNAPSHOT_TAG, { expire: 0 });
-  for (const project of TRACKER_PROJECTS) {
-    revalidateTag(`linear-project-${project.linearSlugId}`, { expire: 0 });
-  }
-  const repos = [...new Set(TRACKER_PROJECTS.flatMap((project) => project.repos))];
-  for (const repo of repos) {
-    revalidateTag(`merges-${repo}`, { expire: 0 });
-  }
   revalidateTag("omni-signups", { expire: 0 });
-  // GitHub and Linear project data now live in per-instance memory caches
+  // GitHub merges and Linear project overviews live in per-instance memory
+  // caches: this clears and warms only the instance serving this request;
+  // other instances refresh when their 1h TTL lapses.
   clearMergedPrCache();
   clearProjectOverviewCache();
+  const repos = [...new Set(TRACKER_PROJECTS.flatMap((project) => project.repos))];
   try {
     const snapshot = await refreshSnapshot();
 
-    // Best-effort warm of the impact-chart sources so page views don't pay
-    // the fetch cost and credential health is proven hourly. Failures are
-    // reported but never fail the refresh.
+    // Best-effort warm of this instance's Overview sources. GitHub and
+    // Amplitude fall back silently (null / captured data) rather than
+    // rejecting, so warmFailures counts Linear failures only. Failures never
+    // fail the refresh.
     const warmed = await Promise.allSettled([
       ...repos.map((repo) => fetchMergedPrs(repo)),
       ...TRACKER_PROJECTS.map((p) => getProjectOverview(p.linearSlugId, p.key)),

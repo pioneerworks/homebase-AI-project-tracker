@@ -1,6 +1,6 @@
-import rawMerges from "@/data/pr-merges.json";
 import "server-only";
 
+import rawMerges from "@/data/pr-merges.json";
 import { fetchMergedPrs } from "@/lib/github-merges";
 import type { MergeDay, MergedPr } from "@/lib/pr-classify";
 

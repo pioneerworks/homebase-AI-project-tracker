@@ -98,6 +98,7 @@ test("attentionItems: losing experiments first, then flagged projects in order",
     items.map((i) => i.kind),
     ["experiment", "overdue", "health"],
   );
+  assert.equal(items[0].title, "Losing: Scheduling LP module");
   assert.equal(items[0].meta, "−53.4% Owner signups · significant (p = 0.004)");
   assert.equal(items[1].title, "A/B testing · M1 · First live experiments");
   assert.equal(items[1].meta, "Due 2026-09-25 · 19% done");
