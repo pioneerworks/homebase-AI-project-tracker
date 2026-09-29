@@ -28,11 +28,14 @@ export function hasGithubToken(): boolean {
   return Boolean(token) && !token!.includes("SENSITIVE");
 }
 
+const CACHE_TTL_MS = 60 * 60 * 1000;
+const FAILURE_TTL_MS = 5 * 60 * 1000;
+
 const mergedPrCache = ttlCache(
   ({ repo, windowDays }: { repo: string; windowDays: number }) => loadMergedPrs(repo, windowDays),
   {
-    ttlMs: 60 * 60 * 1000,
-    failureTtlMs: 5 * 60 * 1000,
+    ttlMs: CACHE_TTL_MS,
+    failureTtlMs: FAILURE_TTL_MS,
     keyOf: ({ repo, windowDays }) => `${repo}:${windowDays}`,
   },
 );
@@ -97,7 +100,7 @@ async function loadMergedPrs(repo: string, windowDays: number): Promise<MergedPr
       batches = await Promise.all(pages.map(fetchPage));
     } catch (error) {
       console.warn(
-        "GitHub merged-PR fetch failed; falling back to seed data:",
+        "GitHub merged-PR load failed (skipped for 5m); callers use the seed:",
         error instanceof Error ? error.message : error,
       );
       throw error;

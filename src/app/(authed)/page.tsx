@@ -2,7 +2,7 @@ import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import ProjectTable, { type ProjectRow } from "@/components/project-table";
 import SectionBoundary from "@/components/section-boundary";
 import { amplitudeConfig } from "@/lib/amplitude";
-import { nextMilestone } from "@/lib/linear-projects";
+import { nextMilestone } from "@/lib/milestones";
 import { mergeStats, pageTouchCount } from "@/lib/merges";
 import { dailySignupSummary, pctChange, shiftDate, torontoToday } from "@/lib/standup";
 import { getSessionUser } from "@/lib/oidc-session";

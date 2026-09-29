@@ -7,7 +7,7 @@ import "server-only";
  *
  * Use it with `cache: "no-store"`: Next drops the signal when it revalidates a
  * stale `next.revalidate` fetch in the background, which would leave that
- * refresh unbounded. Cache with unstable_cache around the call instead.
+ * refresh unbounded. Cache with ttlCache (src/lib/ttl-cache.ts) instead.
  */
 export async function fetchWithTimeout(
   input: string,

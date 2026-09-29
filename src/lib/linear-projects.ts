@@ -5,12 +5,11 @@ import { ttlCache } from "@/lib/ttl-cache";
 
 import type { ProjectMilestoneSummary } from "@/lib/milestones";
 
-export { nextMilestone } from "@/lib/milestones";
 export type { MilestoneIssue, ProjectMilestoneSummary } from "@/lib/milestones";
 
 const LINEAR_API = "https://api.linear.app/graphql";
 
-const CACHE_TTL = 3600;
+const CACHE_TTL_MS = 60 * 60 * 1000;
 /** Per-call deadline; on timeout the project shows "Linear unavailable". */
 const LINEAR_TIMEOUT_MS = 8_000;
 /** Whole-project budget, covering issue pagination. */
@@ -317,7 +316,7 @@ export function toProjectOverview(project: ProjectNode): ProjectOverview {
 
 const overviewCache = ttlCache(
   ({ slugId, key }: { slugId: string; key?: string }) => loadProjectOverview(slugId, key),
-  { ttlMs: CACHE_TTL * 1000, failureTtlMs: 60 * 1000, keyOf: ({ slugId }) => slugId },
+  { ttlMs: CACHE_TTL_MS, failureTtlMs: 60 * 1000, keyOf: ({ slugId }) => slugId },
 );
 
 /** Drop cached overviews so the next call refetches (hourly refresh job). */

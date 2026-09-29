@@ -129,6 +129,39 @@ test("ttlCache serves the last good value when a refresh fails", async () => {
   assert.equal(await cache.get("k", 5_000), "good"); // expired, refresh fails, stale kept
 });
 
+test("ttlCache serves a stale value without reloading while the upstream is failing", async () => {
+  let loads = 0;
+  let fail = false;
+  const cache = ttlCache(
+    async () => {
+      loads++;
+      if (fail) throw new Error("down");
+      return "good";
+    },
+    { ttlMs: 1_000, failureTtlMs: 10_000 },
+  );
+  assert.equal(await cache.get("k", 0), "good");
+  fail = true;
+  assert.equal(await cache.get("k", 2_000), "good"); // expired: one failing refresh
+  assert.equal(await cache.get("k", 3_000), "good"); // inside failureTtlMs: no reload
+  assert.equal(loads, 2);
+});
+
+test("ttlCache.clear drops an in-flight load's result", async () => {
+  let release!: (value: string) => void;
+  const cache = ttlCache(
+    () => new Promise<string>((resolve) => (release = resolve)),
+    { ttlMs: 60_000, failureTtlMs: 60_000 },
+  );
+  const stale = cache.get("k", 0);
+  cache.clear();
+  release("old");
+  assert.equal(await stale, "old");
+  const fresh = cache.get("k", 1);
+  release("new");
+  assert.equal(await fresh, "new"); // "old" was not written back
+});
+
 test("ttlCache skips a failing upstream for failureTtlMs, then retries", async () => {
   let loads = 0;
   const cache = ttlCache(

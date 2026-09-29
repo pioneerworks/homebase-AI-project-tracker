@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { nextMilestone, toProjectOverview } from "../src/lib/linear-projects";
+import { toProjectOverview } from "../src/lib/linear-projects";
+import { nextMilestone } from "../src/lib/milestones";
 import { dailySignupSummary, pctChange, torontoToday } from "../src/lib/standup";
 
 const issue = (over: Record<string, unknown> = {}) => ({
