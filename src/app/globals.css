@@ -2995,6 +2995,73 @@ footer {
 }
 
 /* ===== Overview ===== */
+.section-skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--white) 25%, var(--surface-gray) 50%, var(--white) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+/* min-heights measured from the rendered sections at 1440 */
+.skeleton-attention {
+  min-height: 109px;
+}
+
+.skeleton-kpi {
+  min-height: 160px;
+}
+
+.skeleton-chart {
+  min-height: 606px;
+}
+
+.skeleton-exp {
+  min-height: 164px;
+  border-radius: var(--radius-small);
+}
+
+.skeleton-projects {
+  min-height: 665px;
+}
+
+@media (max-width: 680px) {
+  .skeleton-chart {
+    min-height: 1000px;
+  }
+
+  .skeleton-attention {
+    min-height: 240px;
+  }
+}
+
+.section-error {
+  padding: 20px;
+}
+
+.route-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+}
+
+.route-error-retry {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: var(--brand-purple);
+  color: var(--white);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-skeleton {
+    animation: none;
+  }
+}
+
 .shell-layout .page.overview {
   max-width: none;
   display: flex;

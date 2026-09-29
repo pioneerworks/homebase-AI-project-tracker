@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { fetchMergedPrs, hasGithubToken } from "../src/lib/github-merges";
+import { clearMergedPrCache, fetchMergedPrs, hasGithubToken } from "../src/lib/github-merges";
 
 type PullStub = {
   number: number;
@@ -43,6 +43,7 @@ async function withStubbedFetch(
   const originalFetch = globalThis.fetch;
   const originalToken = process.env.GITHUB_TOKEN;
   const requested: number[] = [];
+  clearMergedPrCache();
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const page = Number(new URL(String(input)).searchParams.get("page"));
     requested.push(page);

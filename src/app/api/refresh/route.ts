@@ -1,7 +1,8 @@
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { fetchMergedPrs } from "@/lib/github-merges";
+import { clearMergedPrCache, fetchMergedPrs } from "@/lib/github-merges";
+import { clearProjectOverviewCache, getProjectOverview } from "@/lib/linear-projects";
 import { getSignupSeries } from "@/lib/omni";
 import { refreshSnapshot } from "@/lib/linear";
 import { SNAPSHOT_TAG } from "@/lib/projects";
@@ -29,6 +30,9 @@ export async function POST(request: NextRequest) {
     revalidateTag(`merges-${repo}`, { expire: 0 });
   }
   revalidateTag("omni-signups", { expire: 0 });
+  // GitHub and Linear project data now live in per-instance memory caches
+  clearMergedPrCache();
+  clearProjectOverviewCache();
   try {
     const snapshot = await refreshSnapshot();
 
@@ -37,6 +41,7 @@ export async function POST(request: NextRequest) {
     // reported but never fail the refresh.
     const warmed = await Promise.allSettled([
       ...repos.map((repo) => fetchMergedPrs(repo)),
+      ...TRACKER_PROJECTS.map((p) => getProjectOverview(p.linearSlugId, p.key)),
       getSignupSeries(),
     ]);
     const warmFailures = warmed.filter(
