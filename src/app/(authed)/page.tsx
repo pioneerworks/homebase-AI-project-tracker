@@ -1,5 +1,6 @@
 import ImpactChart, { type ImpactPoint } from "@/components/impact-chart";
 import ProjectTable, { type ProjectRow } from "@/components/project-table";
+import SectionBoundary from "@/components/section-boundary";
 import { amplitudeConfig } from "@/lib/amplitude";
 import { nextMilestone } from "@/lib/linear-projects";
 import { mergeStats, pageTouchCount } from "@/lib/merges";
@@ -17,13 +18,7 @@ import { loadExperiments, loadMergeDays, loadSignupSeries, MERGE_REPO } from "@/
 import type { ExperimentCard } from "@/lib/statsig";
 import { getTrackerOverviews } from "@/lib/tracker-overviews";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
-import {
-  ArrowUpRight,
-  CalendarX,
-  CircleCheck,
-  FlaskConical,
-  TriangleAlert,
-} from "lucide-react";
+import { ArrowUpRight, CalendarX, CircleCheck, FlaskConical, TriangleAlert } from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cache, Suspense } from "react";
@@ -191,8 +186,7 @@ function AttentionStrip({ items, summary }: { items: AttentionItem[]; summary: s
   );
 }
 
-const signedPct = (value: number) =>
-  `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}%`;
+const signedPct = (value: number) => `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}%`;
 
 function Experiment({ experiment }: { experiment: ExperimentCard }) {
   const lift = experiment.percentChange;
@@ -272,10 +266,10 @@ function Experiment({ experiment }: { experiment: ExperimentCard }) {
   );
 }
 
-/** Placeholder sized like the section it stands in for, so nothing shifts. */
-function SectionSkeleton({ label, height }: { label: string; height: number }) {
+/** Placeholder with the section's rendered min-height, so nothing shifts. */
+function SectionSkeleton({ label, size }: { label: string; size: string }) {
   return (
-    <div className="card section-skeleton" style={{ height }} role="status" aria-busy="true">
+    <div className={`card section-skeleton skeleton-${size}`} aria-busy="true">
       <span className="sr-only">Loading {label}…</span>
     </div>
   );
@@ -283,16 +277,12 @@ function SectionSkeleton({ label, height }: { label: string; height: number }) {
 
 function KpiSkeleton() {
   return (
-    <section aria-label="Signup KPIs" aria-busy="true">
-      <div className="kpis">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="card section-skeleton" style={{ height: 142 }} />
-        ))}
-      </div>
-      <span className="sr-only" role="status">
-        Loading signup metrics…
-      </span>
-    </section>
+    <div className="kpis" aria-busy="true">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="card section-skeleton skeleton-kpi" />
+      ))}
+      <span className="sr-only">Loading signup metrics…</span>
+    </div>
   );
 }
 
@@ -309,7 +299,9 @@ async function PageHeader({ today }: { today: string }) {
         AI team{weekFrom && weekTo ? ` · last 7 days, ${weekLabel(weekFrom, weekTo)}` : ""}
       </p>
       <h1 className="h1">Overview</h1>
-      <p className="dek">What we shipped, what it did to signups, and which projects need a hand.</p>
+      <p className="dek">
+        What we shipped, what it did to signups, and which projects need a hand.
+      </p>
       {daily && !dailyIsYesterday && (
         <p className="stale-note" role="status">
           Latest complete day is {formatDay(daily.date)}; the live feed is behind.
@@ -324,7 +316,9 @@ function HeaderFallback() {
     <>
       <p className="eyebrow-label">AI team</p>
       <h1 className="h1">Overview</h1>
-      <p className="dek">What we shipped, what it did to signups, and which projects need a hand.</p>
+      <p className="dek">
+        What we shipped, what it did to signups, and which projects need a hand.
+      </p>
     </>
   );
 }
@@ -365,7 +359,6 @@ const loadImpact = cache(async () => {
 
 async function KpiSection({ today }: { today: string }) {
   const { merges, signupSeries, points, mergesByDay } = await loadImpact();
-  const signupEvent = amplitudeConfig()?.signupEvent ?? "Owner Account Created";
   const daily = dailySignupSummary(signupSeries.days, today);
   const dayDelta = daily ? pctChange(daily.signups, daily.prevDay?.signups) : null;
   const weekDelta = daily ? pctChange(daily.signups, daily.lastWeek?.signups) : null;
@@ -418,71 +411,64 @@ async function KpiSection({ today }: { today: string }) {
     : [];
 
   return (
-    <section aria-label="Signup KPIs">
-      <div className="kpis">
-        {daily ? (
-          <Kpi
-            label={`Signups · ${dailyIsYesterday ? "yesterday" : formatDay(daily.date)}`}
-            value={daily.signups.toLocaleString("en-US")}
-            spark={sameWeekday}
-            dir={dirOf(weekDelta)}
-          >
-            <Delta value={weekDelta} />
-            <span>
-              vs{" "}
-              {daily.lastWeek
-                ? `${daily.lastWeek.signups} last ${weekdayOf(daily.lastWeek.date)}`
-                : "last week"}
+    <div className="kpis">
+      {daily ? (
+        <Kpi
+          label={`Signups · ${dailyIsYesterday ? "yesterday" : formatDay(daily.date)}`}
+          value={daily.signups.toLocaleString("en-US")}
+          spark={sameWeekday}
+          dir={dirOf(weekDelta)}
+        >
+          <Delta value={weekDelta} />
+          <span>
+            vs{" "}
+            {daily.lastWeek
+              ? `${daily.lastWeek.signups} last ${weekdayOf(daily.lastWeek.date)}`
+              : "last week"}
+          </span>
+          {dayDelta != null && daily.prevDay && (
+            <span className="kpi-delta-quiet">
+              <Delta value={dayDelta} /> vs {daily.prevDay.signups} the day before
             </span>
-            {dayDelta != null && daily.prevDay && (
-              <span className="kpi-delta-quiet">
-                <Delta value={dayDelta} /> vs {daily.prevDay.signups} the day before
-              </span>
-            )}
-          </Kpi>
-        ) : (
-          <article className="card kpi kpi-empty">
-            <span className="kpi-label">Signups · yesterday</span>
-            <span className="kpi-value">—</span>
-            <span className="kpi-delta">No complete day in the feed yet</span>
-          </article>
-        )}
-        <Kpi
-          label="Signups / day · 7d avg"
-          value={avg(last7).toFixed(0)}
-          spark={last7.map((p) => p.signups ?? 0)}
-          dir={dirOf(signupDelta)}
-        >
-          <Delta value={signupDelta} />
-          <span>vs {avg(prev7).toFixed(0)} prior 7 days</span>
+          )}
         </Kpi>
-        <Kpi
-          label="Signup rate · 7d"
-          value={rate7 != null ? `${(rate7 * 100).toFixed(2)}%` : "—"}
-          spark={last7.map((p) => p.rate ?? 0)}
-          dir={dirOf(rateDelta, 2)}
-        >
-          <Delta value={rateDelta} unit="pp" digits={2} />
-          <span>
-            {visitorsLast7 > 0
-              ? `of ${visitorsLast7.toLocaleString("en-US")} visitors in 7 days`
-              : "traffic not captured"}
-          </span>
-        </Kpi>
-        <Kpi label="PRs merged · 7d" value={String(mergesLast7)} spark={mergeSpark} dir="flat">
-          <b className="flat">{pageMergesLast7} page-touching</b>
-          <span>
-            {mergesLast7 - pageMergesLast7} infra · {stats.total.toLocaleString("en-US")}
-            {stats.firstMergeDay ? ` since ${shortDay(stats.firstMergeDay)}` : " total"}
-          </span>
-        </Kpi>
-      </div>
-      <p className="section-note">
-        Signups are unique users who viewed a migrated page (Page Viewed) and then fired{" "}
-        <code>{signupEvent}</code>, from Amplitude. Rate = signups ÷ unique visitors. Day-over-day
-        swings follow the weekday cycle, so yesterday is compared with the same weekday last week.
-      </p>
-    </section>
+      ) : (
+        <article className="card kpi kpi-empty">
+          <span className="kpi-label">Signups · yesterday</span>
+          <span className="kpi-value">—</span>
+          <span className="kpi-delta">No complete day in the feed yet</span>
+        </article>
+      )}
+      <Kpi
+        label="Signups / day · 7d avg"
+        value={avg(last7).toFixed(0)}
+        spark={last7.map((p) => p.signups ?? 0)}
+        dir={dirOf(signupDelta)}
+      >
+        <Delta value={signupDelta} />
+        <span>vs {avg(prev7).toFixed(0)} prior 7 days</span>
+      </Kpi>
+      <Kpi
+        label="Signup rate · 7d"
+        value={rate7 != null ? `${(rate7 * 100).toFixed(2)}%` : "—"}
+        spark={last7.map((p) => p.rate ?? 0)}
+        dir={dirOf(rateDelta, 2)}
+      >
+        <Delta value={rateDelta} unit="pp" digits={2} />
+        <span>
+          {visitorsLast7 > 0
+            ? `of ${visitorsLast7.toLocaleString("en-US")} visitors in 7 days`
+            : "traffic not captured"}
+        </span>
+      </Kpi>
+      <Kpi label="PRs merged · 7d" value={String(mergesLast7)} spark={mergeSpark} dir="flat">
+        <b className="flat">{pageMergesLast7} page-touching</b>
+        <span>
+          {mergesLast7 - pageMergesLast7} infra · {stats.total.toLocaleString("en-US")}
+          {stats.firstMergeDay ? ` since ${shortDay(stats.firstMergeDay)}` : " total"}
+        </span>
+      </Kpi>
+    </div>
   );
 }
 
@@ -498,10 +484,10 @@ async function ChartSection({ today }: { today: string }) {
       footnote={
         <>
           Bars show merged PRs per day from {MERGE_REPO} (
-          {merges.source === "github" ? "live from GitHub" : "seeded snapshot"}) on their own
-          scale. Orange PRs touch a page (design, copy, or a route) and grey PRs are
-          infrastructure. Click a day to see which PRs merged and how each was classified. A{" "}
-          <code>page-touch</code> or <code>infra</code> GitHub label overrides the heuristic.
+          {merges.source === "github" ? "live from GitHub" : "seeded snapshot"}) on their own scale.
+          Orange PRs touch a page (design, copy, or a route) and grey PRs are infrastructure. Click
+          a day to see which PRs merged and how each was classified. A <code>page-touch</code> or{" "}
+          <code>infra</code> GitHub label overrides the heuristic.
           {signupSeries.source === "amplitude"
             ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot.`
             : signupSeries.source === "omni"
@@ -562,19 +548,17 @@ async function ProjectsSection({ today }: { today: string }) {
         issuesDonePct: overview ? overview.counts.completionPct : null,
       };
     }),
-    ...DONE_PROJECTS.map(
-      (p): ProjectRow => ({
-        key: p.key,
-        href: p.href,
-        name: p.name,
-        description: p.summary,
-        owner: p.lead,
-        state: DONE_STATE,
-        available: true,
-        milestone: { name: "Complete", progress: 100, due: null, completedOn: MIGRATION_SHIPPED },
-        issuesDonePct: 100,
-      }),
-    ),
+    ...DONE_PROJECTS.map((p): ProjectRow => ({
+      key: p.key,
+      href: p.href,
+      name: p.name,
+      description: p.summary,
+      owner: p.lead,
+      state: DONE_STATE,
+      available: true,
+      milestone: { name: "Complete", progress: 100, due: null, completedOn: MIGRATION_SHIPPED },
+      issuesDonePct: 100,
+    })),
   ];
   return <ProjectTable rows={rows} />;
 }
@@ -588,6 +572,7 @@ export default async function OverviewPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login?callbackUrl=/");
   const today = torontoToday();
+  const signupEvent = amplitudeConfig()?.signupEvent ?? "Owner Account Created";
 
   return (
     <div className="page overview">
@@ -597,17 +582,30 @@ export default async function OverviewPage() {
         </Suspense>
       </header>
 
-      <Suspense fallback={<SectionSkeleton label="items needing attention" height={96} />}>
-        <AttentionSection today={today} />
-      </Suspense>
+      <SectionBoundary label="items needing attention">
+        <Suspense fallback={<SectionSkeleton label="items needing attention" size="attention" />}>
+          <AttentionSection today={today} />
+        </Suspense>
+      </SectionBoundary>
 
-      <Suspense fallback={<KpiSkeleton />}>
-        <KpiSection today={today} />
-      </Suspense>
+      <section aria-label="Signup KPIs">
+        <SectionBoundary label="signup metrics">
+          <Suspense fallback={<KpiSkeleton />}>
+            <KpiSection today={today} />
+          </Suspense>
+        </SectionBoundary>
+        <p className="section-note">
+          Signups are unique users who viewed a migrated page (Page Viewed) and then fired{" "}
+          <code>{signupEvent}</code>, from Amplitude. Rate = signups ÷ unique visitors. Day-over-day
+          swings follow the weekday cycle, so yesterday is compared with the same weekday last week.
+        </p>
+      </section>
 
-      <Suspense fallback={<SectionSkeleton label="the signups chart" height={520} />}>
-        <ChartSection today={today} />
-      </Suspense>
+      <SectionBoundary label="the signups chart">
+        <Suspense fallback={<SectionSkeleton label="the signups chart" size="chart" />}>
+          <ChartSection today={today} />
+        </Suspense>
+      </SectionBoundary>
 
       <section className="card exp-card" aria-labelledby="exp-title">
         <div className="exp-head">
@@ -618,15 +616,17 @@ export default async function OverviewPage() {
             Statsig <ArrowUpRight size={14} aria-hidden="true" />
           </a>
         </div>
-        <Suspense
-          fallback={
-            <div className="section-skeleton exp-skeleton" role="status" aria-busy="true">
-              <span className="sr-only">Loading experiments…</span>
-            </div>
-          }
-        >
-          <ExperimentList />
-        </Suspense>
+        <SectionBoundary label="experiments">
+          <Suspense
+            fallback={
+              <div className="section-skeleton skeleton-exp" aria-busy="true">
+                <span className="sr-only">Loading experiments…</span>
+              </div>
+            }
+          >
+            <ExperimentList />
+          </Suspense>
+        </SectionBoundary>
         <p className="section-note">
           A/B tests running in Statsig, with the primary metric&apos;s lift (test vs control) and
           significance from the Statsig Console API. Wins and losses are only called when the
@@ -634,9 +634,11 @@ export default async function OverviewPage() {
         </p>
       </section>
 
-      <Suspense fallback={<SectionSkeleton label="projects" height={560} />}>
-        <ProjectsSection today={today} />
-      </Suspense>
+      <SectionBoundary label="projects">
+        <Suspense fallback={<SectionSkeleton label="projects" size="projects" />}>
+          <ProjectsSection today={today} />
+        </Suspense>
+      </SectionBoundary>
     </div>
   );
 }
