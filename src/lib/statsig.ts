@@ -1,5 +1,7 @@
 import "server-only";
 
+import { asTimeout, fetchWithTimeout } from "@/lib/fetch-timeout";
+
 /**
  * Running Statsig experiments via the Console API.
  *
@@ -130,18 +132,31 @@ export function verdictFromPrimary(
   };
 }
 
+/** Per-request deadline; the pulse calls run in parallel after the list call. */
+export const STATSIG_TIMEOUT_MS = 6_000;
+
 async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
-  const response = await fetch(`${CONSOLE_BASE}${path}`, {
-    headers: {
-      "STATSIG-API-KEY": apiKey,
-      "STATSIG-API-VERSION": API_VERSION,
+  const response = await fetchWithTimeout(
+    `${CONSOLE_BASE}${path}`,
+    {
+      headers: {
+        "STATSIG-API-KEY": apiKey,
+        "STATSIG-API-VERSION": API_VERSION,
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+    STATSIG_TIMEOUT_MS,
+    "Statsig Console API",
+  );
   if (!response.ok) {
     throw new Error(`Statsig Console API failed: ${response.status}`);
   }
-  const body = (await response.json()) as { data: T };
+  let body: { data: T };
+  try {
+    body = (await response.json()) as { data: T };
+  } catch (error) {
+    throw asTimeout(error, STATSIG_TIMEOUT_MS, "Statsig Console API");
+  }
   return body.data;
 }
 

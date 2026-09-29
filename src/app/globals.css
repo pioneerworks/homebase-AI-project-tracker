@@ -2995,6 +2995,24 @@ footer {
 }
 
 /* ===== Overview ===== */
+.section-skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--white) 25%, var(--surface-gray) 50%, var(--white) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.exp-skeleton {
+  height: 150px;
+  border-radius: var(--radius-small);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-skeleton {
+    animation: none;
+  }
+}
+
 .shell-layout .page.overview {
   max-width: none;
   display: flex;

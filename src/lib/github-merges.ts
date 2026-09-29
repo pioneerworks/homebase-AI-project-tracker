@@ -1,5 +1,7 @@
 import "server-only";
 
+import { asTimeout, fetchWithTimeout } from "@/lib/fetch-timeout";
+
 /**
  * GitHub merged-PR fetch for impact tracking.
  * Requires GITHUB_TOKEN (repo scope is enough). When the token is missing or
@@ -8,6 +10,8 @@ import "server-only";
 import type { MergedPr } from "@/lib/pr-classify";
 
 const GITHUB_API = "https://api.github.com";
+/** Per-page deadline; on timeout the chart falls back to the committed seed. */
+const GITHUB_TIMEOUT_MS = 6_000;
 
 type GitHubPull = {
   number: number;
@@ -32,7 +36,7 @@ export async function fetchMergedPrs(
   const since = Date.now() - windowDays * 86400000;
 
   async function fetchPage(page: number): Promise<GitHubPull[]> {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${GITHUB_API}/repos/pioneerworks/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
       {
         headers: {
@@ -41,9 +45,15 @@ export async function fetchMergedPrs(
         },
         next: { revalidate: 3600, tags: [`merges-${repo}`] },
       },
+      GITHUB_TIMEOUT_MS,
+      "GitHub API",
     );
     if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
-    return (await response.json()) as GitHubPull[];
+    try {
+      return (await response.json()) as GitHubPull[];
+    } catch (error) {
+      throw asTimeout(error, GITHUB_TIMEOUT_MS, "GitHub API");
+    }
   }
 
   const seen = new Set<number>();

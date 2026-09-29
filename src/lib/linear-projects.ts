@@ -1,5 +1,7 @@
 import "server-only";
 
+import { fetchWithTimeout } from "@/lib/fetch-timeout";
+
 import type { ProjectMilestoneSummary } from "@/lib/milestones";
 
 export { nextMilestone } from "@/lib/milestones";
@@ -8,6 +10,8 @@ export type { MilestoneIssue, ProjectMilestoneSummary } from "@/lib/milestones";
 const LINEAR_API = "https://api.linear.app/graphql";
 
 const CACHE_TTL = 3600;
+/** Per-call deadline; on timeout the project shows "Linear unavailable". */
+const LINEAR_TIMEOUT_MS = 8_000;
 
 /**
  * Production origin of this dashboard. Local dev without a LINEAR_API_KEY
@@ -159,12 +163,17 @@ query ProjectIssues($id: String!, $after: String) {
 `;
 
 async function linearQuery<T>(apiKey: string, body: unknown, tag: string): Promise<T> {
-  const response = await fetch(LINEAR_API, {
-    method: "POST",
-    headers: { Authorization: apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    next: { revalidate: CACHE_TTL, tags: [tag] },
-  });
+  const response = await fetchWithTimeout(
+    LINEAR_API,
+    {
+      method: "POST",
+      headers: { Authorization: apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      next: { revalidate: CACHE_TTL, tags: [tag] },
+    },
+    LINEAR_TIMEOUT_MS,
+    "Linear API",
+  );
   if (!response.ok) throw new Error(`Linear API error: ${response.status}`);
   const json = (await response.json()) as { data?: T; errors?: { message: string }[] };
   if (json.errors?.length) throw new Error(`Linear GraphQL error: ${json.errors[0].message}`);
@@ -173,9 +182,12 @@ async function linearQuery<T>(apiKey: string, body: unknown, tag: string): Promi
 }
 
 async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
-  const response = await fetch(`${RELAY_ORIGIN}/api/projects/${key}`, {
-    cache: "no-store",
-  });
+  const response = await fetchWithTimeout(
+    `${RELAY_ORIGIN}/api/projects/${key}`,
+    { cache: "no-store" },
+    LINEAR_TIMEOUT_MS,
+    "Linear relay",
+  );
   if (!response.ok) {
     throw new Error(
       `Relay fetch failed (${response.status}) from ${RELAY_ORIGIN}/api/projects/${key}`,
