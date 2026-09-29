@@ -163,7 +163,7 @@ function AttentionStrip({ items, summary }: { items: AttentionItem[]; summary: s
           const body = (
             <>
               <span className="alert-title">
-                <Icon size={14} aria-hidden="true" style={{ display: "inline" }} />
+                <Icon size={14} aria-hidden="true" />
                 {item.title}
               </span>
               <span className="alert-meta">{item.meta}</span>
@@ -172,11 +172,17 @@ function AttentionStrip({ items, summary }: { items: AttentionItem[]; summary: s
           return (
             <li key={`${item.kind}-${item.href}-${item.title}`}>
               {item.external ? (
-                <a className="alert" href={item.href} target="_blank" rel="noreferrer">
+                <a
+                  className="alert"
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={item.title}
+                >
                   {body}
                 </a>
               ) : (
-                <Link className="alert" href={item.href}>
+                <Link className="alert" href={item.href} title={item.title}>
                   {body}
                 </Link>
               )}

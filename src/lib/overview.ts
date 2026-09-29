@@ -83,7 +83,8 @@ export function attentionItems(
     .filter((e) => e.verdict === "losing" && e.percentChange != null)
     .map((e) => ({
       kind: "experiment",
-      title: `${e.title} is losing`,
+      // verdict first, so a clamped title never hides it
+      title: `Losing: ${e.title}`,
       meta: `${signed(e.percentChange!)} ${e.primaryMetric ?? "primary metric"} · significant (${formatPValue(e.pValue)})`,
       href: e.permalink ?? "https://console.statsig.com",
       external: true,
