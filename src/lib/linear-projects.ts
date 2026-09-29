@@ -1,6 +1,7 @@
 import "server-only";
 
-import { fetchWithTimeout } from "@/lib/fetch-timeout";
+import { fetchWithTimeout, readJson } from "@/lib/fetch-timeout";
+import { ttlCache } from "@/lib/ttl-cache";
 
 import type { ProjectMilestoneSummary } from "@/lib/milestones";
 
@@ -12,6 +13,8 @@ const LINEAR_API = "https://api.linear.app/graphql";
 const CACHE_TTL = 3600;
 /** Per-call deadline; on timeout the project shows "Linear unavailable". */
 const LINEAR_TIMEOUT_MS = 8_000;
+/** Whole-project budget, covering issue pagination. */
+const LINEAR_PROJECT_BUDGET_MS = 15_000;
 
 /**
  * Production origin of this dashboard. Local dev without a LINEAR_API_KEY
@@ -162,20 +165,24 @@ query ProjectIssues($id: String!, $after: String) {
 }
 `;
 
-async function linearQuery<T>(apiKey: string, body: unknown, tag: string): Promise<T> {
+async function linearQuery<T>(apiKey: string, body: unknown, timeoutMs: number): Promise<T> {
   const response = await fetchWithTimeout(
     LINEAR_API,
     {
       method: "POST",
       headers: { Authorization: apiKey, "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      next: { revalidate: CACHE_TTL, tags: [tag] },
+      cache: "no-store",
     },
-    LINEAR_TIMEOUT_MS,
+    timeoutMs,
     "Linear API",
   );
   if (!response.ok) throw new Error(`Linear API error: ${response.status}`);
-  const json = (await response.json()) as { data?: T; errors?: { message: string }[] };
+  const json = await readJson<{ data?: T; errors?: { message: string }[] }>(
+    response,
+    timeoutMs,
+    "Linear API",
+  );
   if (json.errors?.length) throw new Error(`Linear GraphQL error: ${json.errors[0].message}`);
   if (!json.data) throw new Error("Linear API returned no data");
   return json.data;
@@ -194,7 +201,11 @@ async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
     );
   }
   // An older deployment may not return the newer fields yet.
-  const overview = (await response.json()) as Partial<ProjectOverview> & ProjectOverview;
+  const overview = await readJson<Partial<ProjectOverview> & ProjectOverview>(
+    response,
+    LINEAR_TIMEOUT_MS,
+    "Linear relay",
+  );
   return {
     ...overview,
     content: overview.content ?? null,
@@ -304,18 +315,43 @@ export function toProjectOverview(project: ProjectNode): ProjectOverview {
   };
 }
 
+const overviewCache = ttlCache(
+  ({ slugId, key }: { slugId: string; key?: string }) => loadProjectOverview(slugId, key),
+  { ttlMs: CACHE_TTL * 1000, failureTtlMs: 60 * 1000, keyOf: ({ slugId }) => slugId },
+);
+
+/** Drop cached overviews so the next call refetches (hourly refresh job). */
+export function clearProjectOverviewCache(): void {
+  overviewCache.clear();
+}
+
+/**
+ * A project's Linear overview, cached for an hour per function instance.
+ * A failed refresh keeps serving the last good copy.
+ */
 export async function getProjectOverview(slugId: string, key?: string): Promise<ProjectOverview> {
+  return overviewCache.get({ slugId, key });
+}
+
+async function loadProjectOverview(slugId: string, key?: string): Promise<ProjectOverview> {
   const apiKey = process.env.LINEAR_API_KEY;
   if (!apiKey || apiKey.includes("SENSITIVE")) {
     if (!key) throw new Error("LINEAR_API_KEY is not set");
     return fetchRelayOverview(key);
   }
 
-  const tag = `linear-project-${slugId}`;
+  // one budget for the first page and any follow-up pages, so a slow Linear
+  // can't stack up per-call timeouts
+  const deadline = Date.now() + LINEAR_PROJECT_BUDGET_MS;
+  const remaining = () => {
+    const left = deadline - Date.now();
+    if (left <= 0) throw new Error(`Linear API timed out after ${LINEAR_PROJECT_BUDGET_MS}ms`);
+    return Math.min(LINEAR_TIMEOUT_MS, left);
+  };
   const data = await linearQuery<{ project?: ProjectNode | null }>(
     apiKey,
     { query, variables: { id: slugId } },
-    tag,
+    remaining(),
   );
   const project = data.project;
   if (!project) throw new Error(`Linear project not found: ${slugId}`);
@@ -326,7 +362,7 @@ export async function getProjectOverview(slugId: string, key?: string): Promise<
     const more = await linearQuery<{ project?: { issues: ProjectNode["issues"] } | null }>(
       apiKey,
       { query: moreIssuesQuery, variables: { id: slugId, after: pageInfo.endCursor } },
-      tag,
+      remaining(),
     );
     if (!more.project) break;
     project.issues.nodes.push(...more.project.issues.nodes);

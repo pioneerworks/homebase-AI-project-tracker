@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asTimeout, fetchWithTimeout } from "@/lib/fetch-timeout";
+import { fetchWithTimeout, readJson } from "@/lib/fetch-timeout";
 
 /**
  * Running Statsig experiments via the Console API.
@@ -132,8 +132,8 @@ export function verdictFromPrimary(
   };
 }
 
-/** Per-request deadline; the pulse calls run in parallel after the list call. */
-export const STATSIG_TIMEOUT_MS = 6_000;
+/** Per-request deadline; the pulse calls run in parallel after the list call. Mutable for tests. */
+export const statsigTimeout = { ms: 6_000 };
 
 async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
   const response = await fetchWithTimeout(
@@ -145,18 +145,13 @@ async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
       },
       cache: "no-store",
     },
-    STATSIG_TIMEOUT_MS,
+    statsigTimeout.ms,
     "Statsig Console API",
   );
   if (!response.ok) {
     throw new Error(`Statsig Console API failed: ${response.status}`);
   }
-  let body: { data: T };
-  try {
-    body = (await response.json()) as { data: T };
-  } catch (error) {
-    throw asTimeout(error, STATSIG_TIMEOUT_MS, "Statsig Console API");
-  }
+  const body = await readJson<{ data: T }>(response, statsigTimeout.ms, "Statsig Console API");
   return body.data;
 }
 
@@ -214,10 +209,16 @@ export function toExperimentCards(
   });
 }
 
-let cache: { at: number; cards: ExperimentCard[] } | null = null;
+let cache: { at: number; ttl: number; cards: ExperimentCard[] } | null = null;
+let failure: { at: number; error: unknown } | null = null;
+/** Cards where some pulse failed are retried sooner than a clean load. */
+const PARTIAL_CACHE_TTL_MS = 5 * 60 * 1000;
+/** After a failed list call, skip Statsig briefly instead of waiting on it every view. */
+const FAILURE_TTL_MS = 2 * 60 * 1000;
 
 export function resetStatsigCacheForTests(): void {
   cache = null;
+  failure = null;
 }
 
 /**
@@ -231,14 +232,28 @@ export async function getRunningExperiments(
   const config = statsigConfig(env);
   if (!config) return null;
 
-  if (cache && now - cache.at < CACHE_TTL_MS) {
+  if (cache && now - cache.at < cache.ttl) {
     return cache.cards;
   }
+  if (failure && now - failure.at < FAILURE_TTL_MS) {
+    if (cache) return cache.cards;
+    throw failure.error;
+  }
 
-  const experiments = await consoleGet<ExternalExperimentDto[]>(
-    config.apiKey,
-    "/experiments?status=active&limit=100",
-  );
+  let experiments: ExternalExperimentDto[];
+  try {
+    experiments = await consoleGet<ExternalExperimentDto[]>(
+      config.apiKey,
+      "/experiments?status=active&limit=100",
+    );
+  } catch (error) {
+    failure = { at: now, error };
+    // a stale list beats an error card
+    if (cache) return cache.cards;
+    throw error;
+  }
+  failure = null;
+  let partial = false;
 
   const pulses = new Map<string, ExperimentPulseResultsDto>();
   await Promise.all(
@@ -255,11 +270,12 @@ export async function getRunningExperiments(
         );
       } catch {
         // one experiment failing to load results shouldn't hide the others
+        partial = true;
       }
     }),
   );
 
   const cards = toExperimentCards(experiments, pulses, now);
-  cache = { at: now, cards };
+  cache = { at: now, ttl: partial ? PARTIAL_CACHE_TTL_MS : CACHE_TTL_MS, cards };
   return cards;
 }

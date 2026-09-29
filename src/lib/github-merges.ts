@@ -1,6 +1,7 @@
 import "server-only";
 
-import { asTimeout, fetchWithTimeout } from "@/lib/fetch-timeout";
+import { fetchWithTimeout, readJson } from "@/lib/fetch-timeout";
+import { ttlCache } from "@/lib/ttl-cache";
 
 /**
  * GitHub merged-PR fetch for impact tracking.
@@ -27,11 +28,37 @@ export function hasGithubToken(): boolean {
   return Boolean(token) && !token!.includes("SENSITIVE");
 }
 
+const mergedPrCache = ttlCache(
+  ({ repo, windowDays }: { repo: string; windowDays: number }) => loadMergedPrs(repo, windowDays),
+  {
+    ttlMs: 60 * 60 * 1000,
+    failureTtlMs: 5 * 60 * 1000,
+    keyOf: ({ repo, windowDays }) => `${repo}:${windowDays}`,
+  },
+);
+
+/** Drop cached merges so the next call refetches (hourly refresh job). */
+export function clearMergedPrCache(): void {
+  mergedPrCache.clear();
+}
+
+/**
+ * Merged PRs in the window, cached for an hour per function instance, or
+ * null when no token is set or GitHub is unreachable (callers use the seed).
+ */
 export async function fetchMergedPrs(
   repo: string,
   windowDays = 120,
 ): Promise<MergedPr[] | null> {
   if (!hasGithubToken()) return null;
+  try {
+    return await mergedPrCache.get({ repo, windowDays });
+  } catch {
+    return null;
+  }
+}
+
+async function loadMergedPrs(repo: string, windowDays: number): Promise<MergedPr[] | null> {
   const token = process.env.GITHUB_TOKEN!.trim();
   const since = Date.now() - windowDays * 86400000;
 
@@ -43,17 +70,13 @@ export async function fetchMergedPrs(
           Authorization: `Bearer ${token}`,
           Accept: "application/vnd.github+json",
         },
-        next: { revalidate: 3600, tags: [`merges-${repo}`] },
+        cache: "no-store",
       },
       GITHUB_TIMEOUT_MS,
       "GitHub API",
     );
     if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
-    try {
-      return (await response.json()) as GitHubPull[];
-    } catch (error) {
-      throw asTimeout(error, GITHUB_TIMEOUT_MS, "GitHub API");
-    }
+    return readJson<GitHubPull[]>(response, GITHUB_TIMEOUT_MS, "GitHub API");
   }
 
   const seen = new Set<number>();
@@ -77,7 +100,7 @@ export async function fetchMergedPrs(
         "GitHub merged-PR fetch failed; falling back to seed data:",
         error instanceof Error ? error.message : error,
       );
-      return null;
+      throw error;
     }
 
     for (let index = 0; index < batches.length; index++) {

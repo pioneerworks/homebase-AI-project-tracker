@@ -24,6 +24,8 @@ import Link from "next/link";
 import { cache, Suspense } from "react";
 
 export const dynamic = "force-dynamic";
+// every upstream has its own deadline; this is the backstop for the whole render
+export const maxDuration = 30;
 
 // Chart window: Owner Account Created was first tracked Jun 26 2026; the
 // first full day is Jun 27
