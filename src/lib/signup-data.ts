@@ -1,6 +1,6 @@
 /**
  * Captured signup history from the Amplitude MCP (Cross-Platform project
- * 677513, queried 2026-09-29), reproducing the team's funnel chart:
+ * 677513, queried 2026-10-01), reproducing the team's funnel chart:
  *   traffic = unique users with Page Viewed, user property device
  *             ([Amplitude] Device family) != "Linux", and event property
  *             product_area contains "mw_"
