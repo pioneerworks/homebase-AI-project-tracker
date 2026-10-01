@@ -1,35 +1,28 @@
 import "server-only";
 
 /**
- * Amplitude funnel series via the Export API.
+ * Amplitude funnel series via the Dashboard REST API (/api/2/funnels).
  *
- * Reproduces the team's Amplitude funnel chart ("Page Viewed" filtered to
- * product_area mw_* and device != Linux → "Owner Account Created", unique
- * users, conversion over time) as a daily series:
- *   traffic = unique users with a qualifying Page Viewed that day
- *   signups = users with a qualifying Page Viewed and Owner Account Created
- *             that day
+ * Runs the team's Amplitude funnel chart server-side ("Page Viewed" filtered
+ * to product_area contains mw_ and user device != Linux → "Owner Account
+ * Created", ordered, converted within one day, daily) and reads the per-day
+ * step counts:
+ *   traffic = users entering step 1 that day
+ *   signups = users completing step 2
  *   rate    = signups / traffic
  *
- * Uses the Export API (Basic auth with the project API key + secret) which
- * returns a ZIP of hourly gzipped JSONL event files. Requires both
- * AMPLITUDE_API_KEY and AMPLITUDE_SECRET to be set and readable.
- *
- * Known divergences from the Amplitude chart (documented for reviewers):
- *  - day bucketing uses UTC, the Amplitude UI uses the project timezone
- *  - identity = user_id, falling back to device_id (cross-platform stitching
- *    may differ slightly from Amplitude's identity resolution)
- *  - signups count users with a qualifying Page Viewed and the conversion
- *    event on the same day (event order not checked); the chart's 1-day
- *    window can span midnight
+ * Amplitude computes the funnel, so identity resolution and the 1-day window
+ * match the chart. Days follow the project timezone (UTC for 677513).
+ * Requires AMPLITUDE_API_KEY and AMPLITUDE_SECRET (project API key + secret
+ * key) to be set and readable.
  */
-import { gunzipSync, unzipSync } from "fflate";
-
-import { asTimeout, fetchWithTimeout } from "@/lib/fetch-timeout";
+import { fetchWithTimeout, readJson } from "@/lib/fetch-timeout";
 import { ttlCache } from "@/lib/ttl-cache";
 import type { SignupDay } from "@/lib/signup-data";
 
-const AMPLITUDE_EXPORT_URL = "https://amplitude.com/api/2/export";
+const AMPLITUDE_FUNNELS_URL = "https://amplitude.com/api/2/funnels";
+const LABEL = "Amplitude Dashboard API";
+const DAY_MS = 86_400_000;
 
 export type AmplitudeConfig = {
   apiKey: string;
@@ -58,115 +51,73 @@ export function amplitudeConfig(
   };
 }
 
-/** Export API wants YYYYMMDDTHH (UTC, inclusive hour range). */
-function exportStamp(date: Date): string {
-  return (
-    date.getUTCFullYear() +
-    String(date.getUTCMonth() + 1).padStart(2, "0") +
-    String(date.getUTCDate()).padStart(2, "0") +
-    "T" +
-    String(date.getUTCHours()).padStart(2, "0")
-  );
-}
-
-export type DayCounts = { date: string; pageviewUsers: number; signupUsers: number };
+const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 /**
- * Pure aggregation over JSONL event lines (exported for tests). One line per
- * event; identity is user_id falling back to device_id.
+ * The funnel request for the last `windowDays` complete days, ending
+ * yesterday (UTC) so today's partial day never enters the series.
  */
-export function aggregateFromLines(
-  lines: string[],
-  config: Pick<AmplitudeConfig, "signupEvent" | "pageviewEvent" | "productAreaPrefix">,
-): Map<string, { pageview: Set<string>; signup: Set<string> }> {
-  const byDay = new Map<string, { pageview: Set<string>; signup: Set<string> }>();
+export function funnelQuery(
+  config: AmplitudeConfig,
+  now: number,
+): { url: string; windowStart: string } {
+  const today = Date.UTC(
+    new Date(now).getUTCFullYear(),
+    new Date(now).getUTCMonth(),
+    new Date(now).getUTCDate(),
+  );
+  const end = isoDay(today - DAY_MS);
+  const windowStart = isoDay(today - config.windowDays * DAY_MS);
 
-  for (const line of lines) {
-    if (!line) continue;
-    let event: {
-      event_type?: string;
-      event_time?: string;
-      user_id?: string | null;
-      device_id?: string | null;
-      event_properties?: Record<string, unknown>;
-    };
-    try {
-      event = JSON.parse(line);
-    } catch {
-      continue;
-    }
-    if (!event?.event_type || !event.event_time) continue;
+  const params = new URLSearchParams();
+  params.append(
+    "e",
+    JSON.stringify({
+      event_type: config.pageviewEvent,
+      filters: [
+        {
+          subprop_type: "event",
+          subprop_key: "product_area",
+          subprop_op: "contains",
+          subprop_value: [config.productAreaPrefix],
+        },
+        // [Amplitude] Device family is the user-level "device" property
+        { subprop_type: "user", subprop_key: "device", subprop_op: "is not", subprop_value: ["Linux"] },
+      ],
+    }),
+  );
+  params.append("e", JSON.stringify({ event_type: config.signupEvent, filters: [] }));
+  params.set("start", windowStart.replaceAll("-", ""));
+  params.set("end", end.replaceAll("-", ""));
+  params.set("mode", "ordered");
+  params.set("i", "1");
+  params.set("cs", String(DAY_MS / 1000));
 
-    let isPageview = event.event_type === config.pageviewEvent;
-    let isSignup = event.event_type === config.signupEvent;
-    if (!isPageview && !isSignup) continue;
+  return { url: `${AMPLITUDE_FUNNELS_URL}?${params}`, windowStart };
+}
 
-    const props = (event.event_properties ?? {}) as Record<string, unknown>;
-    if (isPageview) {
-      // chart filter: Device type != Linux
-      const device = String(props.device_family ?? "").toLowerCase();
-      if (device === "linux") continue;
-      // chart filter: product_area contains mw_
-      const productArea = String(props.product_area ?? "");
-      if (!productArea.includes(config.productAreaPrefix)) continue;
-    }
+type FunnelsResponse = {
+  data?: { dayFunnels?: { xValues?: string[]; series?: number[][] } }[];
+};
 
-    const identity = event.user_id || event.device_id;
-    if (!identity) continue;
-
-    const date = event.event_time.slice(0, 10);
-    let day = byDay.get(date);
-    if (!day) {
-      day = { pageview: new Set(), signup: new Set() };
-      byDay.set(date, day);
-    }
-    if (isPageview) day.pageview.add(identity);
-    else day.signup.add(identity);
+/** Map the funnels response's per-day step counts to SignupDay rows. */
+export function funnelToSignupDays(body: FunnelsResponse): SignupDay[] {
+  const day = body.data?.[0]?.dayFunnels;
+  if (!day?.xValues?.length || !day.series?.length) {
+    throw new Error(`${LABEL} returned no daily funnel data`);
   }
-
-  return byDay;
+  return day.xValues.map((date, i) => {
+    const [traffic = 0, signups = 0] = day.series![i] ?? [];
+    return { date, signups, traffic, rate: traffic > 0 ? signups / traffic : null };
+  });
 }
 
-export function toSignupDays(
-  byDay: Map<string, { pageview: Set<string>; signup: Set<string> }>,
-): SignupDay[] {
-  return [...byDay.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, day]) => {
-      const traffic = day.pageview.size;
-      // funnel: only users who also had a qualifying Page Viewed that day
-      let signups = 0;
-      for (const identity of day.signup) if (day.pageview.has(identity)) signups++;
-      return {
-        date,
-        signups,
-        traffic,
-        rate: traffic > 0 ? signups / traffic : null,
-      };
-    });
-}
-
-/** Decode the Export API ZIP: entries are gzipped JSONL files. */
-export function extractLinesFromZip(zip: Uint8Array): string[] {
-  const files = unzipSync(zip);
-  const lines: string[] = [];
-  for (const [name, compressed] of Object.entries(files)) {
-    if (!name.endsWith(".gz") && !name.endsWith(".json")) continue;
-    const text = name.endsWith(".gz")
-      ? new TextDecoder().decode(gunzipSync(compressed))
-      : new TextDecoder().decode(compressed);
-    for (const line of text.split("\n")) lines.push(line);
-  }
-  return lines;
-}
-
-/** In-memory TTL cache so page views don't re-process the export ZIP. */
+/** In-memory TTL cache so page views share one funnel query. */
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 /**
- * The export is a ZIP of every event in the window; the Overview can't wait on
- * it indefinitely. Past this deadline the page renders from the captured
- * snapshot instead. Mutable for tests.
+ * The Overview can't wait on Amplitude indefinitely. Past this deadline the
+ * page renders from the captured snapshot instead. Mutable for tests.
  */
 export const amplitudeTimeout = { ms: 8_000 };
 
@@ -201,36 +152,18 @@ export async function getAmplitudeFunnel(
   return funnelCache.get({ config, now }, now);
 }
 
-async function fetchFunnel(
-  config: AmplitudeConfig,
-  now: number,
-): Promise<Funnel> {
-  const end = new Date(now);
-  const start = new Date(end.getTime() - config.windowDays * 86400000);
-  const windowStart = start.toISOString().slice(0, 10);
-
+async function fetchFunnel(config: AmplitudeConfig, now: number): Promise<Funnel> {
+  const { url, windowStart } = funnelQuery(config, now);
   const auth = Buffer.from(`${config.apiKey}:${config.secret}`).toString("base64");
   const response = await fetchWithTimeout(
-    `${AMPLITUDE_EXPORT_URL}?start=${exportStamp(start)}&end=${exportStamp(end)}`,
-    {
-      headers: { Authorization: `Basic ${auth}` },
-      cache: "no-store",
-    },
+    url,
+    { headers: { Authorization: `Basic ${auth}` }, cache: "no-store" },
     amplitudeTimeout.ms,
-    "Amplitude Export API",
+    LABEL,
   );
   if (!response.ok) {
-    throw new Error(`Amplitude Export API failed: ${response.status}`);
+    throw new Error(`${LABEL} failed: ${response.status}`);
   }
-
-  let zip: Uint8Array;
-  try {
-    zip = new Uint8Array(await response.arrayBuffer());
-  } catch (error) {
-    throw asTimeout(error, amplitudeTimeout.ms, "Amplitude Export API");
-  }
-  const byDay = aggregateFromLines(extractLinesFromZip(zip), config);
-  const days = toSignupDays(byDay);
-
-  return { days, windowStart };
+  const body = await readJson<FunnelsResponse>(response, amplitudeTimeout.ms, LABEL);
+  return { days: funnelToSignupDays(body), windowStart };
 }
