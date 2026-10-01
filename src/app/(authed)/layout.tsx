@@ -1,8 +1,7 @@
 import AppShell from "@/components/app-shell";
 import { getSessionUser } from "@/lib/oidc-session";
-import { projectIdentity, projectState } from "@/lib/overview";
+import { healthState, projectIdentity } from "@/lib/overview";
 import type { SidebarProjects } from "@/components/app-shell";
-import { torontoToday } from "@/lib/standup";
 import { getDoneOverviews, getTrackerOverviews } from "@/lib/tracker-overviews";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import type { ReactNode } from "react";
@@ -15,7 +14,8 @@ import type { ReactNode } from "react";
  * bare: each page still runs its own session check and redirects to /login
  * with its own callback URL.
  *
- * The sidebar's project names and state dots come from Linear and stream in:
+ * Dots show the health the lead set in Linear (an overdue milestone shows
+ * in the Overview table, not here). Names and dots come from Linear and stream in:
  * the promise is handed to the client unresolved so Linear latency never
  * blocks the shell.
  */
@@ -31,11 +31,10 @@ export default async function AuthedLayout({
     getDoneOverviews(),
   ])
     .then(([active, done]) => {
-      const today = torontoToday();
       return Object.fromEntries([
         ...TRACKER_PROJECTS.map((p, i) => [
           p.key,
-          { name: projectIdentity(p.key, active[i]).name, state: projectState(active[i], today).key },
+          { name: projectIdentity(p.key, active[i]).name, state: healthState(active[i]) },
         ]),
         ...DONE_PROJECTS.map((p, i) => [
           p.key,

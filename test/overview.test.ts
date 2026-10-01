@@ -6,6 +6,7 @@ import {
   attentionItems,
   attentionSummary,
   initials,
+  healthState,
   projectIdentity,
   projectState,
   type AttentionProject,
@@ -148,4 +149,14 @@ test("projectIdentity has no hardcoded copy to fall back to", () => {
     name: "ab-testing",
     description: "",
   });
+});
+
+test("healthState follows Linear health, even with an overdue milestone", () => {
+  // M1 due Sep 25, still open: the table calls this overdue, the dot doesn't
+  assert.equal(projectState(overview(), "2026-10-01").key, "overdue");
+  assert.equal(healthState(overview()), "onTrack");
+  assert.equal(healthState(overview({ health: "atRisk" })), "atRisk");
+  assert.equal(healthState(overview({ health: "offTrack" })), "offTrack");
+  assert.equal(healthState(overview({ health: null })), "none");
+  assert.equal(healthState(null), "none");
 });

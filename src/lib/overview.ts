@@ -47,6 +47,14 @@ export function projectState(
 }
 
 /**
+ * The health the lead set on the Linear project, for the sidebar dots.
+ * Unlike projectState, an overdue milestone does not override it.
+ */
+export function healthState(overview: Pick<ProjectOverview, "health"> | null): ProjectStateKey {
+  return overview?.health ?? "none";
+}
+
+/**
  * Name and one-line summary for a project row, straight from Linear. With no
  * Linear data there is no hardcoded copy: the row shows its key and no summary.
  */
