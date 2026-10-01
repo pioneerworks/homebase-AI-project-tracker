@@ -46,6 +46,47 @@ export function projectState(
   return { key, label: STATE_LABELS[key], lateDays: key === "overdue" ? lateDays : 0 };
 }
 
+/**
+ * The health the lead set on the Linear project, for the sidebar dots.
+ * Unlike projectState, an overdue milestone does not override it.
+ */
+export function healthState(overview: Pick<ProjectOverview, "health"> | null): ProjectStateKey {
+  return overview?.health ?? "none";
+}
+
+/** One sidebar link: the Linear name and the dot's state. */
+export type SidebarProject = { name: string; state: ProjectStateKey; available: boolean };
+
+/**
+ * Sidebar entry for a project. Done projects keep a done dot (their place in
+ * DONE_PROJECTS already says so); active ones show the Linear health.
+ */
+export function sidebarProject(
+  key: string,
+  overview: Pick<ProjectOverview, "name" | "description" | "health"> | null,
+  done: boolean,
+): SidebarProject {
+  return {
+    name: projectIdentity(key, overview).name,
+    state: done ? "done" : healthState(overview),
+    available: Boolean(overview),
+  };
+}
+
+/**
+ * Name and one-line summary for a project row, straight from Linear. With no
+ * Linear data there is no hardcoded copy: the row shows its key and no summary.
+ */
+export function projectIdentity(
+  key: string,
+  overview: Pick<ProjectOverview, "name" | "description"> | null,
+): { name: string; description: string } {
+  return {
+    name: overview?.name?.trim() || key,
+    description: overview?.description?.trim() ?? "",
+  };
+}
+
 export const DONE_STATE: ProjectState = { key: "done", label: STATE_LABELS.done, lateDays: 0 };
 
 export type AttentionItem = {
@@ -58,7 +99,8 @@ export type AttentionItem = {
 
 export type AttentionProject = {
   key: string;
-  shortName: string;
+  /** Linear project name */
+  name: string;
   overview: ProjectOverview | null;
   state: ProjectState;
 };
@@ -97,7 +139,7 @@ export function attentionItems(
       if (p.state.key === "overdue" && next) {
         return {
           kind: "overdue",
-          title: `${p.shortName} · ${next.name}`,
+          title: `${p.name} · ${next.name}`,
           meta: `Due ${formatDay(next.targetDate!)} · ${next.progress}% done`,
           href,
           external: false,
@@ -105,7 +147,7 @@ export function attentionItems(
       }
       return {
         kind: "health",
-        title: `${p.shortName} is ${p.state.label.toLowerCase()}`,
+        title: `${p.name} is ${p.state.label.toLowerCase()}`,
         meta: next ? `Next: ${next.name} · ${next.progress}% done` : "Health set in Linear",
         href,
         external: false,

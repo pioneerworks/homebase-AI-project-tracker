@@ -6,6 +6,9 @@ import {
   attentionItems,
   attentionSummary,
   initials,
+  healthState,
+  sidebarProject,
+  projectIdentity,
   projectState,
   type AttentionProject,
 } from "../src/lib/overview";
@@ -80,11 +83,11 @@ test("projectState: completed milestones are never overdue", () => {
 test("attentionItems: losing experiments first, then flagged projects in order", () => {
   const today = "2026-09-28";
   const projects: AttentionProject[] = [
-    { key: "a", shortName: "Agents", overview: overview({ milestones: [] }), state: projectState(overview({ milestones: [] }), today) },
-    { key: "b", shortName: "A/B testing", overview: overview(), state: projectState(overview(), today) },
+    { key: "a", name: "Agents", overview: overview({ milestones: [] }), state: projectState(overview({ milestones: [] }), today) },
+    { key: "b", name: "A/B testing", overview: overview(), state: projectState(overview(), today) },
     {
       key: "c",
-      shortName: "Tools",
+      name: "Tools",
       overview: overview({ health: "offTrack", milestones: [] }),
       state: projectState(overview({ health: "offTrack", milestones: [] }), today),
     },
@@ -108,7 +111,7 @@ test("attentionItems: losing experiments first, then flagged projects in order",
 
 test("attentionItems: no experiments and healthy projects means nothing to flag", () => {
   const projects: AttentionProject[] = [
-    { key: "a", shortName: "Agents", overview: null, state: projectState(null, "2026-09-28") },
+    { key: "a", name: "Agents", overview: null, state: projectState(null, "2026-09-28") },
   ];
   assert.deepEqual(attentionItems(null, projects, fmt), []);
 });
@@ -132,4 +135,49 @@ test("projectState: a dated open milestone wins over an undated one", () => {
 test("projectState: tolerates a relay payload without milestones", () => {
   const legacy = { health: "onTrack", milestones: undefined } as unknown as ProjectOverview;
   assert.equal(projectState(legacy, "2026-09-28").key, "onTrack");
+});
+
+test("projectIdentity uses Linear's live name and summary", () => {
+  assert.deepEqual(
+    projectIdentity("ab-testing", { name: " A/B testing ", description: " Building the environment. " }),
+    { name: "A/B testing", description: "Building the environment." },
+  );
+});
+
+test("projectIdentity has no hardcoded copy to fall back to", () => {
+  assert.deepEqual(projectIdentity("ab-testing", null), { name: "ab-testing", description: "" });
+  assert.deepEqual(projectIdentity("ab-testing", { name: "  ", description: null }), {
+    name: "ab-testing",
+    description: "",
+  });
+});
+
+test("healthState follows Linear health, even with an overdue milestone", () => {
+  // M1 due Sep 25, still open: the table calls this overdue, the dot doesn't
+  assert.equal(projectState(overview(), "2026-10-01").key, "overdue");
+  assert.equal(healthState(overview()), "onTrack");
+  assert.equal(healthState(overview({ health: "atRisk" })), "atRisk");
+  assert.equal(healthState(overview({ health: "offTrack" })), "offTrack");
+  assert.equal(healthState(overview({ health: null })), "none");
+  assert.equal(healthState(null), "none");
+});
+
+test("sidebarProject: Linear name and health, done dot for done projects", () => {
+  const live = { ...overview(), name: "A/B testing", description: null } as ProjectOverview;
+  assert.deepEqual(sidebarProject("ab-testing", live, false), {
+    name: "A/B testing",
+    state: "onTrack",
+    available: true,
+  });
+  assert.deepEqual(sidebarProject("ab-testing", null, false), {
+    name: "ab-testing",
+    state: "none",
+    available: false,
+  });
+  // a done project stays done even when Linear is down
+  assert.deepEqual(sidebarProject("migration", null, true), {
+    name: "migration",
+    state: "done",
+    available: false,
+  });
 });

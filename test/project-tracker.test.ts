@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { toProjectOverview } from "../src/lib/linear-projects";
+import { normalizeRelayOverview, toProjectOverview } from "../src/lib/linear-projects";
 import { nextMilestone } from "../src/lib/milestones";
 import { dailySignupSummary, pctChange, torontoToday } from "../src/lib/standup";
 
@@ -21,6 +21,8 @@ const projectNode = (over: Record<string, unknown> = {}) => ({
   id: "p1",
   name: "A/B testing",
   slugId: "d9f5d074ffc1",
+  url: "https://linear.app/joinhomebase/project/ab-testing-d9f5d074ffc1",
+  completedAt: null,
   description: "One-line summary.",
   content: "## Why\n\nThe full brief.",
   icon: null,
@@ -50,6 +52,10 @@ const projectNode = (over: Record<string, unknown> = {}) => ({
 
 test("toProjectOverview maps owner, health, brief and milestones", () => {
   const overview = toProjectOverview(projectNode() as never);
+  assert.equal(overview.name, "A/B testing");
+  assert.equal(overview.description, "One-line summary.");
+  assert.equal(overview.url, "https://linear.app/joinhomebase/project/ab-testing-d9f5d074ffc1");
+  assert.equal(overview.completedAt, null);
   assert.equal(overview.lead, "Loki Nichlani");
   assert.equal(overview.health, "atRisk");
   assert.equal(overview.content, "## Why\n\nThe full brief.");
@@ -78,6 +84,27 @@ test("toProjectOverview tolerates missing lead, health and brief", () => {
   assert.equal(overview.lead, null);
   assert.equal(overview.health, null);
   assert.equal(overview.content, null);
+});
+
+test("toProjectOverview keeps Linear's completion timestamp", () => {
+  const overview = toProjectOverview(
+    projectNode({ completedAt: "2026-09-08T14:28:01.105Z" }) as never,
+  );
+  assert.equal(overview.completedAt, "2026-09-08T14:28:01.105Z");
+});
+
+test("normalizeRelayOverview fills fields an older relay omits, without inventing a URL", () => {
+  const live = toProjectOverview(projectNode() as never);
+  const { url, completedAt, lead, health, milestones, content, ...old } = live;
+  void [url, completedAt, lead, health, milestones, content];
+  const normalized = normalizeRelayOverview(old);
+  assert.equal(normalized.url, null);
+  assert.equal(normalized.completedAt, null);
+  assert.equal(normalized.lead, null);
+  assert.equal(normalized.health, null);
+  assert.deepEqual(normalized.milestones, []);
+  assert.equal(normalized.name, "A/B testing");
+  assert.deepEqual(normalizeRelayOverview(live), live);
 });
 
 test("nextMilestone picks the earliest-dated open milestone", () => {
@@ -168,4 +195,17 @@ test("presetRange anchors on the latest day and clamps to the first", async () =
   assert.deepEqual(presetRange("7d", "2026-06-01", "2026-09-22"), { from: "2026-09-16", to: "2026-09-22" });
   assert.deepEqual(presetRange("90d", "2026-08-01", "2026-09-22"), { from: "2026-08-01", to: "2026-09-22" });
   assert.deepEqual(presetRange("all", "2026-06-01", "2026-09-22"), { from: "2026-06-01", to: "2026-09-22" });
+});
+
+test("tracker config holds only Linear ids and repos, no display copy", async () => {
+  const { DONE_PROJECTS, TRACKER_PROJECTS, linearProject } = await import("../src/lib/tracker-projects");
+  for (const p of [...TRACKER_PROJECTS, ...DONE_PROJECTS]) {
+    for (const field of ["name", "shortName", "shortPurpose", "linearUrl", "summary", "blurb", "lead"]) {
+      assert.equal(field in p, false, `${p.key} still hardcodes ${field}`);
+    }
+    assert.match(p.linearSlugId, /^[0-9a-f]{12}$/);
+  }
+  assert.equal(linearProject("ab-testing")?.linearSlugId, "d9f5d074ffc1");
+  assert.equal(linearProject("migration")?.linearSlugId, "97fe44f106cb");
+  assert.equal(linearProject("nope"), undefined);
 });

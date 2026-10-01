@@ -1903,6 +1903,12 @@ footer {
   overflow-wrap: anywhere;
 }
 
+.sidebar-shortcut .skeleton-line {
+  width: 120px;
+  height: 12px;
+  opacity: 0.25;
+}
+
 .sidebar-shortcut[aria-current="page"] {
   background: rgb(255 255 255 / 0.1);
   color: var(--white);

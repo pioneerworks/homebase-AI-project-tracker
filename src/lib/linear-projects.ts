@@ -29,6 +29,8 @@ export type ProjectOverview = {
   id: string;
   name: string;
   slugId: string;
+  /** Project page in Linear (null from a relay deployment that predates it) */
+  url: string | null;
   /** Linear's one-line project summary */
   description: string | null;
   /** Full project brief (the project overview document, markdown) */
@@ -40,6 +42,7 @@ export type ProjectOverview = {
   health: ProjectHealth | null;
   targetDate: string | null;
   startedAt: string | null;
+  completedAt: string | null;
   counts: {
     total: number;
     completed: number;
@@ -69,6 +72,7 @@ type ProjectNode = {
   id: string;
   name: string;
   slugId: string;
+  url: string;
   description: string | null;
   content: string | null;
   icon: string | null;
@@ -78,6 +82,7 @@ type ProjectNode = {
   health: string | null;
   targetDate: string | null;
   startedAt: string | null;
+  completedAt: string | null;
   projectMilestones: {
     nodes: {
       id: string;
@@ -100,6 +105,7 @@ query ProjectOverview($id: String!) {
     id
     name
     slugId
+    url
     description
     content
     icon
@@ -109,6 +115,7 @@ query ProjectOverview($id: String!) {
     health
     targetDate
     startedAt
+    completedAt
     projectMilestones(first: 25) {
       nodes {
         id
@@ -187,6 +194,24 @@ async function linearQuery<T>(apiKey: string, body: unknown, timeoutMs: number):
   return json.data;
 }
 
+/** Fields added after the first relay deployment. */
+type RelayOptional = "content" | "url" | "completedAt" | "lead" | "health" | "milestones";
+
+/** Fill fields an older relay deployment doesn't return (exported for tests). */
+export function normalizeRelayOverview(
+  overview: Omit<ProjectOverview, RelayOptional> & Partial<Pick<ProjectOverview, RelayOptional>>,
+): ProjectOverview {
+  return {
+    ...overview,
+    content: overview.content ?? null,
+    url: overview.url ?? null,
+    completedAt: overview.completedAt ?? null,
+    lead: overview.lead ?? null,
+    health: overview.health ?? null,
+    milestones: overview.milestones ?? [],
+  };
+}
+
 async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
   const response = await fetchWithTimeout(
     `${RELAY_ORIGIN}/api/projects/${key}`,
@@ -200,18 +225,14 @@ async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
     );
   }
   // An older deployment may not return the newer fields yet.
-  const overview = await readJson<Partial<ProjectOverview> & ProjectOverview>(
+  const overview = await readJson<
+    Omit<ProjectOverview, RelayOptional> & Partial<Pick<ProjectOverview, RelayOptional>>
+  >(
     response,
     LINEAR_TIMEOUT_MS,
     "Linear relay",
   );
-  return {
-    ...overview,
-    content: overview.content ?? null,
-    lead: overview.lead ?? null,
-    health: overview.health ?? null,
-    milestones: overview.milestones ?? [],
-  };
+  return normalizeRelayOverview(overview);
 }
 
 function toHealth(value: string | null | undefined): ProjectHealth | null {
@@ -290,6 +311,7 @@ export function toProjectOverview(project: ProjectNode): ProjectOverview {
     id: project.id,
     name: project.name,
     slugId: project.slugId,
+    url: project.url,
     description: project.description,
     content: project.content?.trim() || null,
     iconUrl: project.icon,
@@ -299,6 +321,7 @@ export function toProjectOverview(project: ProjectNode): ProjectOverview {
     health: toHealth(project.health),
     targetDate: project.targetDate,
     startedAt: project.startedAt,
+    completedAt: project.completedAt ?? null,
     counts: {
       total: issues.length,
       completed,

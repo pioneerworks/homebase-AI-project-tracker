@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getProjectOverview } from "@/lib/linear-projects";
 import { getSessionUser } from "@/lib/oidc-session";
-import { trackerProject } from "@/lib/tracker-projects";
+import { linearProject } from "@/lib/tracker-projects";
 
 export const runtime = "nodejs";
 
@@ -27,7 +27,7 @@ export async function GET(
   }
 
   const { key } = await params;
-  const project = trackerProject(key);
+  const project = linearProject(key);
   if (!project) {
     return NextResponse.json(
       { error: `Unknown project: ${key}` },

@@ -124,7 +124,13 @@ pulls their full issue inventory, latest project updates, and project
 descriptions into the “Active projects” section.
 
 The AI project tracker (overview and `/projects/[key]`) reads each tracked
-project's lead, health, and Linear project milestones. Cards show the owner,
+project's name, summary, lead, health, link, completion date, and Linear
+project milestones. `src/lib/tracker-projects.ts` lists only which projects to
+track (key, Linear slug id, impact-chart repos): don't add display copy there,
+rename or edit the project in Linear instead. When Linear is unavailable a row
+shows its key rather than stale text. Sidebar dots show the health the lead set
+in Linear; an overdue milestone is flagged in the Overview table and "Needs
+attention" instead. Cards show the owner,
 health, and the next open milestone with its due date; project pages list every
 milestone with its progress and issues (state and assignee). A project with no
 update posted yet shows its full Linear brief (the project overview document).

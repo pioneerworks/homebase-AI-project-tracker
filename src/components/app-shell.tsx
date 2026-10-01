@@ -5,35 +5,57 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, use, useEffect, useState } from "react";
 
-import type { ProjectStateKey } from "@/lib/overview";
+import type { SidebarProject } from "@/lib/overview";
 import { initials, STATE_LABELS } from "@/lib/overview";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
+/** Project key → its sidebar entry, each resolving on its own. */
+export type SidebarProjects = Record<string, Promise<SidebarProject>>;
+
 type Props = {
   user: { name: string; email: string } | null;
-  /** Project key → display state, for the sidebar dots. */
-  projectStates: Promise<Record<string, ProjectStateKey>>;
+  projects: SidebarProjects;
 };
 
-function StateDot({
+function ProjectLabel({
   projectKey,
-  states,
+  project: pending,
 }: {
   projectKey: string;
-  states: Promise<Record<string, ProjectStateKey>>;
+  project: Promise<SidebarProject> | undefined;
 }) {
-  const key = use(states)[projectKey] ?? "none";
+  const project = pending ? use(pending) : null;
+  const state = project?.state ?? "none";
+  const label =
+    state === "done"
+      ? project?.available
+        ? STATE_LABELS.done
+        : `${STATE_LABELS.done} (Linear unavailable)`
+      : project?.available
+        ? `Linear health: ${STATE_LABELS[state]}`
+        : "Linear unavailable";
   return (
     <>
-      <span className={`state-dot state-dot-${key}`} aria-hidden="true" title={STATE_LABELS[key]} />
-      <span className="sr-only">{STATE_LABELS[key]}: </span>
+      <span className={`state-dot state-dot-${state}`} aria-hidden="true" title={label} />
+      <span className="sr-only">{label}: </span>
+      {project?.name ?? projectKey}
+    </>
+  );
+}
+
+function ProjectLabelFallback({ projectKey }: { projectKey: string }) {
+  return (
+    <>
+      <span className="state-dot state-dot-none" aria-hidden="true" />
+      <span className="skeleton-line" aria-hidden="true" />
+      <span className="sr-only">{projectKey} (loading)</span>
     </>
   );
 }
 
 export default function AppShell({
   user,
-  projectStates,
+  projects,
   children,
 }: Props & { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -98,12 +120,9 @@ export default function AppShell({
                   aria-current={isActive(`/projects/${p.key}`) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <Suspense
-                    fallback={<span className="state-dot state-dot-none" aria-hidden="true" />}
-                  >
-                    <StateDot projectKey={p.key} states={projectStates} />
+                  <Suspense fallback={<ProjectLabelFallback projectKey={p.key} />}>
+                    <ProjectLabel projectKey={p.key} project={projects[p.key]} />
                   </Suspense>
-                  {p.shortName}
                 </Link>
               ))}
             </div>
@@ -120,9 +139,9 @@ export default function AppShell({
                   aria-current={isActive(p.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <span className="state-dot state-dot-done" aria-hidden="true" />
-                  <span className="sr-only">Done: </span>
-                  {p.shortName}
+                  <Suspense fallback={<ProjectLabelFallback projectKey={p.key} />}>
+                    <ProjectLabel projectKey={p.key} project={projects[p.key]} />
+                  </Suspense>
                 </Link>
               ))}
             </div>

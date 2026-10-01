@@ -11,12 +11,13 @@ import {
   attentionSummary,
   DONE_STATE,
   formatPValue,
+  projectIdentity,
   projectState,
   type AttentionItem,
 } from "@/lib/overview";
 import { loadExperiments, loadMergeDays, loadSignupSeries, MERGE_REPO } from "@/lib/overview-data";
 import type { ExperimentCard } from "@/lib/statsig";
-import { getTrackerOverviews } from "@/lib/tracker-overviews";
+import { getDoneOverviews, getTrackerOverviews } from "@/lib/tracker-overviews";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { ArrowUpRight, CalendarX, CircleCheck, FlaskConical, TriangleAlert } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -30,8 +31,6 @@ export const maxDuration = 30;
 // Chart window: Owner Account Created was first tracked Jun 26 2026; the
 // first full day is Jun 27
 const CHART_START = "2026-06-27";
-// The marketing site migration shipped (Payload cutover) on Jul 15 2026.
-const MIGRATION_SHIPPED = "2026-07-15";
 const STATSIG_CONSOLE = "https://console.statsig.com";
 
 function formatDay(date: string): string {
@@ -335,7 +334,7 @@ async function AttentionSection({ today }: { today: string }) {
   const [experiments, overviews] = await Promise.all([loadExperiments(), getTrackerOverviews()]);
   const projects = TRACKER_PROJECTS.map((p, index) => ({
     key: p.key,
-    shortName: p.shortName,
+    name: projectIdentity(p.key, overviews[index]).name,
     overview: overviews[index],
     state: projectState(overviews[index], today),
   }));
@@ -535,7 +534,10 @@ async function ExperimentList() {
 }
 
 async function ProjectsSection({ today }: { today: string }) {
-  const overviews = await getTrackerOverviews();
+  const [overviews, doneOverviews] = await Promise.all([
+    getTrackerOverviews(),
+    getDoneOverviews(),
+  ]);
   const rows: ProjectRow[] = [
     ...TRACKER_PROJECTS.map((p, index): ProjectRow => {
       const overview = overviews[index];
@@ -543,8 +545,7 @@ async function ProjectsSection({ today }: { today: string }) {
       return {
         key: p.key,
         href: `/projects/${p.key}`,
-        name: p.name,
-        description: p.shortPurpose,
+        ...projectIdentity(p.key, overview),
         owner: overview ? overview.lead : null,
         state: projectState(overview, today),
         available: Boolean(overview),
@@ -556,17 +557,30 @@ async function ProjectsSection({ today }: { today: string }) {
         issuesDonePct: overview ? overview.counts.completionPct : null,
       };
     }),
-    ...DONE_PROJECTS.map((p): ProjectRow => ({
-      key: p.key,
-      href: p.href,
-      name: p.name,
-      description: p.summary,
-      owner: p.lead,
-      state: DONE_STATE,
-      available: true,
-      milestone: { name: "Complete", progress: 100, due: null, completedOn: MIGRATION_SHIPPED },
-      issuesDonePct: 100,
-    })),
+    ...DONE_PROJECTS.map((p, index): ProjectRow => {
+      const overview = doneOverviews[index];
+      return {
+        key: p.key,
+        href: p.href,
+        ...projectIdentity(p.key, overview),
+        owner: overview ? overview.lead : null,
+        state: DONE_STATE,
+        available: Boolean(overview),
+        // the ship date is Linear's completion date; the issue ring stays live,
+        // so issues left open on a project closed in Linear show below 100%
+        milestone: overview
+          ? {
+              name: "Complete",
+              progress: 100,
+              due: null,
+              completedOn: overview.completedAt
+                ? torontoToday(new Date(overview.completedAt))
+                : undefined,
+            }
+          : null,
+        issuesDonePct: overview ? overview.counts.completionPct : null,
+      };
+    }),
   ];
   return <ProjectTable rows={rows} />;
 }
