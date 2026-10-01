@@ -26,11 +26,14 @@ function ProjectLabel({
 }) {
   const project = pending ? use(pending) : null;
   const state = project?.state ?? "none";
-  const label = project?.available
-    ? state === "done"
-      ? STATE_LABELS.done
-      : `Linear health: ${STATE_LABELS[state]}`
-    : "Linear unavailable";
+  const label =
+    state === "done"
+      ? project?.available
+        ? STATE_LABELS.done
+        : `${STATE_LABELS.done} (Linear unavailable)`
+      : project?.available
+        ? `Linear health: ${STATE_LABELS[state]}`
+        : "Linear unavailable";
   return (
     <>
       <span className={`state-dot state-dot-${state}`} aria-hidden="true" title={label} />

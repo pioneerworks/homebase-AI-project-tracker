@@ -566,14 +566,16 @@ async function ProjectsSection({ today }: { today: string }) {
         owner: overview ? overview.lead : null,
         state: DONE_STATE,
         available: Boolean(overview),
-        // Linear's completion date; the issue ring stays live, so issues left
-        // open on a project closed in Linear show up as less than 100%
-        milestone: overview?.completedAt
+        // the ship date is Linear's completion date; the issue ring stays live,
+        // so issues left open on a project closed in Linear show below 100%
+        milestone: overview
           ? {
               name: "Complete",
               progress: 100,
               due: null,
-              completedOn: torontoToday(new Date(overview.completedAt)),
+              completedOn: overview.completedAt
+                ? torontoToday(new Date(overview.completedAt))
+                : undefined,
             }
           : null,
         issuesDonePct: overview ? overview.counts.completionPct : null,
