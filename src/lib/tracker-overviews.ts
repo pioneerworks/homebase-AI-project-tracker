@@ -23,8 +23,9 @@ function loadOverviews(
 
 /**
  * Linear overviews for every tracker project, in TRACKER_PROJECTS order, with
- * null where a fetch failed. Memoized per request so the sidebar (layout) and
- * the overview page share one set of Linear calls.
+ * null where a fetch failed. Memoized per request so the overview page's
+ * sections share one set of calls; the sidebar reads the same per-project
+ * cache (and in-flight fetches) through getProjectOverview.
  */
 export const getTrackerOverviews = cache(() => loadOverviews(TRACKER_PROJECTS));
 

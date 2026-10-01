@@ -54,6 +54,25 @@ export function healthState(overview: Pick<ProjectOverview, "health"> | null): P
   return overview?.health ?? "none";
 }
 
+/** One sidebar link: the Linear name and the dot's state. */
+export type SidebarProject = { name: string; state: ProjectStateKey; available: boolean };
+
+/**
+ * Sidebar entry for a project. Done projects keep a done dot (their place in
+ * DONE_PROJECTS already says so); active ones show the Linear health.
+ */
+export function sidebarProject(
+  key: string,
+  overview: Pick<ProjectOverview, "name" | "description" | "health"> | null,
+  done: boolean,
+): SidebarProject {
+  return {
+    name: projectIdentity(key, overview).name,
+    state: done ? "done" : healthState(overview),
+    available: Boolean(overview),
+  };
+}
+
 /**
  * Name and one-line summary for a project row, straight from Linear. With no
  * Linear data there is no hardcoded copy: the row shows its key and no summary.

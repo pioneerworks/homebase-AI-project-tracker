@@ -1904,8 +1904,7 @@ footer {
 }
 
 .sidebar-shortcut .skeleton-line {
-  flex: 1;
-  max-width: 140px;
+  width: 120px;
   height: 12px;
   opacity: 0.25;
 }

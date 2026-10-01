@@ -7,6 +7,7 @@ import {
   attentionSummary,
   initials,
   healthState,
+  sidebarProject,
   projectIdentity,
   projectState,
   type AttentionProject,
@@ -159,4 +160,24 @@ test("healthState follows Linear health, even with an overdue milestone", () => 
   assert.equal(healthState(overview({ health: "offTrack" })), "offTrack");
   assert.equal(healthState(overview({ health: null })), "none");
   assert.equal(healthState(null), "none");
+});
+
+test("sidebarProject: Linear name and health, done dot for done projects", () => {
+  const live = { ...overview(), name: "A/B testing", description: null } as ProjectOverview;
+  assert.deepEqual(sidebarProject("ab-testing", live, false), {
+    name: "A/B testing",
+    state: "onTrack",
+    available: true,
+  });
+  assert.deepEqual(sidebarProject("ab-testing", null, false), {
+    name: "ab-testing",
+    state: "none",
+    available: false,
+  });
+  // a done project stays done even when Linear is down
+  assert.deepEqual(sidebarProject("migration", null, true), {
+    name: "migration",
+    state: "done",
+    available: false,
+  });
 });

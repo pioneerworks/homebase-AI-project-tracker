@@ -29,8 +29,8 @@ export type ProjectOverview = {
   id: string;
   name: string;
   slugId: string;
-  /** Project page in Linear */
-  url: string;
+  /** Project page in Linear (null from a relay deployment that predates it) */
+  url: string | null;
   /** Linear's one-line project summary */
   description: string | null;
   /** Full project brief (the project overview document, markdown) */
@@ -194,6 +194,24 @@ async function linearQuery<T>(apiKey: string, body: unknown, timeoutMs: number):
   return json.data;
 }
 
+/** Fields added after the first relay deployment. */
+type RelayOptional = "content" | "url" | "completedAt" | "lead" | "health" | "milestones";
+
+/** Fill fields an older relay deployment doesn't return (exported for tests). */
+export function normalizeRelayOverview(
+  overview: Omit<ProjectOverview, RelayOptional> & Partial<Pick<ProjectOverview, RelayOptional>>,
+): ProjectOverview {
+  return {
+    ...overview,
+    content: overview.content ?? null,
+    url: overview.url ?? null,
+    completedAt: overview.completedAt ?? null,
+    lead: overview.lead ?? null,
+    health: overview.health ?? null,
+    milestones: overview.milestones ?? [],
+  };
+}
+
 async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
   const response = await fetchWithTimeout(
     `${RELAY_ORIGIN}/api/projects/${key}`,
@@ -207,20 +225,14 @@ async function fetchRelayOverview(key: string): Promise<ProjectOverview> {
     );
   }
   // An older deployment may not return the newer fields yet.
-  const overview = await readJson<Partial<ProjectOverview> & ProjectOverview>(
+  const overview = await readJson<
+    Omit<ProjectOverview, RelayOptional> & Partial<Pick<ProjectOverview, RelayOptional>>
+  >(
     response,
     LINEAR_TIMEOUT_MS,
     "Linear relay",
   );
-  return {
-    ...overview,
-    content: overview.content ?? null,
-    url: overview.url ?? `https://linear.app/joinhomebase/project/${overview.slugId}`,
-    completedAt: overview.completedAt ?? null,
-    lead: overview.lead ?? null,
-    health: overview.health ?? null,
-    milestones: overview.milestones ?? [],
-  };
+  return normalizeRelayOverview(overview);
 }
 
 function toHealth(value: string | null | undefined): ProjectHealth | null {

@@ -5,42 +5,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, use, useEffect, useState } from "react";
 
-import type { ProjectStateKey } from "@/lib/overview";
+import type { SidebarProject } from "@/lib/overview";
 import { initials, STATE_LABELS } from "@/lib/overview";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
-/** Project key → Linear name and display state, for the sidebar. */
-export type SidebarProjects = Record<string, { name: string; state: ProjectStateKey }>;
+/** Project key → its sidebar entry, each resolving on its own. */
+export type SidebarProjects = Record<string, Promise<SidebarProject>>;
 
 type Props = {
   user: { name: string; email: string } | null;
-  projects: Promise<SidebarProjects>;
+  projects: SidebarProjects;
 };
 
 function ProjectLabel({
   projectKey,
-  projects,
+  project: pending,
 }: {
   projectKey: string;
-  projects: Promise<SidebarProjects>;
+  project: Promise<SidebarProject> | undefined;
 }) {
-  const project = use(projects)[projectKey];
+  const project = pending ? use(pending) : null;
   const state = project?.state ?? "none";
+  const label = project?.available
+    ? state === "done"
+      ? STATE_LABELS.done
+      : `Linear health: ${STATE_LABELS[state]}`
+    : "Linear unavailable";
   return (
     <>
-      <span className={`state-dot state-dot-${state}`} aria-hidden="true" title={STATE_LABELS[state]} />
-      <span className="sr-only">{STATE_LABELS[state]}: </span>
+      <span className={`state-dot state-dot-${state}`} aria-hidden="true" title={label} />
+      <span className="sr-only">{label}: </span>
       {project?.name ?? projectKey}
     </>
   );
 }
 
-function ProjectLabelFallback() {
+function ProjectLabelFallback({ projectKey }: { projectKey: string }) {
   return (
     <>
       <span className="state-dot state-dot-none" aria-hidden="true" />
-      <span className="skeleton-line skeleton-line-md" aria-hidden="true" />
-      <span className="sr-only">Loading project…</span>
+      <span className="skeleton-line" aria-hidden="true" />
+      <span className="sr-only">{projectKey} (loading)</span>
     </>
   );
 }
@@ -112,8 +117,8 @@ export default function AppShell({
                   aria-current={isActive(`/projects/${p.key}`) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <Suspense fallback={<ProjectLabelFallback />}>
-                    <ProjectLabel projectKey={p.key} projects={projects} />
+                  <Suspense fallback={<ProjectLabelFallback projectKey={p.key} />}>
+                    <ProjectLabel projectKey={p.key} project={projects[p.key]} />
                   </Suspense>
                 </Link>
               ))}
@@ -131,8 +136,8 @@ export default function AppShell({
                   aria-current={isActive(p.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <Suspense fallback={<ProjectLabelFallback />}>
-                    <ProjectLabel projectKey={p.key} projects={projects} />
+                  <Suspense fallback={<ProjectLabelFallback projectKey={p.key} />}>
+                    <ProjectLabel projectKey={p.key} project={projects[p.key]} />
                   </Suspense>
                 </Link>
               ))}

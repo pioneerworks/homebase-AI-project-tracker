@@ -219,9 +219,11 @@ export default async function ProjectPage({
             <section className="section" aria-label="Project brief">
               <div className="section-head">
                 <h2>Project brief</h2>
-                <a href={overview.url} target="_blank" rel="noreferrer">
-                  View in Linear ↗
-                </a>
+                {linearUrl && (
+                  <a href={linearUrl} target="_blank" rel="noreferrer">
+                    View in Linear ↗
+                  </a>
+                )}
               </div>
               <div className="recap-card">
                 <p className="brief-note">

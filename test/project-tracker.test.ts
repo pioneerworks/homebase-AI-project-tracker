@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { toProjectOverview } from "../src/lib/linear-projects";
+import { normalizeRelayOverview, toProjectOverview } from "../src/lib/linear-projects";
 import { nextMilestone } from "../src/lib/milestones";
 import { dailySignupSummary, pctChange, torontoToday } from "../src/lib/standup";
 
@@ -91,6 +91,20 @@ test("toProjectOverview keeps Linear's completion timestamp", () => {
     projectNode({ completedAt: "2026-09-08T14:28:01.105Z" }) as never,
   );
   assert.equal(overview.completedAt, "2026-09-08T14:28:01.105Z");
+});
+
+test("normalizeRelayOverview fills fields an older relay omits, without inventing a URL", () => {
+  const live = toProjectOverview(projectNode() as never);
+  const { url, completedAt, lead, health, milestones, content, ...old } = live;
+  void [url, completedAt, lead, health, milestones, content];
+  const normalized = normalizeRelayOverview(old);
+  assert.equal(normalized.url, null);
+  assert.equal(normalized.completedAt, null);
+  assert.equal(normalized.lead, null);
+  assert.equal(normalized.health, null);
+  assert.deepEqual(normalized.milestones, []);
+  assert.equal(normalized.name, "A/B testing");
+  assert.deepEqual(normalizeRelayOverview(live), live);
 });
 
 test("nextMilestone picks the earliest-dated open milestone", () => {
