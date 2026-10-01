@@ -11,6 +11,7 @@ import {
   attentionSummary,
   DONE_STATE,
   formatPValue,
+  projectIdentity,
   projectState,
   type AttentionItem,
 } from "@/lib/overview";
@@ -543,8 +544,7 @@ async function ProjectsSection({ today }: { today: string }) {
       return {
         key: p.key,
         href: `/projects/${p.key}`,
-        name: p.name,
-        description: p.shortPurpose,
+        ...projectIdentity(p, overview),
         owner: overview ? overview.lead : null,
         state: projectState(overview, today),
         available: Boolean(overview),

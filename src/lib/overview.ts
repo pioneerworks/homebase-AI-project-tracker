@@ -46,6 +46,20 @@ export function projectState(
   return { key, label: STATE_LABELS[key], lateDays: key === "overdue" ? lateDays : 0 };
 }
 
+/**
+ * Name and one-line summary for a project row: Linear's live values, falling
+ * back to the tracker's hardcoded copy when Linear is unavailable or blank.
+ */
+export function projectIdentity(
+  fallback: { name: string; shortPurpose: string },
+  overview: Pick<ProjectOverview, "name" | "description"> | null,
+): { name: string; description: string } {
+  return {
+    name: overview?.name?.trim() || fallback.name,
+    description: overview?.description?.trim() || fallback.shortPurpose,
+  };
+}
+
 export const DONE_STATE: ProjectState = { key: "done", label: STATE_LABELS.done, lateDays: 0 };
 
 export type AttentionItem = {

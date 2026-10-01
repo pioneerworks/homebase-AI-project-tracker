@@ -6,6 +6,7 @@ import {
   attentionItems,
   attentionSummary,
   initials,
+  projectIdentity,
   projectState,
   type AttentionProject,
 } from "../src/lib/overview";
@@ -132,4 +133,20 @@ test("projectState: a dated open milestone wins over an undated one", () => {
 test("projectState: tolerates a relay payload without milestones", () => {
   const legacy = { health: "onTrack", milestones: undefined } as unknown as ProjectOverview;
   assert.equal(projectState(legacy, "2026-09-28").key, "onTrack");
+});
+
+test("projectIdentity prefers Linear's live name and summary", () => {
+  const fallback = { name: "A/B testing | Experimentation", shortPurpose: "Old blurb." };
+  assert.deepEqual(
+    projectIdentity(fallback, { name: "A/B testing", description: "Building the environment." }),
+    { name: "A/B testing", description: "Building the environment." },
+  );
+});
+
+test("projectIdentity falls back to the tracker copy when Linear is missing or blank", () => {
+  const fallback = { name: "A/B testing | Experimentation", shortPurpose: "Old blurb." };
+  const expected = { name: fallback.name, description: fallback.shortPurpose };
+  assert.deepEqual(projectIdentity(fallback, null), expected);
+  assert.deepEqual(projectIdentity(fallback, { name: "  ", description: null }), expected);
+  assert.deepEqual(projectIdentity(fallback, { name: "", description: "   " }), expected);
 });
