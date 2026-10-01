@@ -193,20 +193,20 @@ test("getAmplitudeFunnel: a 404 is cached as a failure, then retried after the T
   assert.equal(calls, 2);
 });
 
-test("getAmplitudeFunnel: a stalled export times out and is cached as a failure", async () => {
+test("getAmplitudeFunnel: a stalled request times out and is cached as a failure", async () => {
   const counter = { calls: 0 };
   globalThis.fetch = stallBeforeHeaders(counter);
   await within(1_000, () =>
-    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Export API timed out after 50ms/),
+    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Dashboard API timed out after 50ms/),
   );
   await assert.rejects(getAmplitudeFunnel(env, 1_000), /timed out/);
   assert.equal(counter.calls, 1);
 });
 
-test("getAmplitudeFunnel: a stalled export body times out", async () => {
+test("getAmplitudeFunnel: a stalled response body times out", async () => {
   globalThis.fetch = stallMidBody();
   await within(1_000, () =>
-    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Export API timed out after 50ms/),
+    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Dashboard API timed out after 50ms/),
   );
 });
 

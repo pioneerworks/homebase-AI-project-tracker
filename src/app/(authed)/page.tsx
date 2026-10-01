@@ -497,7 +497,7 @@ async function ChartSection({ today }: { today: string }) {
           a day to see which PRs merged and how each was classified. A <code>page-touch</code> or{" "}
           <code>infra</code> GitHub label overrides the heuristic.
           {signupSeries.source === "amplitude"
-            ? ` Signups (${signupEvent}) and traffic are live from the Amplitude Export API (unique users); days before the live window come from the captured snapshot.`
+            ? ` Signups (${signupEvent}) and traffic are live from the Amplitude funnel (unique users); days before the live window come from the captured snapshot.`
             : signupSeries.source === "omni"
               ? " Signups are live from Omni."
               : " Signups and traffic come from the captured Amplitude funnel (Page Viewed with product_area mw_ → Owner Account Created, unique users). Owner Account Created was first tracked on Jun 26, so the series starts Jun 27."}

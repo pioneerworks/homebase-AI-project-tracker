@@ -10,7 +10,6 @@
     "test": "tsx --conditions=react-server --test test/**/*.test.ts"
   },
   "dependencies": {
-    "fflate": "^0.8.3",
     "jose": "6.2.3",
     "lucide-react": "^1.48.0",
     "next": "16.2.12",
