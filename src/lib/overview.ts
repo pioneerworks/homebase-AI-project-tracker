@@ -47,16 +47,16 @@ export function projectState(
 }
 
 /**
- * Name and one-line summary for a project row: Linear's live values, falling
- * back to the tracker's hardcoded copy when Linear is unavailable or blank.
+ * Name and one-line summary for a project row, straight from Linear. With no
+ * Linear data there is no hardcoded copy: the row shows its key and no summary.
  */
 export function projectIdentity(
-  fallback: { name: string; shortPurpose: string },
+  key: string,
   overview: Pick<ProjectOverview, "name" | "description"> | null,
 ): { name: string; description: string } {
   return {
-    name: overview?.name?.trim() || fallback.name,
-    description: overview?.description?.trim() || fallback.shortPurpose,
+    name: overview?.name?.trim() || key,
+    description: overview?.description?.trim() ?? "",
   };
 }
 
@@ -72,7 +72,8 @@ export type AttentionItem = {
 
 export type AttentionProject = {
   key: string;
-  shortName: string;
+  /** Linear project name */
+  name: string;
   overview: ProjectOverview | null;
   state: ProjectState;
 };
@@ -111,7 +112,7 @@ export function attentionItems(
       if (p.state.key === "overdue" && next) {
         return {
           kind: "overdue",
-          title: `${p.shortName} · ${next.name}`,
+          title: `${p.name} · ${next.name}`,
           meta: `Due ${formatDay(next.targetDate!)} · ${next.progress}% done`,
           href,
           external: false,
@@ -119,7 +120,7 @@ export function attentionItems(
       }
       return {
         kind: "health",
-        title: `${p.shortName} is ${p.state.label.toLowerCase()}`,
+        title: `${p.name} is ${p.state.label.toLowerCase()}`,
         meta: next ? `Next: ${next.name} · ${next.progress}% done` : "Health set in Linear",
         href,
         external: false,

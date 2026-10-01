@@ -1,91 +1,63 @@
+/**
+ * Which Linear projects the hub tracks. Only identifiers live here: every
+ * name, summary, lead, link and date shown on the hub is read from Linear.
+ */
 export type TrackerProject = {
+  /** URL key for /projects/[key] */
   key: string;
-  name: string;
-  /** Sidebar and alert label */
-  shortName: string;
   linearSlugId: string;
-  linearUrl: string;
-  status: "active" | "done";
-  shortPurpose: string;
+  /** GitHub repos whose merges feed the impact chart */
   repos: string[];
+};
+
+export type DoneProject = {
+  key: string;
+  linearSlugId: string;
+  /** In-app page kept for reference */
+  href: string;
 };
 
 export const TRACKER_PROJECTS: TrackerProject[] = [
   {
     key: "marketing-site-execution-agents",
-    shortName: "Marketing site agents",
-    name: "Marketing site execution agents",
     linearSlugId: "c5b9ca95167e",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/marketing-site-execution-agents-c5b9ca95167e/overview",
-    status: "active",
-    shortPurpose:
-      "Agent-run execution on the marketing site across the Atrium and Culina agent fleets — shipping page work, fixes, and experiments at scale.",
     repos: ["marketing-site-payload"],
   },
   {
     key: "ab-testing",
-    shortName: "A/B testing",
-    name: "A/B testing | Experimentation",
     linearSlugId: "d9f5d074ffc1",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/ab-testing-d9f5d074ffc1/overview",
-    status: "active",
-    shortPurpose:
-      "Experimentation program: A/B tests on landing pages and signup flows to move conversion.",
     repos: ["marketing-site-payload"],
   },
   {
     key: "launch-more-tool-pages",
-    shortName: "Tool pages",
-    name: "Launch more tool pages",
     linearSlugId: "d03b951404ed",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/launch-more-tool-pages-d03b951404ed/overview",
-    status: "active",
-    shortPurpose:
-      "Ship one or two new or rebuilt tool pages every two weeks, then automate their post-publish distribution and monitoring.",
     repos: ["marketing-site-payload"],
   },
   {
     key: "unlock-agentic-design-content",
-    shortName: "Agentic design",
-    name: "Unlock agentic design/content capabilities",
     linearSlugId: "b12b50221653",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/unlock-agentic-designcontent-capabilities-b12b50221653/overview",
-    status: "active",
-    shortPurpose:
-      "Make Figma the front door to the agent pipeline, with a master brand-safe design file as the source of truth for agent work.",
     repos: ["marketing-site-payload"],
   },
   {
     key: "payload-admin-rebuild",
-    shortName: "Payload admin rebuild",
-    name: "Payload admin rebuild — from stock Payload to Braveen's design",
     linearSlugId: "098422f41fd9",
-    linearUrl:
-      "https://linear.app/joinhomebase/project/payload-admin-rebuild-from-stock-payload-to-braveens-design-098422f41fd9/overview",
-    status: "active",
-    shortPurpose:
-      "Rebuild the Payload admin panel from the stock CMS to Braveen's design so editors get a purpose-built workspace.",
     repos: ["marketing-site-payload"],
   },
 ];
 
-export const DONE_PROJECTS = [
+export const DONE_PROJECTS: DoneProject[] = [
   {
     key: "migration",
-    name: "Marketing site migration",
+    linearSlugId: "97fe44f106cb",
     href: "/migration",
-    shortName: "Marketing site migration",
-    lead: "Brian Nguyen",
-    summary: "Webflow → Payload migration of joinhomebase.com",
-    blurb:
-      "joinhomebase.com migration progress, URL parity, and hosting cutover — completed. Kept for reference.",
   },
-] as const;
+];
 
 export function trackerProject(key: string): TrackerProject | undefined {
   return TRACKER_PROJECTS.find((p) => p.key === key);
+}
+
+/** Any hub project, active or done, by key. */
+export function linearProject(key: string): TrackerProject | DoneProject | undefined {
+  return trackerProject(key) ?? DONE_PROJECTS.find((p) => p.key === key);
 }

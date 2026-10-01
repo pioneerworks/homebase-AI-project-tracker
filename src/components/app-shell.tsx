@@ -9,31 +9,45 @@ import type { ProjectStateKey } from "@/lib/overview";
 import { initials, STATE_LABELS } from "@/lib/overview";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
+/** Project key → Linear name and display state, for the sidebar. */
+export type SidebarProjects = Record<string, { name: string; state: ProjectStateKey }>;
+
 type Props = {
   user: { name: string; email: string } | null;
-  /** Project key → display state, for the sidebar dots. */
-  projectStates: Promise<Record<string, ProjectStateKey>>;
+  projects: Promise<SidebarProjects>;
 };
 
-function StateDot({
+function ProjectLabel({
   projectKey,
-  states,
+  projects,
 }: {
   projectKey: string;
-  states: Promise<Record<string, ProjectStateKey>>;
+  projects: Promise<SidebarProjects>;
 }) {
-  const key = use(states)[projectKey] ?? "none";
+  const project = use(projects)[projectKey];
+  const state = project?.state ?? "none";
   return (
     <>
-      <span className={`state-dot state-dot-${key}`} aria-hidden="true" title={STATE_LABELS[key]} />
-      <span className="sr-only">{STATE_LABELS[key]}: </span>
+      <span className={`state-dot state-dot-${state}`} aria-hidden="true" title={STATE_LABELS[state]} />
+      <span className="sr-only">{STATE_LABELS[state]}: </span>
+      {project?.name ?? projectKey}
+    </>
+  );
+}
+
+function ProjectLabelFallback() {
+  return (
+    <>
+      <span className="state-dot state-dot-none" aria-hidden="true" />
+      <span className="skeleton-line skeleton-line-md" aria-hidden="true" />
+      <span className="sr-only">Loading project…</span>
     </>
   );
 }
 
 export default function AppShell({
   user,
-  projectStates,
+  projects,
   children,
 }: Props & { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -98,12 +112,9 @@ export default function AppShell({
                   aria-current={isActive(`/projects/${p.key}`) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <Suspense
-                    fallback={<span className="state-dot state-dot-none" aria-hidden="true" />}
-                  >
-                    <StateDot projectKey={p.key} states={projectStates} />
+                  <Suspense fallback={<ProjectLabelFallback />}>
+                    <ProjectLabel projectKey={p.key} projects={projects} />
                   </Suspense>
-                  {p.shortName}
                 </Link>
               ))}
             </div>
@@ -120,9 +131,9 @@ export default function AppShell({
                   aria-current={isActive(p.href) ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <span className="state-dot state-dot-done" aria-hidden="true" />
-                  <span className="sr-only">Done: </span>
-                  {p.shortName}
+                  <Suspense fallback={<ProjectLabelFallback />}>
+                    <ProjectLabel projectKey={p.key} projects={projects} />
+                  </Suspense>
                 </Link>
               ))}
             </div>

@@ -1,9 +1,10 @@
 import AppShell from "@/components/app-shell";
 import { getSessionUser } from "@/lib/oidc-session";
-import { projectState, type ProjectStateKey } from "@/lib/overview";
+import { projectIdentity, projectState } from "@/lib/overview";
+import type { SidebarProjects } from "@/components/app-shell";
 import { torontoToday } from "@/lib/standup";
-import { getTrackerOverviews } from "@/lib/tracker-overviews";
-import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
+import { getDoneOverviews, getTrackerOverviews } from "@/lib/tracker-overviews";
+import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import type { ReactNode } from "react";
 
 /**
@@ -14,8 +15,9 @@ import type { ReactNode } from "react";
  * bare: each page still runs its own session check and redirects to /login
  * with its own callback URL.
  *
- * The sidebar's project-state dots stream in: the promise is handed to the
- * client unresolved so Linear latency never blocks the shell.
+ * The sidebar's project names and state dots come from Linear and stream in:
+ * the promise is handed to the client unresolved so Linear latency never
+ * blocks the shell.
  */
 export default async function AuthedLayout({
   children,
@@ -24,18 +26,30 @@ export default async function AuthedLayout({
 }) {
   const user = await getSessionUser();
   if (!user) return children;
-  const projectStates = getTrackerOverviews().then((overviews) => {
-    const today = torontoToday();
-    return Object.fromEntries(
-      TRACKER_PROJECTS.map((p, i) => [p.key, projectState(overviews[i], today).key]),
-    ) as Record<string, ProjectStateKey>;
-  }).catch((error) => {
-    // dots fall back to grey rather than taking down the shell
-    console.log("[sidebar] project states failed:", error instanceof Error ? error.message : error);
-    return {} as Record<string, ProjectStateKey>;
-  });
+  const projects: Promise<SidebarProjects> = Promise.all([
+    getTrackerOverviews(),
+    getDoneOverviews(),
+  ])
+    .then(([active, done]) => {
+      const today = torontoToday();
+      return Object.fromEntries([
+        ...TRACKER_PROJECTS.map((p, i) => [
+          p.key,
+          { name: projectIdentity(p.key, active[i]).name, state: projectState(active[i], today).key },
+        ]),
+        ...DONE_PROJECTS.map((p, i) => [
+          p.key,
+          { name: projectIdentity(p.key, done[i]).name, state: "done" },
+        ]),
+      ]) as SidebarProjects;
+    })
+    .catch((error) => {
+      // labels fall back to keys and dots to grey rather than taking down the shell
+      console.log("[sidebar] Linear projects failed:", error instanceof Error ? error.message : error);
+      return {} as SidebarProjects;
+    });
   return (
-    <AppShell user={user} projectStates={projectStates}>
+    <AppShell user={user} projects={projects}>
       {children}
     </AppShell>
   );

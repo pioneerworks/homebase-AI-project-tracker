@@ -6,7 +6,7 @@ import { clearProjectOverviewCache, getProjectOverview } from "@/lib/linear-proj
 import { getSignupSeries } from "@/lib/omni";
 import { refreshSnapshot } from "@/lib/linear";
 import { SNAPSHOT_TAG } from "@/lib/projects";
-import { TRACKER_PROJECTS } from "@/lib/tracker-projects";
+import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
     // fail the refresh.
     const warmed = await Promise.allSettled([
       ...repos.map((repo) => fetchMergedPrs(repo)),
-      ...TRACKER_PROJECTS.map((p) => getProjectOverview(p.linearSlugId, p.key)),
+      ...[...TRACKER_PROJECTS, ...DONE_PROJECTS].map((p) =>
+        getProjectOverview(p.linearSlugId, p.key),
+      ),
       getSignupSeries(),
     ]);
     const warmFailures = warmed.filter(

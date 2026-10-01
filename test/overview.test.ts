@@ -81,11 +81,11 @@ test("projectState: completed milestones are never overdue", () => {
 test("attentionItems: losing experiments first, then flagged projects in order", () => {
   const today = "2026-09-28";
   const projects: AttentionProject[] = [
-    { key: "a", shortName: "Agents", overview: overview({ milestones: [] }), state: projectState(overview({ milestones: [] }), today) },
-    { key: "b", shortName: "A/B testing", overview: overview(), state: projectState(overview(), today) },
+    { key: "a", name: "Agents", overview: overview({ milestones: [] }), state: projectState(overview({ milestones: [] }), today) },
+    { key: "b", name: "A/B testing", overview: overview(), state: projectState(overview(), today) },
     {
       key: "c",
-      shortName: "Tools",
+      name: "Tools",
       overview: overview({ health: "offTrack", milestones: [] }),
       state: projectState(overview({ health: "offTrack", milestones: [] }), today),
     },
@@ -109,7 +109,7 @@ test("attentionItems: losing experiments first, then flagged projects in order",
 
 test("attentionItems: no experiments and healthy projects means nothing to flag", () => {
   const projects: AttentionProject[] = [
-    { key: "a", shortName: "Agents", overview: null, state: projectState(null, "2026-09-28") },
+    { key: "a", name: "Agents", overview: null, state: projectState(null, "2026-09-28") },
   ];
   assert.deepEqual(attentionItems(null, projects, fmt), []);
 });
@@ -135,18 +135,17 @@ test("projectState: tolerates a relay payload without milestones", () => {
   assert.equal(projectState(legacy, "2026-09-28").key, "onTrack");
 });
 
-test("projectIdentity prefers Linear's live name and summary", () => {
-  const fallback = { name: "A/B testing | Experimentation", shortPurpose: "Old blurb." };
+test("projectIdentity uses Linear's live name and summary", () => {
   assert.deepEqual(
-    projectIdentity(fallback, { name: "A/B testing", description: "Building the environment." }),
+    projectIdentity("ab-testing", { name: " A/B testing ", description: " Building the environment. " }),
     { name: "A/B testing", description: "Building the environment." },
   );
 });
 
-test("projectIdentity falls back to the tracker copy when Linear is missing or blank", () => {
-  const fallback = { name: "A/B testing | Experimentation", shortPurpose: "Old blurb." };
-  const expected = { name: fallback.name, description: fallback.shortPurpose };
-  assert.deepEqual(projectIdentity(fallback, null), expected);
-  assert.deepEqual(projectIdentity(fallback, { name: "  ", description: null }), expected);
-  assert.deepEqual(projectIdentity(fallback, { name: "", description: "   " }), expected);
+test("projectIdentity has no hardcoded copy to fall back to", () => {
+  assert.deepEqual(projectIdentity("ab-testing", null), { name: "ab-testing", description: "" });
+  assert.deepEqual(projectIdentity("ab-testing", { name: "  ", description: null }), {
+    name: "ab-testing",
+    description: "",
+  });
 });

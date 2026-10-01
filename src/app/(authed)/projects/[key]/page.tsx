@@ -2,6 +2,7 @@ import MilestoneIssues from "@/components/milestone-issues";
 import HealthPill from "@/components/health-pill";
 import { getProjectOverview } from "@/lib/linear-projects";
 import { getSessionUser } from "@/lib/oidc-session";
+import { projectIdentity } from "@/lib/overview";
 import { torontoToday } from "@/lib/standup";
 import { trackerProject, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 import { redirect } from "next/navigation";
@@ -139,7 +140,8 @@ export default async function ProjectPage({
     error = e instanceof Error ? e.message : "Unknown error fetching Linear data";
   }
 
-  const purpose = overview?.description?.trim() || project.shortPurpose;
+  const { name, description: purpose } = projectIdentity(project.key, overview);
+  const linearUrl = overview?.url ?? null;
   const latest = overview?.updates[0];
   // No project update posted yet: fall back to the brief its creators wrote.
   const brief = overview?.content ?? null;
@@ -148,13 +150,18 @@ export default async function ProjectPage({
     <div className="page">
       <header className="hero">
         <p className="hero-eyebrow">
-          Active project ·{" "}
-          <a href={project.linearUrl} target="_blank" rel="noreferrer">
-            Open in Linear ↗
-          </a>
+          Active project
+          {linearUrl && (
+            <>
+              {" "}·{" "}
+              <a href={linearUrl} target="_blank" rel="noreferrer">
+                Open in Linear ↗
+              </a>
+            </>
+          )}
         </p>
-        <h1>{overview?.name ?? project.name}</h1>
-        <p className="hero-copy">{purpose}</p>
+        <h1>{name}</h1>
+        {purpose && <p className="hero-copy">{purpose}</p>}
       </header>
 
       {error && (
@@ -212,7 +219,7 @@ export default async function ProjectPage({
             <section className="section" aria-label="Project brief">
               <div className="section-head">
                 <h2>Project brief</h2>
-                <a href={project.linearUrl} target="_blank" rel="noreferrer">
+                <a href={overview.url} target="_blank" rel="noreferrer">
                   View in Linear ↗
                 </a>
               </div>
