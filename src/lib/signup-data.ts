@@ -11,7 +11,7 @@
  * series starts on its first full day, 2026-06-27. Today's incomplete
  * interval is excluded.
  *
- * When the AMPLITUDE_* Export keys work or OMNI_* lands, a live query
+ * When the AMPLITUDE_* keys work or OMNI_* lands, a live query
  * supersedes this snapshot; until then this is the real series.
  */
 import rawHistory from "@/data/signup-history.json";
