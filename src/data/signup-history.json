@@ -2,7 +2,7 @@
 {
 "date": "2026-06-27",
 "signups": 118,
-"traffic": 12838,
+"traffic": 12839,
 "rate": 0.0092
 },
 {
@@ -14,25 +14,25 @@
 {
 "date": "2026-06-29",
 "signups": 188,
-"traffic": 21286,
+"traffic": 21288,
 "rate": 0.0088
 },
 {
 "date": "2026-06-30",
 "signups": 162,
-"traffic": 18582,
+"traffic": 18583,
 "rate": 0.0087
 },
 {
 "date": "2026-07-01",
 "signups": 167,
-"traffic": 19491,
+"traffic": 19492,
 "rate": 0.0086
 },
 {
 "date": "2026-07-02",
 "signups": 151,
-"traffic": 17903,
+"traffic": 17904,
 "rate": 0.0084
 },
 {
@@ -56,7 +56,7 @@
 {
 "date": "2026-07-06",
 "signups": 125,
-"traffic": 18897,
+"traffic": 18899,
 "rate": 0.0066
 },
 {
@@ -68,25 +68,25 @@
 {
 "date": "2026-07-08",
 "signups": 175,
-"traffic": 18618,
+"traffic": 18619,
 "rate": 0.0094
 },
 {
 "date": "2026-07-09",
 "signups": 131,
-"traffic": 11453,
+"traffic": 11454,
 "rate": 0.0114
 },
 {
 "date": "2026-07-10",
 "signups": 105,
-"traffic": 11046,
+"traffic": 11048,
 "rate": 0.0095
 },
 {
 "date": "2026-07-11",
 "signups": 67,
-"traffic": 7182,
+"traffic": 7185,
 "rate": 0.0093
 },
 {
@@ -98,31 +98,31 @@
 {
 "date": "2026-07-13",
 "signups": 107,
-"traffic": 12835,
+"traffic": 12837,
 "rate": 0.0083
 },
 {
 "date": "2026-07-14",
 "signups": 163,
-"traffic": 16544,
+"traffic": 16548,
 "rate": 0.0099
 },
 {
 "date": "2026-07-15",
 "signups": 92,
-"traffic": 12360,
+"traffic": 12362,
 "rate": 0.0074
 },
 {
 "date": "2026-07-16",
 "signups": 155,
-"traffic": 11921,
+"traffic": 11924,
 "rate": 0.013
 },
 {
 "date": "2026-07-17",
 "signups": 162,
-"traffic": 11258,
+"traffic": 11260,
 "rate": 0.0144
 },
 {
@@ -140,31 +140,31 @@
 {
 "date": "2026-07-20",
 "signups": 159,
-"traffic": 12787,
+"traffic": 12791,
 "rate": 0.0124
 },
 {
 "date": "2026-07-21",
 "signups": 140,
-"traffic": 12272,
+"traffic": 12275,
 "rate": 0.0114
 },
 {
 "date": "2026-07-22",
 "signups": 171,
-"traffic": 12409,
+"traffic": 12410,
 "rate": 0.0138
 },
 {
 "date": "2026-07-23",
 "signups": 156,
-"traffic": 12081,
+"traffic": 12083,
 "rate": 0.0129
 },
 {
 "date": "2026-07-24",
 "signups": 126,
-"traffic": 13075,
+"traffic": 13078,
 "rate": 0.0096
 },
 {
@@ -182,7 +182,7 @@
 {
 "date": "2026-07-27",
 "signups": 164,
-"traffic": 21986,
+"traffic": 21989,
 "rate": 0.0075
 },
 {
@@ -194,7 +194,7 @@
 {
 "date": "2026-07-29",
 "signups": 140,
-"traffic": 14111,
+"traffic": 14113,
 "rate": 0.0099
 },
 {
@@ -212,7 +212,7 @@
 {
 "date": "2026-08-01",
 "signups": 97,
-"traffic": 8453,
+"traffic": 8454,
 "rate": 0.0115
 },
 {
@@ -230,73 +230,73 @@
 {
 "date": "2026-08-04",
 "signups": 168,
-"traffic": 15786,
+"traffic": 15791,
 "rate": 0.0106
 },
 {
 "date": "2026-08-05",
 "signups": 178,
-"traffic": 13205,
+"traffic": 13209,
 "rate": 0.0135
 },
 {
 "date": "2026-08-06",
 "signups": 161,
-"traffic": 13103,
+"traffic": 13105,
 "rate": 0.0123
 },
 {
 "date": "2026-08-07",
 "signups": 157,
-"traffic": 12777,
+"traffic": 12779,
 "rate": 0.0123
 },
 {
 "date": "2026-08-08",
 "signups": 70,
-"traffic": 7970,
+"traffic": 7971,
 "rate": 0.0088
 },
 {
 "date": "2026-08-09",
 "signups": 83,
-"traffic": 7643,
+"traffic": 7644,
 "rate": 0.0109
 },
 {
 "date": "2026-08-10",
 "signups": 174,
-"traffic": 15456,
+"traffic": 15461,
 "rate": 0.0113
 },
 {
 "date": "2026-08-11",
 "signups": 175,
-"traffic": 13600,
+"traffic": 13603,
 "rate": 0.0129
 },
 {
 "date": "2026-08-12",
 "signups": 178,
-"traffic": 14461,
+"traffic": 14462,
 "rate": 0.0123
 },
 {
 "date": "2026-08-13",
 "signups": 178,
-"traffic": 13678,
+"traffic": 13681,
 "rate": 0.013
 },
 {
 "date": "2026-08-14",
 "signups": 169,
-"traffic": 12773,
+"traffic": 12775,
 "rate": 0.0132
 },
 {
 "date": "2026-08-15",
 "signups": 111,
-"traffic": 8589,
+"traffic": 8590,
 "rate": 0.0129
 },
 {
@@ -308,25 +308,25 @@
 {
 "date": "2026-08-17",
 "signups": 186,
-"traffic": 15645,
+"traffic": 15648,
 "rate": 0.0119
 },
 {
 "date": "2026-08-18",
 "signups": 206,
-"traffic": 16124,
+"traffic": 16125,
 "rate": 0.0128
 },
 {
 "date": "2026-08-19",
 "signups": 183,
-"traffic": 17173,
+"traffic": 17177,
 "rate": 0.0107
 },
 {
 "date": "2026-08-20",
 "signups": 192,
-"traffic": 17897,
+"traffic": 17904,
 "rate": 0.0107
 },
 {
@@ -338,211 +338,211 @@
 {
 "date": "2026-08-22",
 "signups": 94,
-"traffic": 8625,
+"traffic": 8627,
 "rate": 0.0109
 },
 {
 "date": "2026-08-23",
 "signups": 114,
-"traffic": 7837,
+"traffic": 7839,
 "rate": 0.0145
 },
 {
 "date": "2026-08-24",
 "signups": 187,
-"traffic": 15165,
+"traffic": 15168,
 "rate": 0.0123
 },
 {
 "date": "2026-08-25",
 "signups": 225,
-"traffic": 16070,
+"traffic": 16074,
 "rate": 0.014
 },
 {
 "date": "2026-08-26",
 "signups": 233,
-"traffic": 18782,
+"traffic": 18787,
 "rate": 0.0124
 },
 {
 "date": "2026-08-27",
 "signups": 209,
-"traffic": 19151,
+"traffic": 19156,
 "rate": 0.0109
 },
 {
 "date": "2026-08-28",
 "signups": 220,
-"traffic": 18879,
+"traffic": 18883,
 "rate": 0.0117
 },
 {
 "date": "2026-08-29",
 "signups": 145,
-"traffic": 15115,
+"traffic": 15119,
 "rate": 0.0096
 },
 {
 "date": "2026-08-30",
 "signups": 121,
-"traffic": 13663,
+"traffic": 13669,
 "rate": 0.0089
 },
 {
 "date": "2026-08-31",
 "signups": 243,
-"traffic": 22117,
+"traffic": 22127,
 "rate": 0.011
 },
 {
 "date": "2026-09-01",
 "signups": 247,
-"traffic": 21339,
+"traffic": 21347,
 "rate": 0.0116
 },
 {
 "date": "2026-09-02",
 "signups": 241,
-"traffic": 20731,
+"traffic": 20737,
 "rate": 0.0116
 },
 {
 "date": "2026-09-03",
 "signups": 226,
-"traffic": 19688,
+"traffic": 19695,
 "rate": 0.0115
 },
 {
 "date": "2026-09-04",
 "signups": 196,
-"traffic": 18803,
+"traffic": 18808,
 "rate": 0.0104
 },
 {
 "date": "2026-09-05",
 "signups": 145,
-"traffic": 12766,
+"traffic": 12768,
 "rate": 0.0114
 },
 {
 "date": "2026-09-06",
 "signups": 99,
-"traffic": 12550,
+"traffic": 12553,
 "rate": 0.0079
 },
 {
 "date": "2026-09-07",
 "signups": 152,
-"traffic": 14956,
+"traffic": 14960,
 "rate": 0.0102
 },
 {
 "date": "2026-09-08",
 "signups": 207,
-"traffic": 19667,
+"traffic": 19675,
 "rate": 0.0105
 },
 {
 "date": "2026-09-09",
 "signups": 231,
-"traffic": 19689,
+"traffic": 19694,
 "rate": 0.0117
 },
 {
 "date": "2026-09-10",
 "signups": 213,
-"traffic": 20423,
+"traffic": 20436,
 "rate": 0.0104
 },
 {
 "date": "2026-09-11",
 "signups": 194,
-"traffic": 19245,
+"traffic": 19252,
 "rate": 0.0101
 },
 {
 "date": "2026-09-12",
 "signups": 125,
-"traffic": 14377,
+"traffic": 14382,
 "rate": 0.0087
 },
 {
 "date": "2026-09-13",
 "signups": 120,
-"traffic": 14273,
+"traffic": 14276,
 "rate": 0.0084
 },
 {
 "date": "2026-09-14",
 "signups": 222,
-"traffic": 20373,
+"traffic": 20386,
 "rate": 0.0109
 },
 {
 "date": "2026-09-15",
 "signups": 223,
-"traffic": 20055,
+"traffic": 20069,
 "rate": 0.0111
 },
 {
 "date": "2026-09-16",
 "signups": 221,
-"traffic": 21164,
+"traffic": 21183,
 "rate": 0.0104
 },
 {
 "date": "2026-09-17",
 "signups": 217,
-"traffic": 19440,
-"rate": 0.0112
+"traffic": 19470,
+"rate": 0.0111
 },
 {
 "date": "2026-09-18",
 "signups": 170,
-"traffic": 17804,
+"traffic": 17821,
 "rate": 0.0095
 },
 {
 "date": "2026-09-19",
 "signups": 129,
-"traffic": 13767,
+"traffic": 13769,
 "rate": 0.0094
 },
 {
 "date": "2026-09-20",
 "signups": 117,
-"traffic": 14498,
+"traffic": 14508,
 "rate": 0.0081
 },
 {
 "date": "2026-09-21",
 "signups": 213,
-"traffic": 20602,
+"traffic": 20631,
 "rate": 0.0103
 },
 {
 "date": "2026-09-22",
 "signups": 177,
-"traffic": 19301,
+"traffic": 19323,
 "rate": 0.0092
 },
 {
 "date": "2026-09-23",
 "signups": 200,
-"traffic": 22016,
+"traffic": 22046,
 "rate": 0.0091
 },
 {
 "date": "2026-09-24",
 "signups": 198,
-"traffic": 20544,
+"traffic": 20567,
 "rate": 0.0096
 },
 {
 "date": "2026-09-25",
 "signups": 185,
-"traffic": 18967,
+"traffic": 18968,
 "rate": 0.0098
 },
 {
@@ -554,25 +554,31 @@
 {
 "date": "2026-09-27",
 "signups": 122,
-"traffic": 14659,
+"traffic": 14660,
 "rate": 0.0083
 },
 {
 "date": "2026-09-28",
 "signups": 232,
-"traffic": 21989,
-"rate": 0.0106
+"traffic": 21991,
+"rate": 0.0105
 },
 {
 "date": "2026-09-29",
 "signups": 250,
-"traffic": 20840,
+"traffic": 20839,
 "rate": 0.012
 },
 {
 "date": "2026-09-30",
-"signups": 252,
-"traffic": 20807,
-"rate": 0.0121
+"signups": 253,
+"traffic": 20804,
+"rate": 0.0122
+},
+{
+"date": "2026-10-01",
+"signups": 236,
+"traffic": 23548,
+"rate": 0.01
 }
 ]
