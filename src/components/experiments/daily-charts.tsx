@@ -127,7 +127,13 @@ function DailyBarChart({
             cursor={{ fill: "rgb(30 11 58 / 0.04)" }}
             content={<DayTooltip daily={daily} showRate={showRate} />}
           />
-          <Bar dataKey="control" fill={ARM_COLORS.control} barSize={14} radius={[2, 2, 0, 0]}>
+          <Bar
+            dataKey="control"
+            fill={ARM_COLORS.control}
+            barSize={14}
+            radius={[2, 2, 0, 0]}
+            isAnimationActive={false}
+          >
             <LabelList
               dataKey="control"
               position="top"
@@ -137,7 +143,13 @@ function DailyBarChart({
               formatter={countLabel}
             />
           </Bar>
-          <Bar dataKey="test" fill={ARM_COLORS.test} barSize={14} radius={[2, 2, 0, 0]}>
+          <Bar
+            dataKey="test"
+            fill={ARM_COLORS.test}
+            barSize={14}
+            radius={[2, 2, 0, 0]}
+            isAnimationActive={false}
+          >
             <LabelList
               dataKey="test"
               position="top"

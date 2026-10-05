@@ -94,7 +94,9 @@ export default function ExperimentsView({
 
   const hrefForView = (v: View) => `/experiments?view=${v}${surface ? `&surface=${surface}` : ""}`;
   const setView = (v: View) => (event: MouseEvent<HTMLButtonElement>) => {
-    event.currentTarget.blur();
+    // Pointer clicks only: blurring on keyboard activation (event.detail === 0)
+    // would drop focus right after the user tabbed to the tab.
+    if (event.detail > 0) event.currentTarget.blur();
     router.replace(hrefForView(v), { scroll: false });
   };
 

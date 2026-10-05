@@ -279,29 +279,41 @@ async function loadDetail(id: string, apiKey: string, now: number): Promise<Expe
   const srmResult = exposures ? srm([exposures.control, exposures.test], item.targetSplit) : null;
 
   // Daily exposures come from the full cumulative series (so the first kept
-  // day still has a correct delta); the dated pulses cover its last 28 days.
+  // day still has a correct delta). Dated pulses are cumulative too, so when
+  // the window is shorter than the series the day just before it is fetched
+  // as a baseline; the diff then runs over the full requested series before
+  // the result is sliced to the last 28 days.
   const controlDaily = dailyFromCumulative(controlSeries);
   const testDaily = dailyFromCumulative(testSeries);
   const dates = controlDaily.map((point) => point.date).slice(-DETAIL_DAYS);
+  const pulseDates =
+    controlDaily.length > DETAIL_DAYS ? [shiftDate(dates[0], -1), ...dates] : dates;
 
-  const signups = await signupsForDates(apiKey, id, controlId, testId, dates);
+  const signups = await signupsForDates(apiKey, id, controlId, testId, pulseDates);
   if (!signups) return { id, exposures, srm: srmResult, daily: null };
 
+  // Drop the baseline day's pseudo-delta so the kept window starts at a real one.
+  const skip = pulseDates.length - dates.length;
   const daily: DailyPoint[] = dates.map((date, index) => ({
     date,
     exposures: {
       control: controlDaily.find((point) => point.date === date)?.value ?? 0,
       test: testDaily.find((point) => point.date === date)?.value ?? 0,
     },
-    signups: { control: signups.control[index], test: signups.test[index] },
+    signups: {
+      control: signups.control[index + skip],
+      test: signups.test[index + skip],
+    },
   }));
   return { id, exposures, srm: srmResult, daily };
 }
 
 /**
- * Cumulative signups at each requested date, from dated pulse calls run at
- * most DATED_PULSE_CONCURRENCY at a time. Null when any call fails: the daily
- * series needs every day, while exposures and SRM above still stand.
+ * Per-day signup deltas for each requested date, from dated pulse calls run at
+ * most DATED_PULSE_CONCURRENCY at a time. The pulses are cumulative, so the
+ * caller includes a baseline day when needed; diffing happens over the whole
+ * requested series in order. Null when any call fails: the daily series needs
+ * every day, while exposures and SRM above still stand.
  */
 async function signupsForDates(
   apiKey: string,

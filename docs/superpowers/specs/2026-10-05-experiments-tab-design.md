@@ -107,7 +107,7 @@ Follow `HANDOFF.md` §3, §4, §7 and §8, with these changes:
   - The detail call fails: an inline error inside that panel.
   - Daily data fails or is empty: a one-line empty state in block 04.
 - **Export results:** the browser builds a CSV of the rows that are currently filtered, with every table column.
-- **Responsive:** the table scrolls sideways inside its card when the viewport is narrower than 1100px, and Hypothesis | Split stacks below 1100px. Nothing else changes.
+- **Responsive:** the table always scrolls sideways inside its card (`overflow-x: auto`), and the detail panel's Hypothesis | Split row wraps via `flex-wrap` when the fixed-width split block no longer fits. Below 900px the page header stacks and the KPI strip becomes a column. Nothing else changes.
 
 ## Caching and limits
 

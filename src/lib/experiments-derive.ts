@@ -98,7 +98,10 @@ function pathnameOf(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith("/")) return url;
   try {
-    return new URL(url).pathname;
+    const parsed = new URL(url);
+    // Only http(s) URLs have a meaningful path; anything else (javascript:,
+    // data:, …) is never a marketing page.
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.pathname : null;
   } catch {
     return null;
   }
@@ -134,8 +137,9 @@ export function ownerOf(e: ExternalExperimentDto): string | null {
 }
 
 /**
- * Each arm's URL: the arm's `parameterValues.destination_url` when present,
- * otherwise the marketing path on joinhomebase.com for both arms.
+ * Each arm's URL: the arm's `parameterValues.destination_url` when present and
+ * a real https URL (anything else — javascript:, data:, … — is dropped), otherwise
+ * the marketing path on joinhomebase.com for both arms.
  */
 export function armUrls(
   e: ExternalExperimentDto,
@@ -143,10 +147,15 @@ export function armUrls(
 ): { control: string | null; test: string | null } {
   const urlFor = (group: ExternalExperimentDto["groups"][number] | undefined): string | null => {
     const destination = group?.parameterValues?.destination_url;
-    if (typeof destination === "string" && destination) return destination;
+    if (typeof destination === "string" && destination.startsWith("https://")) return destination;
     return path ? `https://www.joinhomebase.com${path}` : null;
   };
   return { control: urlFor(controlGroup(e)), test: urlFor(testGroup(e)) };
+}
+
+/** https URLs only; any other scheme (or empty) is not a link we render. */
+function httpsUrl(url: string | null | undefined): string | null {
+  return url != null && url.startsWith("https://") ? url : null;
 }
 
 function targetSplitOf(e: ExternalExperimentDto): [number, number] {
@@ -173,7 +182,9 @@ function progressLabelOf(
   e: ExternalExperimentDto,
   day: number | null,
 ): string {
-  if (status === "live" && day != null && e.duration != null) return `Day ${day} of ${e.duration}`;
+  if (status === "live" && day != null) {
+    return e.duration != null ? `Day ${day} of ${e.duration}` : `Day ${day}`;
+  }
   if (status === "queued" && e.scheduledStartTime != null) return `Starts ${formatDate(e.scheduledStartTime)}`;
   if (status === "concluded" && e.startTime != null && e.duration != null) {
     return `Ended ${formatDate(e.startTime + e.duration * DAY_MS)}`;
@@ -215,7 +226,7 @@ export function toListItem(
     status,
     primaryMetric: primaryRow?.metricName ?? e.primaryMetrics?.[0]?.name ?? null,
     owner: ownerOf(e),
-    statsigUrl: e.permalink ?? null,
+    statsigUrl: httpsUrl(e.permalink),
     hypothesis: e.hypothesis || null,
     guardrails: guardrails || "—",
     plannedRun: e.duration != null ? `${e.duration} days` : "—",
@@ -230,6 +241,7 @@ export function toListItem(
     totalDays: e.duration ?? null,
     startDate: startMs != null ? isoDate(startMs) : null,
     endDate: startMs != null && e.duration != null ? isoDate(startMs + e.duration * DAY_MS) : null,
+    createdTime: e.createdTime ?? null,
     targetSplit: targetSplitOf(e),
     armUrls: armUrls(e, path),
     armNames: { control: controlGroup(e)?.name ?? "Control", test: testGroup(e)?.name ?? "Test" },
@@ -249,10 +261,13 @@ function byStartDesc(a: string | null, b: string | null): number {
   return a < b ? 1 : -1;
 }
 
-/** live, queued, draft, concluded; newest start first within each group. */
+/** live, queued, draft, concluded; newest start first within each group, createdTime breaking ties. */
 export function sortExperiments(items: ExperimentListItem[]): ExperimentListItem[] {
   return [...items].sort(
-    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || byStartDesc(a.startDate, b.startDate),
+    (a, b) =>
+      STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
+      byStartDesc(a.startDate, b.startDate) ||
+      (b.createdTime ?? 0) - (a.createdTime ?? 0),
   );
 }
 
@@ -447,7 +462,11 @@ const CSV_HEADER
   = "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Progress,Owner";
 
 function csvField(value: string | number | null): string {
-  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const text = String(value ?? "");
+  // Guard against CSV formula injection: a leading = + - @ tab or CR would be
+  // executed by spreadsheet apps, so prefix an apostrophe to defuse it.
+  const guarded = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return `"${guarded.replace(/"/g, '""')}"`;
 }
 
 export function toCsv(items: ExperimentListItem[]): string {

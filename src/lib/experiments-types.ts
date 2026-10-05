@@ -42,6 +42,8 @@ export type ExperimentListItem = {
   totalDays: number | null;
   startDate: string | null;
   endDate: string | null;
+  /** Statsig createdTime (ms), for the within-group sort tiebreak. */
+  createdTime: number | null;
   targetSplit: [number, number];
   armUrls: { control: string | null; test: string | null };
   armNames: { control: string; test: string };

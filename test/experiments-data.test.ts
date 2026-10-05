@@ -433,6 +433,120 @@ test("getExperimentDetail returns null for unknown or draft ids", async () => {
 });
 
 // ---------------------------------------------------------------------------
+// Daily signups when the cumulative series is longer than the 28-day window:
+// the day before the window is fetched as a baseline so the first kept day
+// diffs to a real per-day value instead of the cumulative total.
+// ---------------------------------------------------------------------------
+
+const LONG_ID = "exp_long_series";
+const LONG_START = Date.UTC(2026, 8, 6); // 2026-09-06, 30 days through 2026-10-05
+const longDates = Array.from({ length: 30 }, (_, i) =>
+  new Date(LONG_START + i * 86400000).toISOString().slice(0, 10),
+);
+
+function longDto(): ExternalExperimentDto {
+  return {
+    id: LONG_ID,
+    name: LONG_ID,
+    status: "active",
+    startTime: LONG_START,
+    duration: 30,
+    description: 'A/B test on /long-series-lp: "module" varies between the groups.',
+    groups: [
+      { name: "control", id: "c1", size: 50, isControl: true, parameterValues: {} },
+      { name: "test", id: "t1", size: 50, parameterValues: {} },
+    ],
+  };
+}
+
+function longCumulative(): CumulativeExposuresDto[] {
+  return [
+    {
+      groupID: "c1",
+      groupName: "control",
+      results: longDates.map((date, i) => ({ date, exposures: 100 * (i + 1) })),
+    },
+    {
+      groupID: "t1",
+      groupName: "test",
+      results: longDates.map((date, i) => ({ date, exposures: 200 * (i + 1) })),
+    },
+  ];
+}
+
+/** Known per-day signups: control gets i+1 on day i, test gets 2 every day. */
+function longDatedPulse(date: string): ExperimentPulseResultsDto {
+  const i = longDates.indexOf(date);
+  if (i < 0) throw new Error(`no long-series fixture for ${date}`);
+  const cumulative = {
+    // sum of (k+1) for k ≤ i
+    control: ((i + 1) * (i + 2)) / 2,
+    test: 2 * (i + 1),
+  };
+  const units = { control: 100 * (i + 1), test: 200 * (i + 1) };
+  return {
+    ds: date,
+    primaryMetrics: [
+      {
+        metricID: "Owner Signups::user_warehouse",
+        metricName: "Owner Signups",
+        directionality: "increase",
+        controlMean: cumulative.control / units.control,
+        testMean: cumulative.test / units.test,
+        controlUnits: units.control,
+        testUnits: units.test,
+      },
+    ],
+  };
+}
+
+test("daily signups diff from a baseline day when the series is longer than the window", async () => {
+  installFetch();
+  router = (url) => {
+    const path = url.pathname;
+    if (path === "/console/v1/experiments") return data([longDto()]);
+    const pulse = path.match(/^\/console\/v1\/experiments\/([^/]+)\/pulse_results$/);
+    if (pulse) {
+      if (pulse[1] !== LONG_ID) return new Response("unknown experiment", { status: 404 });
+      const date = url.searchParams.get("date");
+      return date ? data(longDatedPulse(date)) : data(schedulingPulse);
+    }
+    if (path === `/console/v1/experiments/${LONG_ID}/cumulative_exposures`) {
+      return data(longCumulative());
+    }
+    // Linear relay with no LINEAR_API_KEY: unavailable, so the milestone is "—".
+    if (path.startsWith("/api/projects/")) {
+      return new Response("linear unavailable", { status: 503 });
+    }
+    return new Response(`no route for ${path}`, { status: 404 });
+  };
+
+  const detail = await getExperimentDetail(LONG_ID, ENV, NOW);
+  assert.ok(detail);
+  assert.ok(detail.daily);
+  const daily = detail.daily;
+
+  // the kept window is the last 28 days of the 30-day series
+  assert.deepEqual(daily.map((d) => d.date), longDates.slice(-28));
+  // exposures stay per-day deltas of the full cumulative series
+  assert.deepEqual(daily.map((d) => d.exposures.control), Array(28).fill(100));
+  // signups: the first kept day is a real delta (3), not the cumulative total (6)
+  assert.deepEqual(
+    daily.map((d) => d.signups.control),
+    Array.from({ length: 28 }, (_, i) => i + 3),
+  );
+  assert.deepEqual(daily.map((d) => d.signups.test), Array(28).fill(2));
+
+  // one baseline day before the window plus the 28 kept days, nothing more
+  const datedCalls = requests.filter(
+    (r) => r.url.includes("pulse_results") && r.url.includes("date="),
+  );
+  assert.equal(datedCalls.length, 29);
+  assert.ok(datedCalls[0].url.includes("date=2026-09-07"), datedCalls[0]?.url);
+  assert.ok(datedCalls.every((r) => !r.url.includes("date=2026-09-06")));
+});
+
+// ---------------------------------------------------------------------------
 // Detail API route handler (src/lib/experiments-route.ts)
 // ---------------------------------------------------------------------------
 

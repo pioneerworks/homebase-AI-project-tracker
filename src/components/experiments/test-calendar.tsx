@@ -134,7 +134,9 @@ function CalendarRowView({
             {row.barLabel}
           </div>
         ) : (
-          <span className="exp-cal-unscheduled">{row.barLabel}</span>
+          <span className={row.start != null ? "exp-cal-offwindow" : "exp-cal-unscheduled"}>
+            {row.barLabel}
+          </span>
         )}
         {todayPct != null ? (
           <span className="exp-cal-today" style={{ left: `${todayPct}%` }} aria-hidden="true" />

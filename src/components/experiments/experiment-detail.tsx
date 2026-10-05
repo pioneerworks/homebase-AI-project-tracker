@@ -27,12 +27,24 @@ import type {
  * The expanded row's detail panel: detail bar, hypothesis (01), traffic split
  * (02), page frames (03) and the daily charts (04). List data renders the bar
  * and block 01 immediately; blocks 02–04 need GET /api/experiments/{id}, which
- * is cached at module level so reopening a row doesn't fetch again. Failed
- * fetches are never cached — the inline retry always refetches.
+ * is cached at module level for an hour so reopening a row doesn't fetch
+ * again. Failed fetches are never cached — the inline retry always refetches.
  */
 
-const detailCache = new Map<string, ExperimentDetail>();
+const DETAIL_CACHE_TTL_MS = 60 * 60 * 1000;
+const detailCache = new Map<string, { detail: ExperimentDetail; at: number }>();
 const inflight = new Map<string, Promise<ExperimentDetail>>();
+
+/** The cached detail, or null when absent or older than the hour TTL. */
+function cachedDetail(id: string): ExperimentDetail | null {
+  const entry = detailCache.get(id);
+  if (!entry) return null;
+  if (Date.now() - entry.at > DETAIL_CACHE_TTL_MS) {
+    detailCache.delete(id);
+    return null;
+  }
+  return entry.detail;
+}
 
 class DetailUnavailableError extends Error {}
 
@@ -49,7 +61,7 @@ async function fetchDetail(id: string): Promise<ExperimentDetail> {
       }
       if (!response.ok) throw new Error(`detail fetch failed: ${response.status}`);
       const detail = (await response.json()) as ExperimentDetail;
-      detailCache.set(id, detail);
+      detailCache.set(id, { detail, at: Date.now() });
       return detail;
     } finally {
       inflight.delete(id);
@@ -76,15 +88,16 @@ function hubDate(iso: string): string {
 
 export default function ExperimentDetailPanel({ item }: { item: ExperimentListItem }) {
   const slim = item.status === "queued" || item.status === "draft";
-  const [state, setState] = useState<DetailState>(() =>
-    detailCache.has(item.id) ? { kind: "ok", detail: detailCache.get(item.id)! } : { kind: "loading" },
-  );
+  const [state, setState] = useState<DetailState>(() => {
+    const cached = cachedDetail(item.id);
+    return cached ? { kind: "ok", detail: cached } : { kind: "loading" };
+  });
   const [attempt, setAttempt] = useState(0);
   const [stopOpen, setStopOpen] = useState(false);
 
   useEffect(() => {
     if (slim) return;
-    const cached = detailCache.get(item.id);
+    const cached = cachedDetail(item.id);
     if (cached) {
       setState({ kind: "ok", detail: cached });
       return;

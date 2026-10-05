@@ -119,6 +119,7 @@ const base: ExperimentListItem = {
   totalDays: null,
   startDate: null,
   endDate: null,
+  createdTime: null,
   targetSplit: [50, 50],
   armUrls: { control: null, test: null },
   armNames: { control: "control", test: "test" },
@@ -282,6 +283,53 @@ test("toCsv quotes fields and has one row per experiment", () => {
   assert.equal(lines[0], "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Progress,Owner");
   assert.equal(lines.length, 2);
   assert.match(lines[1], /^"Has ""quotes"", commas",/);
+});
+
+test("toCsv defuses formula-leading values", () => {
+  const csv = toCsv([{ ...base, name: '=HYPERLINK("https://evil.example","x")' }]);
+  assert.match(csv, /"'=HYPERLINK/);
+  for (const prefix of ["+", "-", "@", "\t", "\r"]) {
+    const row = toCsv([{ ...base, name: `${prefix}cmd` }]);
+    assert.ok(row.includes(`"'${prefix}cmd"`), prefix);
+  }
+});
+
+test("armUrls and paths reject non-https destination URLs", () => {
+  const dto = exp({
+    description: "",
+    groups: [
+      { name: "control", id: "c1", size: 50, isControl: true, parameterValues: { destination_url: "javascript:alert(1)" } },
+      { name: "test", id: "t1", size: 50, parameterValues: { destination_url: "javascript:alert(2)" } },
+    ],
+  });
+  assert.deepEqual(armUrls(dto, null), { control: null, test: null });
+  // the javascript: URL never becomes a marketing path either
+  assert.equal(experimentPath(dto), null);
+  assert.equal(experimentPath(exp({ description: "", sidecarEditorURL: "javascript:alert(1)" })), null);
+});
+
+test("statsigUrl drops non-https permalinks", () => {
+  assert.equal(toListItem(exp({ permalink: "javascript:alert(1)" }), undefined).statsigUrl, null);
+  assert.equal(
+    toListItem(exp({ permalink: "https://console.statsig.com/experiments/x" }), undefined).statsigUrl,
+    "https://console.statsig.com/experiments/x",
+  );
+});
+
+test("progressLabel handles a live experiment without a duration", () => {
+  const item = toListItem(exp({ duration: null }), undefined, Date.UTC(2026, 9, 4, 12));
+  assert.equal(item.day, 10);
+  assert.equal(item.progressLabel, "Day 10");
+  assert.equal(toListItem(exp({ startTime: null, duration: null }), undefined).progressLabel, "Unscheduled");
+});
+
+test("sortExperiments breaks startDate ties with createdTime", () => {
+  const sorted = sortExperiments([
+    { ...base, id: "old", startDate: "2026-09-25", createdTime: 1000 },
+    { ...base, id: "new", startDate: "2026-09-25", createdTime: 2000 },
+    { ...base, id: "nodate", startDate: null, createdTime: 9999 },
+  ]);
+  assert.deepEqual(sorted.map((i) => i.id), ["new", "old", "nodate"]);
 });
 
 test("armUrls falls back to the joinhomebase path", () => {

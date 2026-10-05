@@ -192,7 +192,7 @@ export default function AppShell({
                 </Link>
               ))}
             </div>
-            </nav>
+          </nav>
             </div>
 
             <SidebarUser user={user} />

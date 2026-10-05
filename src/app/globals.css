@@ -4881,6 +4881,22 @@ a.exp-name:hover {
   z-index: 5;
 }
 
+/* Dated rows whose bar falls outside the six-week window: same muted label
+   as unscheduled rows, but upright — the italic style is for drafts only. */
+.exp-cal-offwindow {
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 5;
+}
+
 /* --- stop dialog --- */
 
 .exp-dialog {
