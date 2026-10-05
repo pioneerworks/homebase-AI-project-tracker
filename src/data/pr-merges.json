@@ -5294,5 +5294,573 @@
 "labels": [
 "experiment"
 ]
+},
+{
+"number": 876,
+"title": "AIA-3291: record the single-frame percentage-layout trap in pitfalls",
+"mergedAt": "2026-09-23T15:22:18Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 871,
+"title": "[ATR-127] Add Hiring Assistant demo video section to Hiring & Onboarding page",
+"mergedAt": "2026-09-23T15:34:11Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 725,
+"title": "Add the babysit-prs skill: the Antoinette review loop, written down",
+"mergedAt": "2026-09-23T16:44:17Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 791,
+"title": "ATR-70: add 11 redirects for retired blog and legacy URLs that 404 today",
+"mergedAt": "2026-09-23T17:36:45Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 881,
+"title": "AIA-3548: Amplitude Demo Video Viewed / Played on /hiring-and-onboarding",
+"mergedAt": "2026-09-23T20:30:45Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 884,
+"title": "AIA-3288: match Statsig's Production environment name so exposures are exported",
+"mergedAt": "2026-09-23T20:56:55Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 883,
+"title": "AIA-3288: ab-test skill learnings from the first live test",
+"mergedAt": "2026-09-23T21:04:41Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 887,
+"title": "Support configurable Next.js development origins",
+"mergedAt": "2026-09-23T23:49:27Z",
+"author": "app/gentlybot",
+"labels": []
+},
+{
+"number": 886,
+"title": "AIA-3288: carry the experiment arm on every Amplitude event, add the tracking QA gate",
+"mergedAt": "2026-09-24T00:18:49Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 882,
+"title": "AIA-3309: payload-ops \u2014 guarded, surgical bulk content edits via the Local API (+ skill)",
+"mergedAt": "2026-09-24T01:48:15Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 888,
+"title": "AIA-3288: ab-test skill: the export signal is cumulative exposures after a load",
+"mergedAt": "2026-09-24T06:48:55Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 885,
+"title": "AIA-3538: render native post tables in the branded comparison-table shell",
+"mergedAt": "2026-09-24T14:25:55Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 890,
+"title": "AIA-3539: add the shared foundation for blog embed blocks",
+"mergedAt": "2026-09-24T16:22:48Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 893,
+"title": "AIA-3288: deliver Amplitude events without the remote-config hop, via beacon",
+"mergedAt": "2026-09-24T18:16:51Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 896,
+"title": "AIA-3288: hand events to Amplitude only once its init has resolved",
+"mergedAt": "2026-09-24T19:06:27Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 892,
+"title": "AIA-3540: add the TL;DR key-takeaways blog embed block",
+"mergedAt": "2026-09-24T19:27:08Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 897,
+"title": "AIA-3288: settle the Amplitude init promise on failure so deferred tracks never reject",
+"mergedAt": "2026-09-24T19:42:04Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 875,
+"title": "[ATR-28] Redesign /blog-author author hub per concept",
+"mergedAt": "2026-09-24T19:58:47Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 832,
+"title": "ATR-110: build /time-clock/time-attendance-software (break-management format)",
+"mergedAt": "2026-09-24T20:08:42Z",
+"author": "tmorand-hue",
+"labels": [
+"page"
+]
+},
+{
+"number": 898,
+"title": "AIA-3541: add the pros and cons blog embed block",
+"mergedAt": "2026-09-24T21:53:09Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 903,
+"title": "Hide EOY promo banner on three paid LPs",
+"mergedAt": "2026-09-24T22:05:03Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 905,
+"title": "Hide EOY promo banner on Solution pages",
+"mergedAt": "2026-09-24T22:48:31Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 901,
+"title": "AIA-3288: ab-test skill: volumes from Statsig, cumulative exposures, ad final URLs, Vercel cross-check",
+"mergedAt": "2026-09-24T23:01:52Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 906,
+"title": "AIA-3592: A/B test: /free-employee-scheduling-app-lp second module (exp_free_employee_scheduling_app_lp_module)",
+"mergedAt": "2026-09-25T02:42:08Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 907,
+"title": "ATR-75: remove the redundant <title> child from the Homebase logo SVG",
+"mergedAt": "2026-09-25T14:38:35Z",
+"author": "soheilchavo",
+"labels": []
+},
+{
+"number": 880,
+"title": "[ATR-111] Create free HR software page (/free-hr-software)",
+"mergedAt": "2026-09-25T15:31:54Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 894,
+"title": "design: BreadcrumbHero opt-in crumbGap='roomy' (crumb-trail breathing room)",
+"mergedAt": "2026-09-25T15:42:04Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 904,
+"title": "AIA-3542: add the how-to steps blog embed block with HowTo JSON-LD",
+"mergedAt": "2026-09-25T16:23:56Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 911,
+"title": "AIA-3288: ab-test skill: mode rule, override by group name, A/B testing project",
+"mergedAt": "2026-09-25T18:08:34Z",
+"author": "abatreau",
+"labels": [
+"experiment"
+]
+},
+{
+"number": 908,
+"title": "design: BreadcrumbHero crumbsAlign='nav' + crumbGap='roomier'",
+"mergedAt": "2026-09-25T18:19:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 879,
+"title": "ATR-123: /free-employee-database \u2014 free employee database software page",
+"mergedAt": "2026-09-25T18:32:25Z",
+"author": "BrianHB-TO",
+"labels": [
+"page",
+"page:publish"
+]
+},
+{
+"number": 909,
+"title": "AIA-3543: add the FAQ section blog embed block with FAQPage JSON-LD",
+"mergedAt": "2026-09-25T19:09:41Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 915,
+"title": "ATR-123: raise /free-employee-database's crumb trail (padTop='free-roster')",
+"mergedAt": "2026-09-25T19:23:53Z",
+"author": "BrianHB-TO",
+"labels": [
+"page"
+]
+},
+{
+"number": 916,
+"title": "[ATR-111] post-merge follow-up: logo-aligned breadcrumbs + card title copy",
+"mergedAt": "2026-09-25T20:20:41Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 902,
+"title": "design: ToolCardGrid card titles wrap inside the visible card (stop reproducing live's 28px right-clip)",
+"mergedAt": "2026-09-25T20:34:33Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 914,
+"title": "ATR-112: build /free-employee-attendance-software (free-scheduling format)",
+"mergedAt": "2026-09-28T14:44:01Z",
+"author": "bkumar-hb",
+"labels": [
+"page",
+"page:publish"
+]
+},
+{
+"number": 929,
+"title": "AIA-3544: add the ranked picks blog embed block with ItemList JSON-LD",
+"mergedAt": "2026-09-28T14:59:59Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 910,
+"title": "ATR-109: build /time-clock/attendance-management (break-management format)",
+"mergedAt": "2026-09-28T15:35:31Z",
+"author": "bkumar-hb",
+"labels": [
+"page",
+"page:publish"
+]
+},
+{
+"number": 931,
+"title": "AIA-3707: add a sponsored option to the shared Link and use it in ranked picks",
+"mergedAt": "2026-09-28T16:00:48Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 930,
+"title": "ATR-3: center the free-tools store-rating pills and add platform logos",
+"mergedAt": "2026-09-28T17:26:21Z",
+"author": "soheilchavo",
+"labels": []
+},
+{
+"number": 932,
+"title": "ATR-113: rebuild /payroll/hourly-payroll from Webflow blog post to product page",
+"mergedAt": "2026-09-28T20:01:36Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 935,
+"title": "ab-test skill: Abby's A/B tests are filed as ATR tickets by Atrium",
+"mergedAt": "2026-09-28T20:43:50Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 937,
+"title": "[ATR-138] Update sitewide payroll promo banner CTA to link to signup flow instead of pricing page",
+"mergedAt": "2026-09-28T21:14:45Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 808,
+"title": "[ATR-87] Add schema markup to /payroll/free and /payroll/small-business (match /payroll)",
+"mergedAt": "2026-09-28T21:32:05Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 933,
+"title": "AIA-3711: cap blog body images at their intrinsic width",
+"mergedAt": "2026-09-29T18:08:08Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 940,
+"title": "ATR-142: restore full-resolution originals for 22 downsized Webflow assets",
+"mergedAt": "2026-09-29T18:39:48Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 938,
+"title": "AIA-3720: refresh /hiring-and-onboarding \u2014 copy, structure and two shared components",
+"mergedAt": "2026-09-29T18:57:33Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 900,
+"title": "Add a HugeIcons design system primitive",
+"mergedAt": "2026-09-29T19:45:34Z",
+"author": "app/gentlybot",
+"labels": []
+},
+{
+"number": 854,
+"title": "[ATR-120] Add scheduling accolades/social proof to all /employee-scheduling/ subproduct pages",
+"mergedAt": "2026-09-29T21:01:05Z",
+"author": "app/eve-culina",
+"labels": []
+},
+{
+"number": 948,
+"title": "fix(lp): hide promo banner on selected pages",
+"mergedAt": "2026-09-29T21:21:20Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 950,
+"title": "Hide desktop navigation on /homebase-solutions-2",
+"mergedAt": "2026-09-29T23:21:19Z",
+"author": "mjump-lab",
+"labels": [
+"paid-lp:publish"
+]
+},
+{
+"number": 951,
+"title": "/hiring-and-onboarding copy: hero, posting-row body and two row CTAs",
+"mergedAt": "2026-09-30T00:22:43Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 952,
+"title": "AIA-3736: Publish the September 2026 Main Street Health Report page",
+"mergedAt": "2026-09-30T12:50:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 949,
+"title": "AIA-3735: Reduce desktop whitespace above breadcrumbs on scheduling, time-clock and payroll pages",
+"mergedAt": "2026-09-30T14:13:46Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 941,
+"title": "AIA-3730: add structuring-linear-work agent skill",
+"mergedAt": "2026-09-30T16:21:17Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 954,
+"title": "AIA-3729: add compactTopSpacing to /payroll/hourly-payroll hero",
+"mergedAt": "2026-09-30T16:50:51Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 953,
+"title": "ATR-143: Add payroll accolades to all /payroll/ pages",
+"mergedAt": "2026-09-30T18:00:14Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 947,
+"title": "ATR-145: centre attendance ratings, clear its hero CTA, drop the yellow ring on free-page white CTAs",
+"mergedAt": "2026-09-30T18:21:17Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 955,
+"title": "AIA-3758: /hiring-and-onboarding SEO and copy pass on headings, hero and row bodies",
+"mergedAt": "2026-09-30T19:24:49Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 831,
+"title": "ATR-68: fix /blog head metadata race + self-canonicalising pagination",
+"mergedAt": "2026-09-30T19:42:12Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 957,
+"title": "AIA-3759: size lazy cover-cropped images by their drawn width",
+"mergedAt": "2026-09-30T20:43:53Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 961,
+"title": "ATR-118: 404 junk /blog?page=, redirect ?page=1, noindex search and unknown filters",
+"mergedAt": "2026-10-01T15:02:05Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 963,
+"title": "AIA-3135: Authenticate the CMS MCP server with Runlayer identity and add agent tools",
+"mergedAt": "2026-10-01T16:29:11Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 964,
+"title": "AIA-3763: Add read-only seo, assets, analyze and guide tools to the CMS MCP",
+"mergedAt": "2026-10-01T16:53:56Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 965,
+"title": "AIA-3762: Add bulk content tools (content, plan, run) to the CMS MCP on a shared payload-ops engine",
+"mergedAt": "2026-10-01T17:14:28Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 966,
+"title": "AIA-3767: fix Nudge phone and HowTo step titles at desktop breakpoints",
+"mergedAt": "2026-10-01T17:31:33Z",
+"author": "bkumar-hb",
+"labels": []
+},
+{
+"number": 962,
+"title": "feat(lp): refresh free timesheets landing page",
+"mergedAt": "2026-10-01T19:02:12Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 971,
+"title": "ATR-137: Address Vercel review comments on /payroll/free",
+"mergedAt": "2026-10-02T17:49:19Z",
+"author": "BrianHB-TO",
+"labels": []
+},
+{
+"number": 973,
+"title": "AIA-3825: Let MCP agents change text inside documents without sending whole bodies",
+"mergedAt": "2026-10-02T19:28:11Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 975,
+"title": "AIA-3760: A/B test: /solutions Facebook URL split (exp_solutions_facebook_url_split)",
+"mergedAt": "2026-10-02T22:28:23Z",
+"author": "mjump-lab",
+"labels": []
+},
+{
+"number": 928,
+"title": "AIA-3557: Match the admin to the design file and turn on native versions, presets and joins",
+"mergedAt": "2026-10-02T23:31:31Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 917,
+"title": "AIA-3319: Upgrade Payload to 3.90.1 and Next to 16.3.3 and tighten integrations access",
+"mergedAt": "2026-10-02T23:31:33Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 976,
+"title": "AIA-3834: /hiring-and-onboarding mobile hero, button CTAs and per-CTA tracking",
+"mergedAt": "2026-10-03T00:38:27Z",
+"author": "matancz1193",
+"labels": []
+},
+{
+"number": 968,
+"title": "AIA-3800: Document how the CMS MCP server works and how to change it",
+"mergedAt": "2026-10-03T02:34:52Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 977,
+"title": "AIA-3486: Turn the media list into a library with folders and Used by",
+"mergedAt": "2026-10-03T02:48:18Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 979,
+"title": "AIA-3212: Fill the content index and keep it in sync on the rebuilt admin",
+"mergedAt": "2026-10-03T03:16:34Z",
+"author": "abatreau",
+"labels": []
+},
+{
+"number": 980,
+"title": "ATR-137 follow-up: /payroll/free offer fine print + remove final CTA banner",
+"mergedAt": "2026-10-03T03:58:54Z",
+"author": "BrianHB-TO",
+"labels": []
 }
 ]
