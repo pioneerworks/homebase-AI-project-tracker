@@ -1,0 +1,232 @@
+"use client";
+
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+import { formatLift, formatRate, significanceLabel } from "@/lib/experiments-derive";
+import type { ExperimentListItem, HubStatus } from "@/lib/experiments-types";
+
+/**
+ * The experiments table card. Rows toggle a detail panel (rendered by
+ * `renderDetail`, a placeholder until Task 6 lands); the open set is seeded
+ * from the `?open=` URL param, which sidebar "Live now" links point at.
+ */
+
+const STATUS_LABELS: Record<HubStatus, string> = {
+  live: "Live",
+  queued: "Queued",
+  draft: "Draft",
+  concluded: "Concluded",
+};
+
+export type TableState = "ok" | "fetch-failed" | "unconfigured";
+
+export default function ExperimentTable({
+  items,
+  state = "ok",
+  seededId = null,
+  renderDetail,
+}: {
+  items: ExperimentListItem[];
+  state?: TableState;
+  /** ?open={id} — seeds the open set once on mount and scrolls to the row. */
+  seededId?: string | null;
+  renderDetail?: (item: ExperimentListItem) => ReactNode;
+}) {
+  const router = useRouter();
+  const [openIds, setOpenIds] = useState<Set<string>>(
+    () => new Set(seededId != null ? [seededId] : []),
+  );
+  const seededScroll = useRef(false);
+
+  // Live-now links land here with ?open={id}: expand that row and bring it
+  // into view, once, after the table has rendered.
+  useEffect(() => {
+    if (seededScroll.current || seededId == null || state !== "ok") return;
+    if (!items.some((item) => item.id === seededId)) return;
+    seededScroll.current = true;
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`exp-${seededId}`)
+        ?.scrollIntoView({ block: "center" });
+    });
+  }, [seededId, items, state]);
+
+  const toggle = (id: string) => {
+    setOpenIds((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="exp-table-card">
+      {state !== "ok" ? (
+        <div className="exp-tablewrap">
+          <div className="exp-empty" role="status">
+            {state === "fetch-failed" ? (
+              <>
+                Couldn&rsquo;t reach Statsig ·{" "}
+                <button type="button" className="exp-retry" onClick={() => router.refresh()}>
+                  retry
+                </button>
+              </>
+            ) : (
+              "Statsig isn't configured for this deployment."
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="exp-tablewrap">
+          <table className="exp-table">
+            <colgroup>
+              <col className="exp-col-chevron" />
+              <col />
+              <col className="exp-col-status" />
+              <col className="exp-col-metric" />
+              <col className="exp-col-rates" />
+              <col className="exp-col-lift" />
+              <col className="exp-col-sig" />
+              <col className="exp-col-samples" />
+              <col className="exp-col-progress" />
+              <col className="exp-col-owner" />
+            </colgroup>
+            <thead className="exp-thead">
+              <tr>
+                <th scope="col">
+                  <span className="sr-only">Details</span>
+                </th>
+                <th scope="col">Experiment</th>
+                <th scope="col">Status</th>
+                <th scope="col">Primary metric</th>
+                <th scope="col">Control → Test</th>
+                <th scope="col">Lift</th>
+                <th scope="col">Significance</th>
+                <th scope="col">Samples</th>
+                <th scope="col">Progress</th>
+                <th scope="col">Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan={10}>
+                    <div className="exp-empty">No experiments match this view.</div>
+                  </td>
+                </tr>
+              ) : (
+                items.map((item) => {
+                  const isOpen = openIds.has(item.id);
+                  const sig = significanceLabel(item);
+                  return (
+                    <RowFragment
+                      key={item.id}
+                      item={item}
+                      isOpen={isOpen}
+                      sig={sig}
+                      onToggle={() => toggle(item.id)}
+                      renderDetail={renderDetail}
+                    />
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RowFragment({
+  item,
+  isOpen,
+  sig,
+  onToggle,
+  renderDetail,
+}: {
+  item: ExperimentListItem;
+  isOpen: boolean;
+  sig: { text: string; tone: "danger" | "success" | "muted" | null };
+  onToggle: () => void;
+  renderDetail?: (item: ExperimentListItem) => ReactNode;
+}) {
+  const samples =
+    item.controlN != null && item.testN != null
+      ? `${item.controlN.toLocaleString("en-US")} vs ${item.testN.toLocaleString("en-US")}`
+      : "—";
+
+  return (
+    <>
+      <tr
+        id={`exp-${item.id}`}
+        className={`exp-tr${isOpen ? " exp-tr-open" : ""}`}
+        onClick={onToggle}
+      >
+        <td className="exp-td exp-td-chevron">
+          <button
+            type="button"
+            className="exp-chevron"
+            aria-expanded={isOpen}
+            aria-controls={`exp-panel-${item.id}`}
+            aria-label={`${isOpen ? "Hide" : "Show"} details for ${item.name}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggle();
+            }}
+          >
+            {isOpen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
+          </button>
+        </td>
+        <td className="exp-td">
+          <span className="exp-cellname">{item.name}</span>
+          {item.path ? <span className="exp-cellpath">{item.path}</span> : null}
+        </td>
+        <td className="exp-td">
+          <span className={`exp-pill exp-pill-${item.status}`}>{STATUS_LABELS[item.status]}</span>
+        </td>
+        <td className="exp-td exp-td-metric">{item.primaryMetric ?? "—"}</td>
+        <td className="exp-td exp-td-rates">
+          {item.controlRate != null && item.testRate != null
+            ? `${formatRate(item.controlRate)} → ${formatRate(item.testRate)}`
+            : "—"}
+        </td>
+        <td className={`exp-td exp-td-lift${item.lift != null ? (item.lift < 0 ? " exp-lift-neg" : item.lift > 0 ? " exp-lift-pos" : "") : ""}`}>
+          {formatLift(item.lift)}
+        </td>
+        <td className={`exp-td exp-td-sig${sig.tone ? ` exp-sig-${sig.tone}` : ""}`}>{sig.text}</td>
+        <td className="exp-td exp-td-samples">{samples}</td>
+        <td className="exp-td exp-td-progress">
+          {item.status === "live" && item.day != null && item.totalDays != null ? (
+            <>
+              <span className="exp-progresstrack" aria-hidden="true">
+                <span
+                  className="exp-progressfill"
+                  style={{ width: `${Math.min(100, Math.max(0, (item.day / item.totalDays) * 100))}%` }}
+                />
+              </span>
+              <span className="exp-progresslabel">{item.progressLabel}</span>
+            </>
+          ) : (
+            item.progressLabel
+          )}
+        </td>
+        <td className="exp-td exp-td-owner">{item.owner ?? "Unassigned"}</td>
+      </tr>
+      {isOpen ? (
+        <tr className="exp-panel-row" id={`exp-panel-${item.id}`}>
+          <td colSpan={10}>
+            {renderDetail ? (
+              renderDetail(item)
+            ) : (
+              <div className="exp-detail-placeholder">Details load here (Task 6)</div>
+            )}
+          </td>
+        </tr>
+      ) : null}
+    </>
+  );
+}

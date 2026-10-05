@@ -206,7 +206,11 @@ function SyncBox({ nav: pending }: { nav: Promise<ExperimentsNav | null> }) {
       {sync.ok ? (
         <span className="exp-side-sync-meta">
           <span>Results refresh hourly</span>
-          {minutes != null ? <span>Last sync {minutes} min ago</span> : null}
+          {/* "N min ago" is computed from Date.now(), which differs between the
+              server render and hydration; suppress the benign text mismatch. */}
+          {minutes != null ? (
+            <span suppressHydrationWarning>Last sync {minutes} min ago</span>
+          ) : null}
         </span>
       ) : null}
     </div>
