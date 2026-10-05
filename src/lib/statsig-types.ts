@@ -17,13 +17,26 @@ export interface ExternalExperimentDto {
   controlGroupID?: string | null;
   primaryMetrics?: Array<{ name: string; type: string }>;
   secondaryMetrics?: Array<{ name: string; type: string }>;
+  owner?: { ownerName?: string } | null;
+  creatorName?: string | null;
+  lastModifierName?: string | null;
+  createdTime?: number;
+  scheduledStartTime?: number | null;
+  sidecarEditorURL?: string;
   groups: Array<{
     name: string;
     id: string | null;
     size?: number;
     isControl?: boolean;
     disabled?: boolean;
+    parameterValues?: Record<string, unknown>;
   }>;
+}
+
+export interface CumulativeExposuresDto {
+  groupID: string;
+  groupName: string;
+  results: { date: string; exposures: number }[];
 }
 
 export interface ExperimentPulseResultsDto {

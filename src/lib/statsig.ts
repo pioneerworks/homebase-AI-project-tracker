@@ -23,39 +23,29 @@ import { fetchWithTimeout, readJson } from "@/lib/fetch-timeout";
  */
 import type { ExperimentPulseResultsDto, ExternalExperimentDto } from "./statsig-types";
 
+// Pure derivations live in statsig-pure.ts so client components can import
+// them without pulling the server-only API-key loader in too.
+import {
+  experimentDay,
+  experimentTitle,
+  pickArms,
+  verdictFromPrimary,
+  type ExperimentCard,
+} from "./statsig-pure";
+
+export {
+  experimentDay,
+  experimentTitle,
+  pickArms,
+  verdictFromPrimary,
+} from "./statsig-pure";
+export type { ExperimentCard, ExperimentVerdict } from "./statsig-pure";
+
 const CONSOLE_BASE = "https://statsigapi.net/console/v1";
 const API_VERSION = "20240601";
 // One call per experiment + one list call, so an hourly refresh stays far
 // below the Console API limit (~900 req / 15 min).
 const CACHE_TTL_MS = 60 * 60 * 1000;
-
-export type ExperimentVerdict = "winning" | "losing" | "no-signal" | "no-data";
-
-export interface ExperimentCard {
-  id: string;
-  title: string;
-  permalink: string | null;
-  hypothesis: string | null;
-  started: string | null;
-  /** 1-based day of the experiment, or null when unused. */
-  day: number | null;
-  durationDays: number | null;
-  primaryMetric: string | null;
-  /** Signed percent change of test vs control, e.g. -53.4 is "test is down 53%". */
-  percentChange: number | null;
-  /** Percent-change CI bounds, [low, high]. */
-  ci: [number, number] | null;
-  pValue: number | null;
-  /** True when the p-value clears Statsig's adjusted alpha for this experiment. */
-  significant: boolean;
-  /** Per-unit mean of each arm (conversion rate when the metric is binomial). */
-  controlRate: number | null;
-  testRate: number | null;
-  controlUnits: number | null;
-  testUnits: number | null;
-  verdict: ExperimentVerdict;
-  noDataReason: string | null;
-}
 
 export function statsigConfig(
   env: Record<string, string | undefined> = process.env,
@@ -65,77 +55,11 @@ export function statsigConfig(
   return { apiKey };
 }
 
-/** exp_free_employee_scheduling_app_lp_module -> "Free employee scheduling app LP module". */
-export function experimentTitle(id: string): string {
-  return id
-    .replace(/^exp_/, "")
-    .replace(/_/g, " ")
-    .replace(/\blp\b/gi, "LP")
-    .replace(/\burl\b/gi, "URL")
-    .replace(/\bid\b/gi, "ID")
-    .replace(/\bapp\b/gi, "App")
-    .replace(/\bai\b/gi, "AI")
-    .split(" ")
-    .map((word) =>
-      /^(LP|URL|ID)$/.test(word) || word === word.toUpperCase()
-        ? word
-        : word.charAt(0).toUpperCase() + word.slice(1),
-    )
-    .join(" ");
-}
-
-export function experimentDay(
-  startTimeMs: number | null | undefined,
-  now: number = Date.now(),
-): number | null {
-  if (!startTimeMs) return null;
-  // Counts elapsed 24h periods like a stopwatch; Statsig's own day counter can
-  // differ by one when an experiment started mid-day UTC (documented like the
-  // UTC day bucketing note in amplitude.ts).
-  return Math.max(1, Math.floor((now - startTimeMs) / 86400000) + 1);
-}
-
-/**
- * Turn the primary-metric pulse row into a dashboard verdict. `directionality`
- * is Statsig's desired direction ("increase" means a positive lift is good).
- */
-export function verdictFromPrimary(
-  metric: ExperimentPulseResultsDto["primaryMetrics"][number],
-): Pick<ExperimentCard, "verdict" | "significant" | "noDataReason" | "percentChange" | "ci" | "pValue"> {
-  if (metric.error) {
-    return {
-      verdict: "no-data",
-      significant: false,
-      noDataReason: metric.error,
-      percentChange: null,
-      ci: null,
-      pValue: null,
-    };
-  }
-  const ci = metric.percentConfidenceInterval;
-  const significant = metric.pValue != null && metric.adjustedAlpha != null
-    ? metric.pValue < metric.adjustedAlpha
-    : false;
-  const desired = metric.directionality === "decrease" ? -1 : 1;
-  const lift = metric.percentChange ?? null;
-  let verdict: ExperimentVerdict = "no-signal";
-  if (significant && lift != null && lift !== 0) {
-    verdict = lift * desired > 0 ? "winning" : "losing";
-  }
-  return {
-    verdict,
-    significant,
-    noDataReason: null,
-    percentChange: lift,
-    ci: ci && ci.lower != null && ci.upper != null ? [ci.lower, ci.upper] : null,
-    pValue: metric.pValue ?? null,
-  };
-}
-
 /** Per-request deadline; the pulse calls run in parallel after the list call. Mutable for tests. */
 export const statsigTimeout = { ms: 6_000 };
 
-async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
+/** Shared with the Experiments tab loader; behaviour unchanged. */
+export async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
   const response = await fetchWithTimeout(
     `${CONSOLE_BASE}${path}`,
     {
@@ -153,22 +77,6 @@ async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
   }
   const body = await readJson<{ data: T }>(response, statsigTimeout.ms, "Statsig Console API");
   return body.data;
-}
-
-/**
- * Pick the control and (first) test group for an experiment's pulse query.
- * Multi-arm experiments: Statsig's pulse endpoint compares one test group
- * against control, so we surface the first non-control arm today rather than
- * issuing one call per arm.
- */
-export function pickArms(
-  experiment: ExternalExperimentDto,
-): { controlId: string | null; testId: string | null } {
-  const control =
-    experiment.groups.find((g) => g.id && g.id === experiment.controlGroupID) ??
-    experiment.groups.find((g) => g.isControl);
-  const test = experiment.groups.find((g) => g.id && g.id !== control?.id);
-  return { controlId: control?.id ?? null, testId: test?.id ?? null };
 }
 
 /** Group DTOs plus pulse results, flattened into dashboard cards. */

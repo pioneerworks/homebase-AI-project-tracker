@@ -16,6 +16,12 @@
   --pr-page: #f0961b;
   --pr-page-text: #9e5706;
 
+  /* Experiments (A/B testing) tab */
+  --purple-chip: #f7ebff;
+  --status-teal: #16b8a6;
+  --exp-control: #9a82e6;
+  --exp-test: #b3262b;
+
   /* Semantic aliases used across every page */
   --bg: var(--white);
   --page-bg: var(--light-cream);
@@ -3784,5 +3790,1607 @@ a.exp-name:hover {
   .seg button,
   .chip-filters button {
     min-height: 44px;
+  }
+}
+
+/* ===== Experiments (A/B testing) sidebar, shown on /experiments ===== */
+/* Values come from the design export (experiments.html): 248px deep-purple
+   sidebar, 36px brand chip, 10px 14px rows, pill count badges, mid-dark sync
+   box. The container (.sidebar) and user block styles are shared with the hub. */
+
+.exp-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exp-side-brand-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.exp-side-title {
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.exp-side-sub {
+  color: var(--purple-rain);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-side-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #40137c;
+  border-radius: var(--radius-small);
+  color: var(--purple-rain);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.exp-side-back:hover {
+  background: var(--mid-dark-purple);
+}
+
+.exp-side-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exp-side-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  color: var(--purple-rain);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.exp-side-row-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.exp-side-row[aria-current="page"] {
+  background: var(--brand-purple);
+  color: var(--white);
+}
+
+.exp-side-row[aria-current="page"] .exp-side-row-label {
+  font-weight: 700;
+}
+
+.exp-side-row:not([aria-current="page"]):hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.exp-side-row-surface {
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+}
+
+.exp-side-count {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mid-dark-purple);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-side-row[aria-current="page"] .exp-side-count {
+  background: rgb(255 254 254 / 0.2);
+}
+
+.exp-side-count-danger {
+  background: var(--danger);
+}
+
+.exp-side-surface-count {
+  flex: none;
+  color: var(--purple-rain);
+  opacity: 0.7;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-side-row[aria-current="page"] .exp-side-surface-count {
+  color: var(--white);
+  opacity: 1;
+}
+
+.exp-side-live {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: var(--radius-small);
+  text-decoration: none;
+}
+
+.exp-side-live:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.exp-side-live-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--purple-rain);
+}
+
+.exp-side-live-dot-losing {
+  background: var(--danger);
+}
+
+.exp-side-live-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.exp-side-live-name {
+  overflow: hidden;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exp-side-live-meta {
+  color: var(--purple-rain);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-side-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exp-side-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--mid-dark-purple);
+}
+
+.exp-side-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exp-side-sync-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-teal);
+}
+
+.exp-side-sync-dot-failed {
+  background: var(--warning);
+}
+
+.exp-side-sync-status {
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exp-side-sync-meta {
+  color: var(--purple-rain);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-side-sync-meta span {
+  display: block;
+}
+
+/* pending-nav skeletons reuse .skeleton-line; these only set size and dim it */
+.exp-side-skeleton-badge {
+  width: 26px;
+  height: 16px;
+  border-radius: 999px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-count {
+  width: 20px;
+  height: 14px;
+  border-radius: 999px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-name {
+  width: 120px;
+  height: 12px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-meta {
+  width: 80px;
+  height: 10px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-md {
+  width: 70%;
+  height: 12px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-sm {
+  width: 45%;
+  height: 11px;
+  opacity: 0.25;
+}
+
+/* ===== Experiments (A/B testing) tab page =====
+   Values from the 2026-10-04 design export (experiments.html, 1440w):
+   main pad 32/40/56, 32px section gap, 1112px content, 44px rows. */
+
+.exp-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 1192px; /* 1112 content + 2×40 padding, as at the 1440 design width */
+  margin: 0 auto;
+  padding: 32px 40px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* --- header --- */
+
+.exp-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.exp-titleblock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.exp-eyebrow {
+  margin: 0;
+  color: var(--brand-purple);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.exp-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 44px;
+}
+
+.exp-dek {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.exp-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+/* --- buttons (outline / dark / danger; sm = banner and dialog size) --- */
+
+.exp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.exp-btn-outline {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.exp-btn-dark {
+  background: var(--deep-purple);
+  color: var(--white);
+}
+
+.exp-btn-danger {
+  background: var(--danger);
+  color: var(--white);
+  font-weight: 800;
+}
+
+.exp-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.exp-btn-sm {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* --- all experiments section --- */
+
+.exp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exp-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.exp-section-titlerow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.exp-h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.exp-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.exp-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.exp-tab {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.exp-tab[aria-current] {
+  background: var(--deep-purple);
+  color: var(--white);
+}
+
+/* --- table card --- */
+
+.exp-table-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.exp-tablewrap {
+  overflow-x: auto;
+}
+
+.exp-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+}
+
+.exp-thead th {
+  background: var(--light-cream);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 8px;
+  text-align: left;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.exp-thead th:first-child {
+  padding-left: 14px;
+}
+
+.exp-thead th:last-child {
+  padding-right: 16px;
+}
+
+.exp-col-chevron {
+  width: 24px;
+}
+
+.exp-col-status {
+  width: 72px;
+}
+
+.exp-col-metric {
+  width: 110px;
+}
+
+.exp-col-rates {
+  width: 104px;
+}
+
+.exp-col-lift {
+  width: 64px;
+}
+
+.exp-col-sig {
+  width: 112px;
+}
+
+.exp-col-samples {
+  width: 96px;
+}
+
+.exp-col-progress {
+  width: 96px;
+}
+
+.exp-col-owner {
+  width: 100px;
+}
+
+.exp-tr {
+  cursor: pointer;
+}
+
+.exp-tr {
+  background: var(--white);
+}
+
+.exp-tr:hover {
+  background: var(--purple-light);
+}
+
+.exp-tr-open,
+.exp-tr-open:hover {
+  background: var(--purple-chip);
+}
+
+.exp-td {
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.exp-td:first-child {
+  padding-left: 14px;
+}
+
+.exp-td:last-child {
+  padding-right: 16px;
+}
+
+.exp-tr-open .exp-td {
+  border-bottom-color: transparent;
+}
+
+.exp-td-chevron {
+  padding-right: 0;
+}
+
+.exp-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--brand-purple);
+  cursor: pointer;
+}
+
+.exp-cellname {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.exp-cellpath {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* One-line verdict under the name (handoff §6 revised): icon + bold text,
+   muted reason truncated with ellipsis before the verdict ever wraps. */
+.exp-tagline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  max-width: 194px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.exp-tagline svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.exp-tagline-reason {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
+.exp-tagline-ahead,
+.exp-tagline-ahead svg {
+  color: var(--success);
+}
+
+.exp-tagline-losing,
+.exp-tagline-losing svg {
+  color: var(--danger);
+}
+
+.exp-pill {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.exp-pill-live {
+  background: rgb(22 184 166 / 0.1);
+  color: #0e8577;
+}
+
+.exp-pill-queued {
+  background: var(--purple-light);
+  color: var(--brand-purple);
+}
+
+.exp-pill-draft,
+.exp-pill-concluded {
+  background: var(--surface-gray);
+  color: var(--muted);
+}
+
+.exp-td-metric,
+.exp-td-samples {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.exp-td-rates {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.exp-td-lift {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-lift-neg {
+  color: var(--danger);
+}
+
+.exp-lift-pos {
+  color: var(--success);
+}
+
+.exp-td-sig {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.exp-sig-danger {
+  color: var(--danger);
+}
+
+.exp-sig-success {
+  color: var(--success-text);
+}
+
+.exp-sig-muted {
+  color: var(--muted);
+}
+
+.exp-td-samples {
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-td-progress {
+  white-space: nowrap;
+}
+
+.exp-progresstrack {
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-gray);
+  overflow: hidden;
+}
+
+.exp-progressfill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand-purple);
+}
+
+.exp-progresslabel {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exp-td-owner {
+  white-space: nowrap;
+}
+
+.exp-panel-row td {
+  padding: 8px 24px 24px 48px;
+  background: var(--purple-chip);
+  border-bottom: 1px solid var(--border);
+}
+
+/* colSpan cell: decouple the panel's intrinsic width from the table's columns
+   (wide content scrolls inside the panel rather than stretching every row). */
+.exp-panel-scroll {
+  width: 0;
+  min-width: 100%;
+  overflow-x: auto;
+}
+
+.exp-empty {
+  padding: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.exp-retry {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: var(--brand-purple);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* --- archive strip --- */
+
+.exp-archive {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.exp-archive-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* --- KPI card: five cells with vertical dividers --- */
+
+.exp-kpis {
+  display: flex;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.exp-kpi {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-right: 24px;
+}
+
+.exp-kpi + .exp-kpi {
+  border-left: 1px solid var(--border);
+  padding-left: 24px;
+}
+
+.exp-kpi:last-child {
+  padding-right: 0;
+}
+
+.exp-kpi-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exp-kpi-value {
+  color: var(--ink);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-kpi-context {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-kpi-danger .exp-kpi-value,
+.exp-kpi-danger .exp-kpi-context {
+  color: var(--danger);
+}
+
+/* --- decision banner --- */
+
+.exp-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: rgb(229 72 77 / 0.06);
+  border: 1px solid rgb(229 72 77 / 0.25);
+}
+
+.exp-banner-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgb(229 72 77 / 0.1);
+  color: var(--danger);
+}
+
+.exp-banner-copy {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exp-banner-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.exp-banner-body {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* --- stop dialog --- */
+
+.exp-dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 24px;
+  width: min(440px, calc(100vw - 48px));
+  box-shadow: var(--shadow-tip);
+}
+
+.exp-dialog::backdrop {
+  background: rgb(30 11 58 / 0.4);
+}
+
+.exp-dialog-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.exp-dialog-body {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.exp-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* --- loading skeleton --- */
+
+.exp-skel-eyebrow {
+  width: 200px;
+  height: 12px;
+}
+
+.exp-skel-title {
+  width: 260px;
+  height: 36px;
+}
+
+.exp-skel-dek {
+  width: 420px;
+  height: 14px;
+}
+
+.exp-skel-btn {
+  width: 140px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.exp-skel-headrow {
+  display: flex;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--light-cream);
+}
+
+.exp-skel-th {
+  flex: 1;
+  height: 10px;
+}
+
+.exp-skel-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 44px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.exp-skel-name {
+  flex: 2;
+  height: 13px;
+}
+
+.exp-skel-cell {
+  flex: 1;
+  height: 12px;
+}
+
+.exp-skel-cell-sm {
+  flex: 0 0 64px;
+  height: 12px;
+}
+
+/* narrow screens: let the header stack, drop the fixed side gutters */
+@media (max-width: 900px) {
+  .exp-main {
+    padding: 24px 20px 48px;
+  }
+
+  .exp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .exp-kpis {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .exp-kpi + .exp-kpi {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .exp-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ===== Experiments detail panel (expanded row) =====
+   Values from the 2026-10-04 design export (experiments.html):
+   panel pad 8/24/24/48, 16px block gap, blocks white 12px radius
+   with 20px padding, 380px split block. */
+
+.exp-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- detail bar --- */
+
+.exp-d-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exp-d-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.exp-d-metaitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exp-d-metaitem svg {
+  flex: none;
+}
+
+.exp-d-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* --- block scaffolding --- */
+
+.exp-d-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.exp-d-block {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.exp-d-grow {
+  flex: 1 1 0;
+}
+
+.exp-d-block-split {
+  flex: none;
+  width: 380px;
+  max-width: 100%;
+}
+
+.exp-d-blockhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exp-d-num {
+  color: var(--brand-purple);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.exp-d-blocktitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.exp-d-blocksub {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.exp-d-muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-d-error {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --- 01 hypothesis --- */
+
+.exp-d-hypothesis {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+}
+
+.exp-d-facts,
+.exp-d-results {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.exp-d-facts {
+  padding-top: 14px;
+}
+
+.exp-d-results {
+  padding-top: 12px;
+}
+
+.exp-d-fact,
+.exp-d-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 120px;
+}
+
+.exp-d-factkey {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.exp-d-factval {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.exp-d-resvalrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exp-d-delta {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.exp-d-delta-neg {
+  color: var(--danger);
+}
+
+.exp-d-delta-pos {
+  color: var(--success-text);
+}
+
+.exp-d-ressub {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* --- 02 traffic split --- */
+
+.exp-d-splitbar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.exp-d-seg {
+  display: flex;
+  align-items: center;
+  flex-basis: 0;
+  min-width: 0;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.exp-d-seg-control {
+  background: var(--purple-rain);
+  color: var(--deep-purple);
+  justify-content: flex-start;
+}
+
+.exp-d-seg-test {
+  background: var(--danger);
+  color: var(--white);
+  justify-content: flex-end;
+}
+
+.exp-d-splitcounts {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.exp-d-srm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.exp-d-srm svg {
+  flex: none;
+}
+
+.exp-d-srm-ok {
+  background: rgb(34 160 107 / 0.08);
+  color: var(--success-dark);
+}
+
+.exp-d-srm-bad {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+/* --- 03 page frames --- */
+
+.exp-d-thumbs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.exp-d-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: 260px;
+}
+
+.exp-d-armrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exp-d-arm {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.exp-d-arm-control {
+  background: var(--purple-rain);
+  color: var(--deep-purple);
+}
+
+.exp-d-arm-test {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.exp-d-armrate {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exp-d-frame {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.exp-d-chrome {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  background: var(--surface-gray);
+  border-bottom: 1px solid var(--border);
+}
+
+.exp-d-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  opacity: 0.7;
+  flex: none;
+}
+
+.exp-d-dot-r {
+  background: var(--danger);
+}
+
+.exp-d-dot-y {
+  background: #f5b83d;
+}
+
+.exp-d-dot-g {
+  background: var(--success);
+}
+
+.exp-d-urlbar {
+  flex: 1;
+  padding: 2px 8px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exp-d-body {
+  display: block;
+  height: 280px;
+  background: var(--surface-gray);
+}
+
+.exp-d-bodyinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 16px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* --- 04 daily charts --- */
+
+.exp-d-legend {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exp-d-legenditem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exp-d-legendswatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.exp-d-charts {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.exp-d-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.exp-d-charthead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.exp-d-charttitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.exp-d-charttotal {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* dark tooltip */
+
+.exp-d-tip {
+  background: var(--deep-purple);
+  color: var(--white);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.exp-d-tip p {
+  margin: 0;
+}
+
+.exp-d-tipdate {
+  font-weight: 700;
+}
+
+.exp-d-tiprow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.exp-d-tipswatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.exp-d-tiprate {
+  opacity: 0.75;
+}
+
+/* rate table */
+
+.exp-d-ratetable {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+}
+
+.exp-d-ratetable th,
+.exp-d-ratetable td {
+  padding: 6px 0 6px 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.exp-d-ratetable th:first-child,
+.exp-d-ratetable td:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.exp-d-ratetable thead th {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.exp-d-ratelabel {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.exp-d-raterowlabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.exp-d-rateswatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.exp-d-rateswatch-control {
+  background: var(--exp-control);
+}
+
+.exp-d-rateswatch-test {
+  background: var(--exp-test);
+}
+
+.exp-d-ratetable td {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.exp-d-ratetotal {
+  font-weight: 800;
+}
+
+.exp-d-raterow-test td,
+.exp-d-raterow-test .exp-d-raterowlabel {
+  color: var(--danger);
+}
+
+/* skeleton + shared numeric styling */
+
+.exp-d-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exp-d-skel-bar {
+  height: 28px;
+  width: 100%;
+}
+
+.exp-d-factval,
+.exp-d-delta,
+.exp-d-splitcounts,
+.exp-d-seg,
+.exp-d-charttotal,
+.exp-d-ratetable td,
+.exp-d-tip {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .exp-d-block-split {
+    width: 100%;
+  }
+
+  .exp-d-body {
+    height: 200px;
   }
 }
