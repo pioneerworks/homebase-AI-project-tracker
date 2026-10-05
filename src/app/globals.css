@@ -4394,6 +4394,7 @@ a.exp-name:hover {
   color: var(--ink);
   font-size: 12px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -4810,7 +4811,6 @@ a.exp-name:hover {
     align-items: flex-start;
   }
 }
-
 
 /* ===== Experiments detail panel (expanded row) =====
    Values from the 2026-10-04 design export (experiments.html):

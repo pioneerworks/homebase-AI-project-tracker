@@ -56,11 +56,11 @@ Table order: live, then queued, then draft, then concluded. Within each group, n
   - Verdict: `verdictFromPrimary`.
   - Display: lift has one decimal and a real minus sign (`−3.0%`). Rates have two decimals.
 - **Tagline** (revised handoff §6): a one-line verdict under each name, derived with the verdict:
-  - live/concluded + `winning` → "Variant is ahead" · `+N% signups` (`TrendingUp`, success)
-  - live/concluded + `losing` → "Variant is losing" · `−N% signups` (`TrendingDown`, danger)
+  - live/concluded + `winning` → "Variant is ahead" · `+N% sign ups` (`TrendingUp`, success)
+  - live/concluded + `losing` → "Variant is losing" · `−N% sign ups` (`TrendingDown`, danger)
   - live/concluded + `no-signal`/`no-data` → "Too early to tell" · `±N%, not sig.` or "no data yet" (`Hourglass`, ink text/muted icon)
   - queued/draft → "Not started yet" (`CircleDashed`, ink text/muted icon)
-  - Lift in the reason is a whole percent; "Owner signups" shortens to "signups". The reason truncates with an ellipsis before the verdict wraps. (Deviation from the handoff's literal conditions: concluded no-signal rows also get "Too early to tell" — the handoff only names live ones, but a concluded row saying "not started" would be wrong.)
+  - Lift in the reason is a whole percent; "Owner signups" shortens to "sign ups". The reason truncates with an ellipsis before the verdict wraps. (Deviation from the handoff's literal conditions: concluded no-signal rows also get "Too early to tell" — the handoff only names live ones, but a concluded row saying "not started" would be wrong.)
 - **Significance label:** `losing` → "Sig. loss" (danger). `winning` → "Sig. win" (success). `no-signal` → `Not yet · p≈${p.toFixed(2)}` (muted). `no-data`, queued and draft → "—".
 - **Guardrails:** the `secondaryMetrics` names joined with " · ", or "—". **MDE:** "—". **Planned run:** `${duration} days`, or "—".
 - **Results line:**
@@ -76,14 +76,14 @@ Table order: live, then queued, then draft, then concluded. Within each group, n
 - **Rate table:** one row each for Control and Test. Each daily cell is that day's signups ÷ that day's exposures. The "N-day" column is total signups ÷ total exposures (not the mean of the daily rates).
 - **SRM:** a chi-square goodness-of-fit test with 1 degree of freedom. It compares the latest cumulative exposures `[c, t]` with the target split from `groups[].size`. `p = erfc(sqrt(χ²/2))`. If `p ≥ 0.01`, show "No sample-ratio mismatch · p = 0.17". Otherwise show the danger text "Sample-ratio mismatch · p = …".
 - **Decision banner:** shows the first live experiment whose verdict is `losing`. Otherwise it is hidden.
-  - If the lift is ≤ −50%, the body reads: "Test arm converts at less than half of control (2.50% → 1.16%, p = 0.004). Keeping it live costs roughly N owner signups a day."
-  - For other negative lifts it reads: "Test arm converts below control (… , p = …). Keeping it live costs roughly N owner signups a day."
+  - If the lift is ≤ −50%, the body reads: "Test arm converts at less than half of control (2.50% → 1.16%, p = 0.004). Keeping it live costs roughly N owner sign ups a day."
+  - For other negative lifts it reads: "Test arm converts below control (… , p = …). Keeping it live costs roughly N owner sign ups a day."
   - N = `round((controlRate − testRate) × testUnits / day)`.
 - **KPIs** (5 cells):
   1. Live tests: the count, with context counting landing pages and signup flow.
   2. Significant results: the count of live experiments that are winning or losing, with context "x loss · y wins".
   3. Visitors in test · 7d: the sum, over live experiments, of the cumulative-exposure increase over the last 7 days, with context "control · test".
-  4. Owner signups in test: the sum of live primary-metric counts since start, with context "Control X · Test Y". This deviates from the handoff's 7-day window because the list view doesn't fetch daily pulses.
+  4. Owner sign ups in test: the sum of live primary-metric counts since start, with context "Control X · Test Y". This deviates from the handoff's 7-day window because the list view doesn't fetch daily pulses.
   5. M1 · First live experiments: `nextMilestone()` of the Linear `ab-testing` project (`linearSlugId d9f5d074ffc1`). The value is its `progress%`. Context is "Due {date}", turning danger with "· N days overdue" when the date has passed. Shows "—" when Linear is unavailable.
 - **Calendar — removed 2026-10-05 at Brian's request** after the first live build; the section doesn't ship in v1. The notes below are kept only as the record of what was designed, in case it returns.
   - Window: 6 weeks, starting on the Monday on or before `today − 14d`.

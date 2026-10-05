@@ -390,7 +390,7 @@ function PagesBlock({ item }: { item: ExperimentListItem }) {
             <div className="exp-d-armrow">
               <span className={`exp-d-arm exp-d-arm-${arm.key}`}>{arm.name}</span>
               {arm.rate != null ? (
-                <span className="exp-d-armrate">{formatRate(arm.rate)} signup rate</span>
+                <span className="exp-d-armrate">{formatRate(arm.rate)} sign-up rate</span>
               ) : null}
             </div>
             <PageFrame url={arm.url} />

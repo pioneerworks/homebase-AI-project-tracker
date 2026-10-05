@@ -210,6 +210,14 @@ test("taglineOf covers the four states (handoff §6, revised)", () => {
     { state: "ahead", text: "Variant is ahead", reason: "+12% sign ups" },
   );
   assert.deepEqual(
+    taglineOf("live", "winning", "1D1", 12.4),
+    { state: "ahead", text: "Variant is ahead", reason: "+12% 1D1" },
+  );
+  assert.deepEqual(
+    taglineOf("live", "winning", "Owner Signups", null),
+    { state: "ahead", text: "Variant is ahead" },
+  );
+  assert.deepEqual(
     taglineOf("live", "no-signal", "Owner Signups", 7.3),
     { state: "too_early", text: "Too early to tell", reason: "+7%, not sig." },
   );

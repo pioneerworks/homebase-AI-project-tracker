@@ -332,7 +332,7 @@ export function significanceLabel(item: ExperimentListItem): { text: string; ton
 /**
  * One-line verdict under the experiment name (handoff §6, revised 2026-10-05).
  * The reason is a whole-percent lift against the shortened metric word
- * ("Owner signups" → "signups"); queued and draft rows simply haven't started.
+ * ("Owner signups" → "sign ups"); queued and draft rows simply haven't started.
  */
 export function taglineOf(
   status: HubStatus,
@@ -344,32 +344,35 @@ export function taglineOf(
     return { state: "not_started", text: "Not started yet" };
   }
   if (verdict === "winning") {
-    return { state: "ahead", text: "Variant is ahead", reason: `+${signedWholePct(lift)} ${metricWord(metricName)}` };
+    return lift != null
+      ? { state: "ahead", text: "Variant is ahead", reason: `+${wholePctMagnitude(lift)} ${metricWord(metricName)}` }
+      : { state: "ahead", text: "Variant is ahead" };
   }
   if (verdict === "losing") {
-    return { state: "losing", text: "Variant is losing", reason: `−${signedWholePct(lift)} ${metricWord(metricName)}` };
+    return lift != null
+      ? { state: "losing", text: "Variant is losing", reason: `−${wholePctMagnitude(lift)} ${metricWord(metricName)}` }
+      : { state: "losing", text: "Variant is losing" };
   }
   return {
     state: "too_early",
     text: "Too early to tell",
-    reason: lift != null ? `${lift >= 0 ? "+" : "−"}${signedWholePct(lift)}, not sig.` : "no data yet",
+    reason: lift != null ? `${lift >= 0 ? "+" : "−"}${wholePctMagnitude(lift)}, not sig.` : "no data yet",
   };
 }
 
 /** Whole percent, magnitude only — the caller supplies the sign. */
-function signedWholePct(lift: number | null): string {
-  if (lift == null) return "0%";
+function wholePctMagnitude(lift: number): string {
   return `${Math.round(Math.abs(lift))}%`;
 }
 
-/** "Owner signups" → "sign ups"; "Owner Signups" → "sign ups"; fallback "sign ups". */
+/**
+ * Shorten a primary-metric name for the tagline reason: the team's Owner
+ * Signups metric reads as "sign ups"; any other name keeps its own casing.
+ */
 function metricWord(metricName: string | null): string {
-  const word = (metricName ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/^owner\s+/, "")
-    .replace(/^signups?$/, "sign ups");
-  return word || "sign ups";
+  const name = (metricName ?? "").trim();
+  if (/^(owner\s+)?signups?$/i.test(name)) return "sign ups";
+  return name || "sign ups";
 }
 
 /**
