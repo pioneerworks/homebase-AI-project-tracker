@@ -6,6 +6,8 @@ import {
   getExperimentsPage,
   resetExperimentsCacheForTests,
 } from "../src/lib/experiments";
+import { handleDetail } from "../src/lib/experiments-route";
+import type { ExperimentDetail } from "../src/lib/experiments-types";
 import type {
   CumulativeExposuresDto,
   ExperimentPulseResultsDto,
@@ -428,4 +430,81 @@ test("getExperimentDetail returns null for unknown or draft ids", async () => {
   standardRouter();
   assert.equal(await getExperimentDetail("exp_unknown", ENV, NOW), null);
   assert.equal(await getExperimentDetail("exp_goose_h1", ENV, NOW), null);
+});
+
+// ---------------------------------------------------------------------------
+// Detail API route handler (src/lib/experiments-route.ts)
+// ---------------------------------------------------------------------------
+
+const DETAIL: ExperimentDetail = {
+  id: SCHEDULING_ID,
+  exposures: { control: 1507, test: 1549 },
+  srm: { ok: true, pValue: 0.8 },
+  daily: [],
+};
+
+/** getDetail stub that records the ids it was called with. */
+function getDetailStub(result: ExperimentDetail | null | Error) {
+  const calls: string[] = [];
+  return {
+    calls,
+    getDetail: async (id: string): Promise<ExperimentDetail | null> => {
+      calls.push(id);
+      if (result instanceof Error) throw result;
+      return result;
+    },
+  };
+}
+
+test("detail route returns 401 without a user", async () => {
+  const stub = getDetailStub(DETAIL);
+  const response = await handleDetail(SCHEDULING_ID, { user: null, getDetail: stub.getDetail });
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { error: "Unauthorized" });
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(stub.calls, []);
+});
+
+test("detail route rejects unknown ids", async () => {
+  const user = { email: "brian@joinhomebase.com" };
+
+  // path-traversal-shaped id: rejected before any lookup
+  const traversal = getDetailStub(DETAIL);
+  const bad = await handleDetail("../etc", { user, getDetail: traversal.getDetail });
+  assert.equal(bad.status, 404);
+  assert.deepEqual(await bad.json(), { error: "Unknown experiment" });
+  assert.equal(bad.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(traversal.calls, []);
+
+  // well-formed id the loader doesn't know: still a 404
+  const unknown = getDetailStub(null);
+  const missing = await handleDetail("exp_unknown", { user, getDetail: unknown.getDetail });
+  assert.equal(missing.status, 404);
+  assert.deepEqual(await missing.json(), { error: "Unknown experiment" });
+  assert.equal(missing.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(unknown.calls, ["exp_unknown"]);
+});
+
+test("detail route returns 502 when the loader throws", async () => {
+  const stub = getDetailStub(new Error("console down"));
+  const response = await handleDetail(SCHEDULING_ID, {
+    user: { email: "brian@joinhomebase.com" },
+    getDetail: stub.getDetail,
+  });
+  assert.equal(response.status, 502);
+  assert.deepEqual(await response.json(), { error: "Statsig unavailable" });
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(stub.calls, [SCHEDULING_ID]);
+});
+
+test("detail route returns the detail JSON for a valid id", async () => {
+  const stub = getDetailStub(DETAIL);
+  const response = await handleDetail(SCHEDULING_ID, {
+    user: { email: "brian@joinhomebase.com" },
+    getDetail: stub.getDetail,
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), DETAIL);
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.deepEqual(stub.calls, [SCHEDULING_ID]);
 });
