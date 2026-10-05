@@ -292,6 +292,10 @@ test("toCsv defuses formula-leading values", () => {
     const row = toCsv([{ ...base, name: `${prefix}cmd` }]);
     assert.ok(row.includes(`"'${prefix}cmd"`), prefix);
   }
+  // numeric cells bypass the guard: a negative number stays a real number
+  const numericRow = toCsv([{ ...base, name: "Numeric cells", controlN: -12.5 }]);
+  assert.match(numericRow, /,"-12\.5",/);
+  assert.ok(!numericRow.includes(`"'-12.5"`));
 });
 
 test("armUrls and paths reject non-https destination URLs", () => {

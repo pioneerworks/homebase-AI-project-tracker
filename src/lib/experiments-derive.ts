@@ -465,7 +465,8 @@ function csvField(value: string | number | null): string {
   const text = String(value ?? "");
   // Guard against CSV formula injection: a leading = + - @ tab or CR would be
   // executed by spreadsheet apps, so prefix an apostrophe to defuse it.
-  const guarded = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  // Numbers are exempt — a numeric cell like -12.5 must stay a real number.
+  const guarded = typeof value === "number" ? text : /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
   return `"${guarded.replace(/"/g, '""')}"`;
 }
 

@@ -340,7 +340,7 @@ async function signupsForDates(
         return null;
       }
       return {
-        date: pulse.ds ?? date,
+        date,
         control: Math.round(row.controlMean * row.controlUnits),
         test: Math.round(row.testMean * row.testUnits),
       };
