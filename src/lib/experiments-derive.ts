@@ -17,6 +17,7 @@ import type {
   Kpi,
   MetricResult,
   Surface,
+  Tagline,
   View,
 } from "./experiments-types";
 
@@ -241,6 +242,7 @@ export function toListItem(
     armUrls: armUrls(e, path),
     armNames: { control: controlGroup(e)?.name ?? "Control", test: testGroup(e)?.name ?? "Test" },
     results,
+    tagline: taglineOf(status, verdict.verdict, primaryRow?.metricName ?? null, verdict.percentChange),
     progressLabel: progressLabelOf(status, e, day),
   };
 }
@@ -325,6 +327,45 @@ export function significanceLabel(item: ExperimentListItem): { text: string; ton
     default:
       return { text: "—", tone: null };
   }
+}
+
+/**
+ * One-line verdict under the experiment name (handoff §6, revised 2026-10-05).
+ * The reason is a whole-percent lift against the shortened metric word
+ * ("Owner signups" → "signups"); queued and draft rows simply haven't started.
+ */
+export function taglineOf(
+  status: HubStatus,
+  verdict: ExperimentListItem["verdict"],
+  metricName: string | null,
+  lift: number | null,
+): Tagline {
+  if (status === "queued" || status === "draft") {
+    return { state: "not_started", text: "Not started yet" };
+  }
+  if (verdict === "winning") {
+    return { state: "ahead", text: "Variant is ahead", reason: `+${signedWholePct(lift)} ${metricWord(metricName)}` };
+  }
+  if (verdict === "losing") {
+    return { state: "losing", text: "Variant is losing", reason: `−${signedWholePct(lift)} ${metricWord(metricName)}` };
+  }
+  return {
+    state: "too_early",
+    text: "Too early to tell",
+    reason: lift != null ? `${lift >= 0 ? "+" : "−"}${signedWholePct(lift)}, not sig.` : "no data yet",
+  };
+}
+
+/** Whole percent, magnitude only — the caller supplies the sign. */
+function signedWholePct(lift: number | null): string {
+  if (lift == null) return "0%";
+  return `${Math.round(Math.abs(lift))}%`;
+}
+
+/** "Owner signups" → "signups"; "Owner Signups" → "signups"; fallback "signups". */
+function metricWord(metricName: string | null): string {
+  const word = (metricName ?? "").trim().toLowerCase().replace(/^owner\s+/, "");
+  return word || "signups";
 }
 
 /**

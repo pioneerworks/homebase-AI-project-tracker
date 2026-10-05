@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, CircleDashed, Hourglass, TrendingDown, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -20,6 +20,14 @@ const STATUS_LABELS: Record<HubStatus, string> = {
   draft: "Draft",
   concluded: "Concluded",
 };
+
+/** Tagline icons by state; colour comes from the CSS class (handoff §6). */
+const TAGLINE_ICONS = {
+  ahead: TrendingUp,
+  losing: TrendingDown,
+  too_early: Hourglass,
+  not_started: CircleDashed,
+} as const;
 
 export type TableState = "ok" | "fetch-failed" | "unconfigured";
 
@@ -185,6 +193,11 @@ function RowFragment({
         <td className="exp-td">
           <span className="exp-cellname">{item.name}</span>
           {item.path ? <span className="exp-cellpath">{item.path}</span> : null}
+          <span className={`exp-tagline exp-tagline-${item.tagline.state}`}>
+            <TaglineIcon state={item.tagline.state} />
+            <strong>{item.tagline.text}</strong>
+            {item.tagline.reason ? <span className="exp-tagline-reason"> · {item.tagline.reason}</span> : null}
+          </span>
         </td>
         <td className="exp-td">
           <span className={`exp-pill exp-pill-${item.status}`}>{STATUS_LABELS[item.status]}</span>
@@ -231,4 +244,10 @@ function RowFragment({
       ) : null}
     </>
   );
+}
+
+/** The tagline's state icon, keyed off the shared map. */
+function TaglineIcon({ state }: { state: keyof typeof TAGLINE_ICONS }) {
+  const Icon = TAGLINE_ICONS[state];
+  return <Icon size={12} aria-hidden="true" />;
 }

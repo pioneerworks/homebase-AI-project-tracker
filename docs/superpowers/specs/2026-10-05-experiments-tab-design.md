@@ -4,7 +4,7 @@
 
 ## Goal
 
-An "A/B testing" item sits under Overview in the AI Hub sidebar. Clicking it opens `/experiments`. That route swaps the sidebar for the Experiments sidebar and shows every Statsig experiment in one table, with expandable detail rows, program KPIs, a decision banner and a 28-day test calendar, following `XrNZp.png` at 1440 wide. All data is live from the Statsig Console API, read server-side only.
+An "A/B testing" item sits under Overview in the AI Hub sidebar. Clicking it opens `/experiments`. That route swaps the sidebar for the Experiments sidebar and shows every Statsig experiment in one table — with a tagline verdict per row, expandable detail rows, program KPIs under the header and a decision banner at the bottom — following `XrNZp.png` at 1440 wide. All data is live from the Statsig Console API, read server-side only.
 
 ## What the live Statsig API gives us (probed 2026-10-05, key from Vercel prod env)
 
@@ -55,6 +55,12 @@ Table order: live, then queued, then draft, then concluded. Within each group, n
   - Lift: Statsig's `percentChange`. Don't recompute it.
   - Verdict: `verdictFromPrimary`.
   - Display: lift has one decimal and a real minus sign (`−3.0%`). Rates have two decimals.
+- **Tagline** (revised handoff §6): a one-line verdict under each name, derived with the verdict:
+  - live/concluded + `winning` → "Variant is ahead" · `+N% signups` (`TrendingUp`, success)
+  - live/concluded + `losing` → "Variant is losing" · `−N% signups` (`TrendingDown`, danger)
+  - live/concluded + `no-signal`/`no-data` → "Too early to tell" · `±N%, not sig.` or "no data yet" (`Hourglass`, ink text/muted icon)
+  - queued/draft → "Not started yet" (`CircleDashed`, ink text/muted icon)
+  - Lift in the reason is a whole percent; "Owner signups" shortens to "signups". The reason truncates with an ellipsis before the verdict wraps. (Deviation from the handoff's literal conditions: concluded no-signal rows also get "Too early to tell" — the handoff only names live ones, but a concluded row saying "not started" would be wrong.)
 - **Significance label:** `losing` → "Sig. loss" (danger). `winning` → "Sig. win" (success). `no-signal` → `Not yet · p≈${p.toFixed(2)}` (muted). `no-data`, queued and draft → "—".
 - **Guardrails:** the `secondaryMetrics` names joined with " · ", or "—". **MDE:** "—". **Planned run:** `${duration} days`, or "—".
 - **Results line:**

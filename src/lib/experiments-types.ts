@@ -18,6 +18,9 @@ export type MetricResult = {
   lift: number | null;
 };
 
+export type TaglineState = "ahead" | "losing" | "too_early" | "not_started";
+export type Tagline = { state: TaglineState; text: string; reason?: string };
+
 export type ExperimentListItem = {
   id: string;
   name: string;
@@ -49,6 +52,8 @@ export type ExperimentListItem = {
   armNames: { control: string; test: string };
   /** [Sign ups, 1D1s] when present */
   results: MetricResult[];
+  /** One-line verdict under the name (handoff §6): ahead / losing / too early / not started. */
+  tagline: Tagline;
   /** "Day 10 of 28" | "Starts Oct 20" | "Unscheduled" | "Ended Oct 1" */
   progressLabel: string;
 };

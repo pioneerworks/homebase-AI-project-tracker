@@ -18,6 +18,7 @@ import {
   sortExperiments,
   surfaceOf,
   srm,
+  taglineOf,
   toCsv,
   toListItem,
 } from "../src/lib/experiments-derive";
@@ -123,6 +124,7 @@ const base: ExperimentListItem = {
   armUrls: { control: null, test: null },
   armNames: { control: "control", test: "test" },
   results: [],
+  tagline: { state: "too_early", text: "Too early to tell" },
   progressLabel: "Unscheduled",
 };
 
@@ -196,6 +198,32 @@ test("significanceLabel per verdict", () => {
   assert.deepEqual(significanceLabel({ ...base, status: "live", verdict: "winning", pValue: 0.01 }), { text: "Sig. win", tone: "success" });
   assert.deepEqual(significanceLabel({ ...base, status: "live", verdict: "no-signal", pValue: 0.7964 }), { text: "Not yet · p≈0.80", tone: "muted" });
   assert.deepEqual(significanceLabel({ ...base, status: "queued", verdict: "no-data", pValue: null }), { text: "—", tone: null });
+});
+
+test("taglineOf covers the four states (handoff §6, revised)", () => {
+  assert.deepEqual(
+    taglineOf("live", "losing", "Owner Signups", -53.4),
+    { state: "losing", text: "Variant is losing", reason: "−53% signups" },
+  );
+  assert.deepEqual(
+    taglineOf("live", "winning", "Owner Signups", 12.4),
+    { state: "ahead", text: "Variant is ahead", reason: "+12% signups" },
+  );
+  assert.deepEqual(
+    taglineOf("live", "no-signal", "Owner Signups", 7.3),
+    { state: "too_early", text: "Too early to tell", reason: "+7%, not sig." },
+  );
+  assert.deepEqual(
+    taglineOf("live", "no-data", null, null),
+    { state: "too_early", text: "Too early to tell", reason: "no data yet" },
+  );
+  assert.deepEqual(taglineOf("queued", "no-data", null, null), { state: "not_started", text: "Not started yet" });
+  assert.deepEqual(taglineOf("draft", "no-data", null, null), { state: "not_started", text: "Not started yet" });
+});
+
+test("toListItem carries the tagline", () => {
+  const item = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  assert.deepEqual(item.tagline, { state: "too_early", text: "Too early to tell", reason: "−3%, not sig." });
 });
 
 test("srm matches chi-square goodness of fit", () => {

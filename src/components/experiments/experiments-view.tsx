@@ -140,6 +140,27 @@ export default function ExperimentsView({
         </div>
       </header>
 
+      <section className="exp-kpis" aria-label="Program KPIs">
+        {page
+          ? page.kpis.map((kpi) => (
+              <div
+                key={kpi.id}
+                className={`exp-kpi${kpi.tone === "danger" ? " exp-kpi-danger" : ""}`}
+              >
+                <span className="exp-kpi-label">{kpi.label}</span>
+                <span className="exp-kpi-value">{kpi.value}</span>
+                <span className="exp-kpi-context">{kpi.context}</span>
+              </div>
+            ))
+          : KPI_LABELS.map((label) => (
+              <div key={label} className="exp-kpi">
+                <span className="exp-kpi-label">{label}</span>
+                <span className="exp-kpi-value">—</span>
+                <span className="exp-kpi-context">—</span>
+              </div>
+            ))}
+      </section>
+
       <section className="exp-section" aria-labelledby="exp-all-title">
         <div className="exp-section-head">
           <div className="exp-section-titlerow">
@@ -183,27 +204,6 @@ export default function ExperimentsView({
             </p>
           </div>
         ) : null}
-      </section>
-
-      <section className="exp-kpis" aria-label="Program KPIs">
-        {page
-          ? page.kpis.map((kpi) => (
-              <div
-                key={kpi.id}
-                className={`exp-kpi${kpi.tone === "danger" ? " exp-kpi-danger" : ""}`}
-              >
-                <span className="exp-kpi-label">{kpi.label}</span>
-                <span className="exp-kpi-value">{kpi.value}</span>
-                <span className="exp-kpi-context">{kpi.context}</span>
-              </div>
-            ))
-          : KPI_LABELS.map((label) => (
-              <div key={label} className="exp-kpi">
-                <span className="exp-kpi-label">{label}</span>
-                <span className="exp-kpi-value">—</span>
-                <span className="exp-kpi-context">—</span>
-              </div>
-            ))}
       </section>
 
       {decision && stopExperiment ? (
