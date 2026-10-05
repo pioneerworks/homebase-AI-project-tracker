@@ -6,7 +6,6 @@ import {
   CircleCheck,
   Image as ImageIcon,
   Split,
-  Square,
   Target,
   Timer,
   TriangleAlert,
@@ -14,7 +13,6 @@ import {
 import { useEffect, useState } from "react";
 
 import DailyCharts from "@/components/experiments/daily-charts";
-import StopDialog from "@/components/experiments/stop-dialog";
 import { formatLift, formatRate } from "@/lib/experiments-derive";
 import type {
   DailyPoint,
@@ -93,7 +91,6 @@ export default function ExperimentDetailPanel({ item }: { item: ExperimentListIt
     return cached ? { kind: "ok", detail: cached } : { kind: "loading" };
   });
   const [attempt, setAttempt] = useState(0);
-  const [stopOpen, setStopOpen] = useState(false);
 
   useEffect(() => {
     if (slim) return;
@@ -154,26 +151,19 @@ export default function ExperimentDetailPanel({ item }: { item: ExperimentListIt
         <div className="exp-d-actions">
           {item.statsigUrl ? (
             <a
-              className="exp-btn exp-btn-outline exp-btn-sm"
+              className="exp-btn exp-btn-dark exp-btn-sm"
               href={item.statsigUrl}
               target="_blank"
               rel="noreferrer"
             >
               Open in Statsig
+              <ArrowUpRight size={12} aria-hidden="true" />
             </a>
           ) : (
-            <button type="button" className="exp-btn exp-btn-outline exp-btn-sm" disabled>
+            <button type="button" className="exp-btn exp-btn-dark exp-btn-sm" disabled>
               Open in Statsig
             </button>
           )}
-          <button
-            type="button"
-            className="exp-btn exp-btn-danger exp-btn-sm"
-            onClick={() => setStopOpen(true)}
-          >
-            <Square size={12} aria-hidden="true" />
-            Stop &amp; keep control
-          </button>
         </div>
       </div>
 
@@ -218,16 +208,6 @@ export default function ExperimentDetailPanel({ item }: { item: ExperimentListIt
           <DailyBlock daily={state.detail?.daily ?? null} />
         </>
       ) : null}
-
-      <StopDialog
-        experiment={{
-          name: item.name,
-          statsigUrl: item.statsigUrl,
-          controlArmName: item.armNames.control,
-        }}
-        open={stopOpen}
-        onClose={() => setStopOpen(false)}
-      />
     </div>
   );
 }

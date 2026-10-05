@@ -2,10 +2,9 @@
 
 import { Archive, ArrowUpRight, Download, Gavel } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 
 import ExperimentTable from "@/components/experiments/experiment-table";
-import StopDialog, { type StopDialogExperiment } from "@/components/experiments/stop-dialog";
 import {
   filterItems,
   parseFilters,
@@ -63,7 +62,6 @@ export default function ExperimentsView({
     view: params.get("view"),
     surface: params.get("surface"),
   });
-  const [stopOpen, setStopOpen] = useState(false);
 
   const filtered = page ? filterItems(page.experiments, { view, surface }) : [];
   const tableState = page === undefined ? "fetch-failed" : page === null ? "unconfigured" : "ok";
@@ -80,16 +78,6 @@ export default function ExperimentsView({
     : null;
 
   const decision = page?.decision ?? null;
-  const decisionItem =
-    decision && page ? page.experiments.find((i) => i.id === decision.experimentId) ?? null : null;
-  const stopExperiment: StopDialogExperiment | null =
-    decision && decisionItem
-      ? {
-          name: decisionItem.name,
-          statsigUrl: decision.statsigUrl,
-          controlArmName: decisionItem.armNames.control,
-        }
-      : null;
 
   const hrefForView = (v: View) => `/experiments?view=${v}${surface ? `&surface=${surface}` : ""}`;
   const setView = (v: View) => (event: MouseEvent<HTMLButtonElement>) => {
@@ -206,7 +194,7 @@ export default function ExperimentsView({
         ) : null}
       </section>
 
-      {decision && stopExperiment ? (
+      {decision ? (
         <section className="exp-banner" aria-label="Decision needed">
           <span className="exp-banner-chip" aria-hidden="true">
             <Gavel size={18} />
@@ -219,14 +207,17 @@ export default function ExperimentsView({
             <a className="exp-btn exp-btn-outline exp-btn-sm" href={decision.slackUrl} target="_blank" rel="noreferrer">
               Discuss in #ab-testing
             </a>
-            <button type="button" className="exp-btn exp-btn-danger exp-btn-sm" onClick={() => setStopOpen(true)}>
-              Stop &amp; keep control
-            </button>
+            <a
+              className="exp-btn exp-btn-dark exp-btn-sm"
+              href={decision.statsigUrl ?? STATSIG_EXPERIMENTS_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in Statsig
+              <ArrowUpRight size={12} aria-hidden="true" />
+            </a>
           </div>
         </section>
-      ) : null}
-      {stopExperiment ? (
-        <StopDialog experiment={stopExperiment} open={stopOpen} onClose={() => setStopOpen(false)} />
       ) : null}
     </div>
   );
