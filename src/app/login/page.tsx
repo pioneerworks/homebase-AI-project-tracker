@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/oidc-session";
 
 export const metadata: Metadata = {
-  title: "Sign in · Homebase migration progress",
+  title: "Sign in · AI Hub · Homebase",
 };
 
 const errorMessages: Record<string, string> = {
@@ -39,15 +39,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="login-page">
       <section className="login-panel" aria-labelledby="login-title">
-        <a className="login-brand" href="/" aria-label="Homebase migration home">
+        <a className="login-brand" href="/" aria-label="Homebase AI Hub home">
           <span className="login-brand-mark" aria-hidden="true" />
           <span>Homebase</span>
         </a>
         <div className="login-kicker">Internal dashboard</div>
-        <h1 id="login-title">Migration progress</h1>
+        <h1 id="login-title">AI Hub</h1>
         <p>
-          Sign in with your Homebase Okta account to view migration progress,
-          page activity, and implementation decisions.
+          Sign in with your Homebase Okta account to view milestones, owners,
+          experiments, and signup impact for the AI team&apos;s projects.
         </p>
 
         {error ? (
