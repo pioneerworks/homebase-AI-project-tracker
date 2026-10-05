@@ -1,0 +1,556 @@
+/**
+ * Pure derivations for the Experiments tab: everything the hub renders is
+ * computed here from the Statsig DTOs, with no fetching and no server-only
+ * imports, so both the API routes and the client components can use it.
+ *
+ * See docs/superpowers/specs/2026-10-05-experiments-tab-design.md
+ * ("Status mapping" and "Field derivations").
+ */
+import { experimentDay, experimentTitle, verdictFromPrimary } from "./statsig-pure";
+import type { ExperimentPulseResultsDto, ExternalExperimentDto } from "./statsig-types";
+import type {
+  CalendarRow,
+  Decision,
+  ExperimentListItem,
+  ExperimentsNav,
+  ExperimentsPage,
+  HubStatus,
+  Kpi,
+  MetricResult,
+  Surface,
+  View,
+} from "./experiments-types";
+
+export const SURFACE_LABELS: Record<Surface, string> = {
+  landing_page: "Landing pages",
+  signup_flow: "Signup flow",
+  tool_page: "Tool pages",
+};
+
+export const SLACK_CHANNEL_URL = "https://homebase.slack.com/app_redirect?channel=ab-testing";
+export const STATSIG_EXPERIMENTS_URL = "https://console.statsig.com/experiments";
+
+const VIEW_ORDER: View[] = ["all", "live", "decision", "queued", "draft", "concluded"];
+const SURFACES: Surface[] = ["landing_page", "signup_flow", "tool_page"];
+const STATUS_ORDER: Record<HubStatus, number> = { live: 0, queued: 1, draft: 2, concluded: 3 };
+const DAY_MS = 86400000;
+
+// ---------------------------------------------------------------------------
+// Date helpers (UTC only, so results never depend on the server timezone)
+// ---------------------------------------------------------------------------
+
+function isoDate(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+function parseDay(date: string): number {
+  return Date.parse(`${date}T00:00:00Z`);
+}
+
+function addDays(date: string, days: number): string {
+  return isoDate(parseDay(date) + days * DAY_MS);
+}
+
+/** "Fri, Sep 25" — the one date format the hub uses outside of ISO strings. */
+function formatDate(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Field derivations
+// ---------------------------------------------------------------------------
+
+/**
+ * Statsig status → hub status, or null when the experiment is excluded from
+ * the hub (abandoned/archived). A `setup` experiment is queued when it has a
+ * scheduled start or a `queued` tag, otherwise it is a draft.
+ */
+export function hubStatus(e: ExternalExperimentDto): HubStatus | null {
+  switch (e.status) {
+    case "active":
+      return "live";
+    case "setup":
+      return e.scheduledStartTime != null || (e.tags ?? []).some((t) => t.toLowerCase() === "queued")
+        ? "queued"
+        : "draft";
+    case "decision_made":
+    case "experiment_stopped":
+    case "assignment_stopped":
+      return "concluded";
+    default:
+      return null;
+  }
+}
+
+/** The marketing path under test: description, then sidecar URL, then the control arm's destination_url. */
+export function experimentPath(e: ExternalExperimentDto): string | null {
+  const described = e.description?.match(/A\/B test on (\/[^\s:]+)/);
+  if (described) return described[1];
+  return pathnameOf(e.sidecarEditorURL) ?? controlDestination(e);
+}
+
+function pathnameOf(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("/")) return url;
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return null;
+  }
+}
+
+function controlDestination(e: ExternalExperimentDto): string | null {
+  const control = controlGroup(e);
+  const destination = control?.parameterValues?.destination_url;
+  return typeof destination === "string" ? pathnameOf(destination) : null;
+}
+
+function controlGroup(e: ExternalExperimentDto): ExternalExperimentDto["groups"][number] | undefined {
+  return e.groups.find((g) => (g.id && g.id === e.controlGroupID) || g.isControl) ?? e.groups[0];
+}
+
+function testGroup(e: ExternalExperimentDto): ExternalExperimentDto["groups"][number] | undefined {
+  const control = controlGroup(e);
+  return e.groups.find((g) => g.id && g.id !== control?.id);
+}
+
+export function surfaceOf(path: string | null): Surface {
+  if (path?.startsWith("/signup")) return "signup_flow";
+  if (path?.includes("/tools/")) return "tool_page";
+  return "landing_page";
+}
+
+/** owner.ownerName, unless empty or a Console API service account; then lastModifierName under the same rule. */
+export function ownerOf(e: ExternalExperimentDto): string | null {
+  for (const candidate of [e.owner?.ownerName, e.lastModifierName]) {
+    if (candidate && candidate.trim() && !candidate.startsWith("CONSOLE API")) return candidate;
+  }
+  return null;
+}
+
+/**
+ * Each arm's URL: the arm's `parameterValues.destination_url` when present,
+ * otherwise the marketing path on joinhomebase.com for both arms.
+ */
+export function armUrls(
+  e: ExternalExperimentDto,
+  path: string | null,
+): { control: string | null; test: string | null } {
+  const urlFor = (group: ExternalExperimentDto["groups"][number] | undefined): string | null => {
+    const destination = group?.parameterValues?.destination_url;
+    if (typeof destination === "string" && destination) return destination;
+    return path ? `https://www.joinhomebase.com${path}` : null;
+  };
+  return { control: urlFor(controlGroup(e)), test: urlFor(testGroup(e)) };
+}
+
+function targetSplitOf(e: ExternalExperimentDto): [number, number] {
+  return [controlGroup(e)?.size ?? 0, testGroup(e)?.size ?? 0];
+}
+
+function metricResult(label: string, row: ExperimentPulseResultsDto["primaryMetrics"][number] | undefined): MetricResult | null {
+  if (!row || row.error) return null;
+  if (row.controlMean == null || row.testMean == null || row.controlUnits == null || row.testUnits == null) {
+    return null;
+  }
+  return {
+    label,
+    control: Math.round(row.controlMean * row.controlUnits),
+    test: Math.round(row.testMean * row.testUnits),
+    controlRate: row.controlMean * 100,
+    testRate: row.testMean * 100,
+    lift: row.percentChange ?? null,
+  };
+}
+
+function progressLabelOf(
+  status: HubStatus,
+  e: ExternalExperimentDto,
+  day: number | null,
+): string {
+  if (status === "live" && day != null && e.duration != null) return `Day ${day} of ${e.duration}`;
+  if (status === "queued" && e.scheduledStartTime != null) return `Starts ${formatDate(e.scheduledStartTime)}`;
+  if (status === "concluded" && e.startTime != null && e.duration != null) {
+    return `Ended ${formatDate(e.startTime + e.duration * DAY_MS)}`;
+  }
+  return "Unscheduled";
+}
+
+/** One flat row per experiment, ready to render. Excluded statuses are the caller's problem (`hubStatus` → null). */
+export function toListItem(
+  e: ExternalExperimentDto,
+  pulse: ExperimentPulseResultsDto | undefined,
+  now: number = Date.now(),
+): ExperimentListItem {
+  const path = experimentPath(e);
+  const status = hubStatus(e) ?? "draft";
+  const primaryRow = pulse?.primaryMetrics?.[0];
+  const verdict = primaryRow
+    ? verdictFromPrimary(primaryRow)
+    : { verdict: "no-data" as const, percentChange: null as number | null, pValue: null as number | null };
+
+  const hasRate = primaryRow != null && !primaryRow.error && primaryRow.controlMean != null && primaryRow.testMean != null;
+
+  const results: MetricResult[] = [];
+  const signups = metricResult("Sign ups", primaryRow);
+  if (signups) results.push(signups);
+  const oneDayOne = pulse?.secondaryMetrics?.find((row) => row.metricName === "1D1");
+  const oneDayOneResult = metricResult("1D1s", oneDayOne);
+  if (oneDayOneResult) results.push(oneDayOneResult);
+
+  const day = experimentDay(e.startTime, now);
+  const startMs = e.startTime ?? (status === "queued" ? e.scheduledStartTime ?? null : null);
+  const guardrails = (e.secondaryMetrics ?? []).map((m) => m.name).join(" · ");
+
+  return {
+    id: e.id,
+    name: experimentTitle(e.name),
+    path,
+    surface: surfaceOf(path),
+    status,
+    primaryMetric: primaryRow?.metricName ?? e.primaryMetrics?.[0]?.name ?? null,
+    owner: ownerOf(e),
+    statsigUrl: e.permalink ?? null,
+    hypothesis: e.hypothesis || null,
+    guardrails: guardrails || "—",
+    plannedRun: e.duration != null ? `${e.duration} days` : "—",
+    controlRate: hasRate ? primaryRow!.controlMean! * 100 : null,
+    testRate: hasRate ? primaryRow!.testMean! * 100 : null,
+    lift: verdict.percentChange,
+    pValue: verdict.pValue,
+    verdict: verdict.verdict,
+    controlN: primaryRow?.controlUnits ?? null,
+    testN: primaryRow?.testUnits ?? null,
+    day,
+    totalDays: e.duration ?? null,
+    startDate: startMs != null ? isoDate(startMs) : null,
+    endDate: startMs != null && e.duration != null ? isoDate(startMs + e.duration * DAY_MS) : null,
+    targetSplit: targetSplitOf(e),
+    armUrls: armUrls(e, path),
+    armNames: { control: controlGroup(e)?.name ?? "Control", test: testGroup(e)?.name ?? "Test" },
+    results,
+    progressLabel: progressLabelOf(status, e, day),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Table, KPIs, decision banner, calendar, nav, filters, CSV
+// ---------------------------------------------------------------------------
+
+function byStartDesc(a: string | null, b: string | null): number {
+  if (a === b) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return a < b ? 1 : -1;
+}
+
+/** live, queued, draft, concluded; newest start first within each group. */
+export function sortExperiments(items: ExperimentListItem[]): ExperimentListItem[] {
+  return [...items].sort(
+    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || byStartDesc(a.startDate, b.startDate),
+  );
+}
+
+function formatP(p: number): string {
+  return p >= 0.001 ? p.toFixed(3) : p.toExponential(1);
+}
+
+/** First live experiment with a significant loss, if any — that's the decision banner. */
+export function pickDecision(items: ExperimentListItem[]): Decision | null {
+  const item = items.find(
+    (i) => i.status === "live" && i.verdict === "losing" && i.controlRate != null && i.testRate != null,
+  );
+  if (!item) return null;
+
+  const rates = `${item.controlRate!.toFixed(2)}% → ${item.testRate!.toFixed(2)}%`;
+  const p = item.pValue != null ? formatP(item.pValue) : "—";
+  const heavy = item.lift != null && item.lift <= -50;
+  const head = heavy
+    ? `Test arm converts at less than half of control (${rates}, p = ${p})`
+    : `Test arm converts below control (${rates}, p = ${p})`;
+  const dailyCost = item.day != null && item.day > 0 && item.testN != null
+    ? Math.round(((item.controlRate! - item.testRate!) / 100) * item.testN / item.day)
+    : null;
+  const body = dailyCost != null
+    ? `${head}. Keeping it live costs roughly ${dailyCost} owner signups a day.`
+    : `${head}.`;
+
+  return {
+    experimentId: item.id,
+    title: `Needs a decision: stop the ${item.name} test`,
+    body,
+    statsigUrl: item.statsigUrl,
+    slackUrl: SLACK_CHANNEL_URL,
+  };
+}
+
+export function formatLift(n: number | null): string {
+  if (n == null) return "—";
+  const sign = n > 0 ? "+" : n < 0 ? "−" : "";
+  return `${sign}${Math.abs(n).toFixed(1)}%`;
+}
+
+export function formatRate(n: number | null): string {
+  if (n == null) return "—";
+  return `${n.toFixed(2)}%`;
+}
+
+export function significanceLabel(item: ExperimentListItem): { text: string; tone: "danger" | "success" | "muted" | null } {
+  if (item.status === "queued" || item.status === "draft") return { text: "—", tone: null };
+  switch (item.verdict) {
+    case "losing":
+      return { text: "Sig. loss", tone: "danger" };
+    case "winning":
+      return { text: "Sig. win", tone: "success" };
+    case "no-signal":
+      return {
+        text: item.pValue != null ? `Not yet · p≈${item.pValue.toFixed(2)}` : "Not yet",
+        tone: "muted",
+      };
+    default:
+      return { text: "—", tone: null };
+  }
+}
+
+/**
+ * Sample-ratio mismatch: chi-square goodness of fit of the observed counts
+ * against the target split, 1 degree of freedom. Returns null when either
+ * side is degenerate (no observations or an empty split).
+ */
+export function srm(counts: [number, number], target: [number, number]): { ok: boolean; pValue: number } | null {
+  const total = counts[0] + counts[1];
+  const targetTotal = target[0] + target[1];
+  if (total <= 0 || targetTotal <= 0) return null;
+
+  const chi2 = counts.reduce((sum, observed, i) => {
+    const expected = total * (target[i] / targetTotal);
+    if (expected <= 0) return sum + (observed > 0 ? Infinity : 0);
+    return sum + (observed - expected) ** 2 / expected;
+  }, 0);
+  const pValue = erfc(Math.sqrt(chi2 / 2));
+  return { ok: pValue >= 0.01, pValue };
+}
+
+/** Complementary error function, Abramowitz–Stegun 7.1.26 (|ε| < 1.5e-7). */
+function erfc(x: number): number {
+  const t = 1 / (1 + 0.3275911 * x);
+  const y = t
+    * (0.254829592
+      + t * (-0.284496736
+        + t * (1.421413741
+          + t * (-1.453152027 + t * 1.061405429))));
+  return y * Math.exp(-x * x);
+}
+
+/** Per-day deltas of a cumulative series; a negative delta (backfill, dedup) clamps to 0. */
+export function dailyFromCumulative(series: { date: string; value: number }[]): { date: string; value: number }[] {
+  let previous = 0;
+  return series.map(({ date, value }) => {
+    const delta = value - previous;
+    previous = value;
+    return { date, value: Math.max(0, delta) };
+  });
+}
+
+const VERDICT_PHRASES: Record<ExperimentListItem["verdict"], string> = {
+  winning: "significant win",
+  losing: "significant loss",
+  "no-signal": "not yet significant",
+  "no-data": "no data yet",
+};
+
+function calendarBarLabel(item: ExperimentListItem): string {
+  if (item.startDate == null) {
+    if (item.status === "draft") {
+      return `Unscheduled · ${item.hypothesis ? "Hypothesis set" : "Hypothesis in review"}`;
+    }
+    return "Unscheduled";
+  }
+  if (item.status === "queued") return "Queued";
+  return `${formatLift(item.lift)} · ${VERDICT_PHRASES[item.verdict]}`;
+}
+
+/** Six-week window starting on the Monday on or before `today − 14d`, one row per experiment. */
+export function buildCalendar(items: ExperimentListItem[], today: string): ExperimentsPage["calendar"] {
+  const fourteenDaysAgo = addDays(today, -14);
+  const dayOfWeek = new Date(`${fourteenDaysAgo}T00:00:00Z`).getUTCDay();
+  const start = addDays(fourteenDaysAgo, -((dayOfWeek + 6) % 7));
+  const weeks = Array.from({ length: 6 }, (_, k) => addDays(start, k * 7));
+
+  const rows: CalendarRow[] = items.map((item) => ({
+    id: item.id,
+    label: item.name,
+    sub: item.hypothesis ?? "",
+    start: item.startDate,
+    end: item.endDate,
+    barLabel: calendarBarLabel(item),
+    tone: item.verdict === "losing" ? "losing" : item.status,
+  }));
+
+  return { start, weeks, rows };
+}
+
+export function parseFilters(params: { view?: string | null; surface?: string | null }): { view: View; surface: Surface | null } {
+  return {
+    view: VIEW_ORDER.includes(params.view as View) ? (params.view as View) : "all",
+    surface: SURFACES.includes(params.surface as Surface) ? (params.surface as Surface) : null,
+  };
+}
+
+export function filterItems(items: ExperimentListItem[], f: { view: View; surface: Surface | null }): ExperimentListItem[] {
+  return items.filter((item) => {
+    if (f.surface && item.surface !== f.surface) return false;
+    switch (f.view) {
+      case "all":
+        return true;
+      case "live":
+        return item.status === "live";
+      case "decision":
+        return item.status === "live" && item.verdict === "losing";
+      default:
+        return item.status === f.view;
+    }
+  });
+}
+
+export function buildNav(items: ExperimentListItem[], sync: { ok: boolean; at: string | null }): ExperimentsNav {
+  const counts: Record<View, number> = { all: items.length, live: 0, decision: 0, queued: 0, draft: 0, concluded: 0 };
+  const surfaces: Record<Surface, number> = { landing_page: 0, signup_flow: 0, tool_page: 0 };
+  const live: ExperimentsNav["live"] = [];
+
+  for (const item of items) {
+    counts[item.status] += 1;
+    surfaces[item.surface] += 1;
+    if (item.status === "live") {
+      const losing = item.verdict === "losing";
+      if (losing) counts.decision += 1;
+      live.push({
+        id: item.id,
+        name: item.name,
+        lift: item.lift,
+        losing,
+        day: item.day,
+        totalDays: item.totalDays,
+      });
+    }
+  }
+
+  return { counts, surfaces, live, sync };
+}
+
+const CSV_HEADER
+  = "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Progress,Owner";
+
+function csvField(value: string | number | null): string {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+export function toCsv(items: ExperimentListItem[]): string {
+  const lines = [CSV_HEADER];
+  for (const item of items) {
+    lines.push(
+      [
+        item.name,
+        item.path ?? "",
+        item.status,
+        item.primaryMetric ?? "—",
+        formatRate(item.controlRate),
+        formatRate(item.testRate),
+        formatLift(item.lift),
+        significanceLabel(item).text,
+        item.controlN ?? "",
+        item.testN ?? "",
+        item.progressLabel,
+        item.owner ?? "Unassigned",
+      ]
+        .map(csvField)
+        .join(","),
+    );
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+function sumSignups(items: ExperimentListItem[]): { control: number; test: number; any: boolean } {
+  let control = 0;
+  let test = 0;
+  let any = false;
+  for (const item of items) {
+    for (const result of item.results) {
+      if (result.label !== "Sign ups") continue;
+      control += result.control;
+      test += result.test;
+      any = true;
+    }
+  }
+  return { control, test, any };
+}
+
+function milestoneKpi(milestone: { progress: number; targetDate: string | null }, today: string): Kpi {
+  if (milestone.targetDate == null) {
+    return { id: "milestone", label: "M1 · First live experiments", value: `${milestone.progress}%`, context: "—" };
+  }
+  const due = parseDay(milestone.targetDate);
+  const overdue = Math.floor((parseDay(today) - due) / DAY_MS);
+  return {
+    id: "milestone",
+    label: "M1 · First live experiments",
+    value: `${milestone.progress}%`,
+    context: `Due ${formatDate(due)}${overdue > 0 ? ` · ${overdue} day${overdue === 1 ? "" : "s"} overdue` : ""}`,
+    tone: overdue > 0 ? "danger" : undefined,
+  };
+}
+
+export function buildKpis(
+  items: ExperimentListItem[],
+  opts: {
+    visitors7d: { control: number; test: number } | null;
+    milestone: { progress: number; targetDate: string | null } | null;
+    today: string;
+  },
+): Kpi[] {
+  const live = items.filter((i) => i.status === "live");
+  const landingPages = live.filter((i) => i.surface === "landing_page").length;
+  const signupFlows = live.filter((i) => i.surface === "signup_flow").length;
+  const losses = live.filter((i) => i.verdict === "losing").length;
+  const wins = live.filter((i) => i.verdict === "winning").length;
+  const signups = sumSignups(live);
+
+  return [
+    {
+      id: "live",
+      label: "Live tests",
+      value: String(live.length),
+      context: `${landingPages} landing pages · ${signupFlows} signup flow`,
+    },
+    {
+      id: "significant",
+      label: "Significant results",
+      value: String(losses + wins),
+      context: `${losses} loss${losses === 1 ? "" : "es"} · ${wins} win${wins === 1 ? "" : "s"}`,
+    },
+    opts.visitors7d
+      ? {
+          id: "visitors",
+          label: "Visitors in test · 7d",
+          value: (opts.visitors7d.control + opts.visitors7d.test).toLocaleString("en-US"),
+          context: `${opts.visitors7d.control.toLocaleString("en-US")} control · ${opts.visitors7d.test.toLocaleString("en-US")} test`,
+        }
+      : { id: "visitors", label: "Visitors in test · 7d", value: "—", context: "—" },
+    signups.any
+      ? {
+          id: "signups",
+          label: "Owner signups in test",
+          value: (signups.control + signups.test).toLocaleString("en-US"),
+          context: `Control ${signups.control.toLocaleString("en-US")} · Test ${signups.test.toLocaleString("en-US")}`,
+        }
+      : { id: "signups", label: "Owner signups in test", value: "—", context: "—" },
+    opts.milestone
+      ? milestoneKpi(opts.milestone, opts.today)
+      : { id: "milestone", label: "M1 · First live experiments", value: "—", context: "—" },
+  ];
+}
