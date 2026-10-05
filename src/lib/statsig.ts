@@ -58,7 +58,8 @@ export function statsigConfig(
 /** Per-request deadline; the pulse calls run in parallel after the list call. Mutable for tests. */
 export const statsigTimeout = { ms: 6_000 };
 
-async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
+/** Shared with the Experiments tab loader; behaviour unchanged. */
+export async function consoleGet<T>(apiKey: string, path: string): Promise<T> {
   const response = await fetchWithTimeout(
     `${CONSOLE_BASE}${path}`,
     {
