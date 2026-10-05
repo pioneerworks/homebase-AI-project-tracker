@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Download, Gavel } from "lucide-react";
+import { Archive, ArrowUpRight, Download, Gavel } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type MouseEvent } from "react";
 
@@ -175,6 +175,7 @@ export default function ExperimentsView({
 
         {counts && !counts.hasConcluded ? (
           <div className="exp-archive">
+            <Archive size={16} aria-hidden="true" />
             <p className="exp-archive-copy">
               No concluded experiments yet — results and learnings will collect here once M1 tests
               are called.

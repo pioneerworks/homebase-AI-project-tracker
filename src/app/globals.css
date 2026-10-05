@@ -4529,6 +4529,7 @@ a.exp-name:hover {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--muted);
 }
 
 .exp-archive-copy {

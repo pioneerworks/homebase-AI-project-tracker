@@ -30,7 +30,7 @@ export default function ExperimentTable({
 }: {
   items: ExperimentListItem[];
   state?: TableState;
-  /** ?open={id} — seeds the open set once on mount and scrolls to the row. */
+  /** ?open={id} — seeds the open set (replacing it on each new seed) and scrolls to the row. */
   seededId?: string | null;
   renderDetail?: (item: ExperimentListItem) => ReactNode;
 }) {
@@ -38,14 +38,19 @@ export default function ExperimentTable({
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set(seededId != null ? [seededId] : []),
   );
-  const seededScroll = useRef(false);
+  // The last ?open value we acted on; null means "no seed handled yet", so a
+  // direct load with ?open={id} seeds and scrolls exactly like before.
+  const lastSeed = useRef<string | null>(null);
 
-  // Live-now links land here with ?open={id}: expand that row and bring it
-  // into view, once, after the table has rendered.
+  // Live-now links land here with ?open={id}. The table stays mounted across
+  // client-side navigations, so each NEW seed value replaces the open set
+  // (dropping rows the user opened earlier) and scrolls once; a removed or
+  // unknown id leaves the current rows alone.
   useEffect(() => {
-    if (seededScroll.current || seededId == null || state !== "ok") return;
-    if (!items.some((item) => item.id === seededId)) return;
-    seededScroll.current = true;
+    if (seededId == null || seededId === lastSeed.current) return;
+    if (state !== "ok" || !items.some((item) => item.id === seededId)) return;
+    lastSeed.current = seededId;
+    setOpenIds(new Set([seededId]));
     requestAnimationFrame(() => {
       document
         .getElementById(`exp-${seededId}`)
@@ -113,7 +118,7 @@ export default function ExperimentTable({
             <tbody>
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={10}>
+                  <td className="exp-td" colSpan={10}>
                     <div className="exp-empty">No experiments match this view.</div>
                   </td>
                 </tr>
