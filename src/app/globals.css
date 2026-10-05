@@ -4677,6 +4677,8 @@ a.exp-name:hover {
   flex: none;
 }
 
+/* --- loading skeleton --- */
+
 .exp-skel-eyebrow {
   width: 200px;
   height: 12px;
