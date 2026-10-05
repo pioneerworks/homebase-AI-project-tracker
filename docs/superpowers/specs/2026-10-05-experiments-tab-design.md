@@ -25,7 +25,7 @@ An "A/B testing" item sits under Overview in the AI Hub sidebar. Clicking it ope
 1. **Daily-by-device source:** Statsig has no device data (above). v1 ships daily per arm from Statsig, and device comes later from Amplitude.
 2. **Sign ups vs Owner signups:** they are the same metric. "Sign ups" in the results line is the Statsig primary `Owner Signups`. "1D1s" is the Statsig secondary metric `1D1`.
 3. **Queued vs Draft:** `setup` with a `scheduledStartTime` or the tag `Queued` (case-insensitive) is **Queued**. Any other `setup` is **Draft**. `abandoned` and `archived` are hidden.
-4. **Stop & keep control:** a confirm dialog, then a link out to the Statsig experiment page. The app makes no Statsig write calls.
+4. **Stop & keep control — removed 2026-10-05 at Brian's request.** The button and its confirm dialog are gone from the detail bar and the decision banner; the banner's action is now "Open in Statsig" (deep link to the experiment). The app makes no Statsig write calls.
 5. **Sidebar "Live now":** kept.
 6. **KPIs and banner below the table:** kept, as in the mock.
 7. **Timezone:** day buckets use Statsig's own `date`/`ds` strings, as returned. "Today" (calendar line, eyebrow week) uses `torontoToday()` from `src/lib/standup.ts`. "Day n of N" uses the existing `experimentDay()`.
