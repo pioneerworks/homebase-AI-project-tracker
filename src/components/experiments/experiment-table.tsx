@@ -2,15 +2,16 @@
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import ExperimentDetailPanel from "@/components/experiments/experiment-detail";
 import { formatLift, formatRate, significanceLabel } from "@/lib/experiments-derive";
 import type { ExperimentListItem, HubStatus } from "@/lib/experiments-types";
 
 /**
- * The experiments table card. Rows toggle a detail panel (rendered by
- * `renderDetail`, a placeholder until Task 6 lands); the open set is seeded
- * from the `?open=` URL param, which sidebar "Live now" links point at.
+ * The experiments table card. Rows toggle a detail panel (the four-block
+ * ExperimentDetailPanel); the open set is seeded from the `?open=` URL param,
+ * which sidebar "Live now" links point at.
  */
 
 const STATUS_LABELS: Record<HubStatus, string> = {
@@ -26,13 +27,11 @@ export default function ExperimentTable({
   items,
   state = "ok",
   seededId = null,
-  renderDetail,
 }: {
   items: ExperimentListItem[];
   state?: TableState;
   /** ?open={id} — seeds the open set (replacing it on each new seed) and scrolls to the row. */
   seededId?: string | null;
-  renderDetail?: (item: ExperimentListItem) => ReactNode;
 }) {
   const router = useRouter();
   const [openIds, setOpenIds] = useState<Set<string>>(
@@ -133,7 +132,6 @@ export default function ExperimentTable({
                       isOpen={isOpen}
                       sig={sig}
                       onToggle={() => toggle(item.id)}
-                      renderDetail={renderDetail}
                     />
                   );
                 })
@@ -151,13 +149,11 @@ function RowFragment({
   isOpen,
   sig,
   onToggle,
-  renderDetail,
 }: {
   item: ExperimentListItem;
   isOpen: boolean;
   sig: { text: string; tone: "danger" | "success" | "muted" | null };
   onToggle: () => void;
-  renderDetail?: (item: ExperimentListItem) => ReactNode;
 }) {
   const samples =
     item.controlN != null && item.testN != null
@@ -223,12 +219,13 @@ function RowFragment({
       </tr>
       {isOpen ? (
         <tr className="exp-panel-row" id={`exp-panel-${item.id}`}>
-          <td colSpan={10}>
-            {renderDetail ? (
-              renderDetail(item)
-            ) : (
-              <div className="exp-detail-placeholder">Details load here (Task 6)</div>
-            )}
+          <td className="exp-td" colSpan={10}>
+            {/* width:0 + min-width:100% keeps wide panel content (a 30-day
+                rate table, say) from stretching the whole table; it scrolls
+                inside the panel instead. */}
+            <div className="exp-panel-scroll">
+              <ExperimentDetailPanel item={item} />
+            </div>
           </td>
         </tr>
       ) : null}
