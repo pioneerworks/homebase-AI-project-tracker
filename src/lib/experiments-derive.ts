@@ -289,7 +289,7 @@ export function pickDecision(items: ExperimentListItem[]): Decision | null {
     ? Math.round(((item.controlRate! - item.testRate!) / 100) * item.testN / item.day)
     : null;
   const body = dailyCost != null
-    ? `${head}. Keeping it live costs roughly ${dailyCost} owner signups a day.`
+    ? `${head}. Keeping it live costs roughly ${dailyCost} owner sign ups a day.`
     : `${head}.`;
 
   return {
@@ -362,10 +362,14 @@ function signedWholePct(lift: number | null): string {
   return `${Math.round(Math.abs(lift))}%`;
 }
 
-/** "Owner signups" → "signups"; "Owner Signups" → "signups"; fallback "signups". */
+/** "Owner signups" → "sign ups"; "Owner Signups" → "sign ups"; fallback "sign ups". */
 function metricWord(metricName: string | null): string {
-  const word = (metricName ?? "").trim().toLowerCase().replace(/^owner\s+/, "");
-  return word || "signups";
+  const word = (metricName ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/^owner\s+/, "")
+    .replace(/^signups?$/, "sign ups");
+  return word || "sign ups";
 }
 
 /**
@@ -562,11 +566,11 @@ export function buildKpis(
     signups.any
       ? {
           id: "signups",
-          label: "Owner signups in test",
+          label: "Owner sign ups in test",
           value: (signups.control + signups.test).toLocaleString("en-US"),
           context: `Control ${signups.control.toLocaleString("en-US")} · Test ${signups.test.toLocaleString("en-US")}`,
         }
-      : { id: "signups", label: "Owner signups in test", value: "—", context: "—" },
+      : { id: "signups", label: "Owner sign ups in test", value: "—", context: "—" },
     opts.milestone
       ? milestoneKpi(opts.milestone, opts.today)
       : { id: "milestone", label: "M1 · First live experiments", value: "—", context: "—" },

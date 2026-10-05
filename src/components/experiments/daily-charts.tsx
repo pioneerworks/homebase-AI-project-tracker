@@ -184,7 +184,7 @@ function RateTable({ daily }: { daily: DailyPoint[] }) {
       <thead>
         <tr>
           <th scope="col" className="exp-d-ratelabelhead">
-            <span className="exp-d-ratelabel">Signup rate by day</span>
+            <span className="exp-d-ratelabel">Sign-up rate by day</span>
           </th>
           {daily.map((point) => (
             <th scope="col" key={point.date}>
@@ -231,7 +231,7 @@ export default function DailyCharts({ daily }: { daily: DailyPoint[] }) {
     <div className="exp-d-daily">
       <div className="exp-d-charts">
         <DailyBarChart title="Exposures / day" rows={toRows("exposures", daily)} daily={daily} showRate={false} />
-        <DailyBarChart title="Owner signups / day" rows={toRows("signups", daily)} daily={daily} showRate={true} />
+        <DailyBarChart title="Owner sign ups / day" rows={toRows("signups", daily)} daily={daily} showRate={true} />
       </div>
       <RateTable daily={daily} />
     </div>

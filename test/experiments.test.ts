@@ -203,11 +203,11 @@ test("significanceLabel per verdict", () => {
 test("taglineOf covers the four states (handoff §6, revised)", () => {
   assert.deepEqual(
     taglineOf("live", "losing", "Owner Signups", -53.4),
-    { state: "losing", text: "Variant is losing", reason: "−53% signups" },
+    { state: "losing", text: "Variant is losing", reason: "−53% sign ups" },
   );
   assert.deepEqual(
     taglineOf("live", "winning", "Owner Signups", 12.4),
-    { state: "ahead", text: "Variant is ahead", reason: "+12% signups" },
+    { state: "ahead", text: "Variant is ahead", reason: "+12% sign ups" },
   );
   assert.deepEqual(
     taglineOf("live", "no-signal", "Owner Signups", 7.3),
@@ -254,7 +254,7 @@ test("pickDecision picks first losing live experiment", () => {
   const d = pickDecision([{ ...base, id: "x", name: "Scheduling LP Module", status: "live", verdict: "losing", controlRate: 2.5, testRate: 1.16, lift: -53.6, pValue: 0.004, testN: 1720, day: 4 }]);
   assert.equal(d?.experimentId, "x");
   assert.equal(d?.title, "Needs a decision: stop the Scheduling LP Module test");
-  assert.match(d!.body, /^Test arm converts at less than half of control \(2\.50% → 1\.16%, p = 0\.004\)\. Keeping it live costs roughly 6 owner signups a day\.$/);
+  assert.match(d!.body, /^Test arm converts at less than half of control \(2\.50% → 1\.16%, p = 0\.004\)\. Keeping it live costs roughly 6 owner sign ups a day\.$/);
   const mild = pickDecision([{ ...base, status: "live", verdict: "losing", controlRate: 2.5, testRate: 2.0, lift: -20, pValue: 0.03, testN: 1000, day: 5 }]);
   assert.match(mild!.body, /^Test arm converts below control/);
 });
@@ -270,7 +270,7 @@ test("buildKpis computes the five cells", () => {
     ["Live tests", "2", "2 landing pages · 0 signup flow"],
     ["Significant results", "1", "1 loss · 0 wins"],
     ["Visitors in test · 7d", "5,851", "2,864 control · 2,987 test"],
-    ["Owner signups in test", "133", "Control 75 · Test 58"],
+    ["Owner sign ups in test", "133", "Control 75 · Test 58"],
     ["M1 · First live experiments", "19%", "Due Fri, Sep 25 · 3 days overdue"],
   ]);
   assert.equal(kpis[4].tone, "danger");

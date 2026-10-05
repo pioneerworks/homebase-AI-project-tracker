@@ -449,7 +449,7 @@ function DailyBlock({ daily }: { daily: DailyPoint[] | null }) {
         <span className="exp-d-num" aria-hidden="true">
           04
         </span>
-        <h3 className="exp-d-blocktitle">Daily exposures &amp; signups</h3>
+        <h3 className="exp-d-blocktitle">Daily exposures &amp; sign ups</h3>
         {hasDaily ? (
           <span className="exp-d-blocksub">
             {hubDate(daily![0].date)} – {hubDate(daily![daily!.length - 1].date)}

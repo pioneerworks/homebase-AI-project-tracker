@@ -33,7 +33,7 @@ const KPI_LABELS = [
   "Live tests",
   "Significant results",
   "Visitors in test · 7d",
-  "Owner signups in test",
+  "Owner sign ups in test",
   "M1 · First live experiments",
 ];
 
@@ -119,7 +119,7 @@ export default function ExperimentsView({
           </p>
           <h1 className="exp-title">Experiments</h1>
           <p className="exp-dek">
-            Every test we&rsquo;re running, what it&rsquo;s doing to signups, and which ones need a
+            Every test we&rsquo;re running, what it&rsquo;s doing to sign ups, and which ones need a
             call.
           </p>
         </div>
