@@ -291,6 +291,54 @@ test("getExperimentsPage throws when the list fails cold, serves cache when warm
   assert.deepEqual(cached, warm);
 });
 
+test("a failed cumulative call is retried after 5 minutes, not served for an hour", async () => {
+  installFetch();
+  let cumulativeOk = false;
+  router = (url) => {
+    const path = url.pathname;
+    if (path === "/console/v1/experiments") return data(listDtos());
+    if (path === `/console/v1/experiments/${SCHEDULING_ID}/pulse_results`) {
+      return data(schedulingPulse);
+    }
+    if (path === `/console/v1/experiments/${SCHEDULING_ID}/cumulative_exposures`) {
+      return cumulativeOk
+        ? data(pageCumulative())
+        : new Response("cumulative failed", { status: 500 });
+    }
+    // Linear relay with no LINEAR_API_KEY: unavailable, so the milestone is "—".
+    if (path.startsWith("/api/projects/")) {
+      return new Response("linear unavailable", { status: 503 });
+    }
+    return new Response(`no route for ${path}`, { status: 404 });
+  };
+  const listCalls = () => requests.filter((r) => r.url.endsWith("experiments?limit=100")).length;
+
+  // list + pulse succeed, cumulative fails → visitors7d "—" and the page is partial
+  const partial = await getExperimentsPage(ENV, NOW);
+  assert.ok(partial);
+  assert.equal(partial.kpis[2].value, "—");
+  assert.equal(listCalls(), 1);
+
+  // within the 5-minute window the cached partial page is served as-is
+  const withinWindow = await getExperimentsPage(ENV, NOW + 60 * 1000);
+  assert.ok(withinWindow);
+  assert.equal(withinWindow.kpis[2].value, "—");
+  assert.equal(listCalls(), 1);
+
+  // past the window the page is retried; cumulative still fails
+  const retried = await getExperimentsPage(ENV, NOW + 6 * 60 * 1000);
+  assert.ok(retried);
+  assert.equal(retried.kpis[2].value, "—");
+  assert.equal(listCalls(), 2);
+
+  // once cumulative recovers, the next retry picks it up
+  cumulativeOk = true;
+  const recovered = await getExperimentsPage(ENV, NOW + 12 * 60 * 1000);
+  assert.ok(recovered);
+  assert.equal(recovered.kpis[2].value, "10,809");
+  assert.equal(listCalls(), 3);
+});
+
 test("getExperimentDetail builds daily series and SRM", async () => {
   installFetch();
   standardRouter({ cumulative: detailCumulative() });
@@ -332,6 +380,47 @@ test("getExperimentDetail returns daily null when a dated pulse fails", async ()
   assert.equal(detail.daily, null);
   assert.deepEqual(detail.exposures, { control: 1507, test: 1549 });
   assert.equal(detail.srm?.ok, true);
+});
+
+test("getExperimentDetail keeps srm null when one arm's cumulative series is empty", async () => {
+  installFetch();
+  standardRouter({ cumulative: [detailCumulative()[0]] }); // test arm missing entirely
+  const detail = await getExperimentDetail(SCHEDULING_ID, ENV, NOW);
+  assert.ok(detail);
+  // no usable pair: exposures and SRM stay null instead of judging [0, N]
+  assert.equal(detail.exposures, null);
+  assert.equal(detail.srm, null);
+  // the daily series still renders; the missing arm reads as 0 exposures
+  assert.ok(detail.daily);
+  assert.deepEqual(
+    detail.daily.map((d) => d.exposures),
+    [
+      { control: 566, test: 0 },
+      { control: 509, test: 0 },
+      { control: 432, test: 0 },
+    ],
+  );
+  assert.deepEqual(
+    detail.daily.map((d) => d.signups.test),
+    [5, 5, 10],
+  );
+});
+
+test("getExperimentDetail keeps srm null when an arm's last exposure is 0", async () => {
+  installFetch();
+  const [control, test] = detailCumulative();
+  standardRouter({
+    cumulative: [control, { ...test, results: [{ date: "2026-09-27", exposures: 0 }] }],
+  });
+  const detail = await getExperimentDetail(SCHEDULING_ID, ENV, NOW);
+  assert.ok(detail);
+  assert.equal(detail.exposures, null);
+  assert.equal(detail.srm, null);
+  assert.ok(detail.daily);
+  assert.deepEqual(
+    detail.daily.map((d) => d.exposures.test),
+    [0, 0, 0],
+  );
 });
 
 test("getExperimentDetail returns null for unknown or draft ids", async () => {

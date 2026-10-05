@@ -18,8 +18,9 @@ import "server-only";
  * project (linear-projects.ts); Linear being down only blanks that cell.
  *
  * Caching is ttlCache: page and details for an hour, last good value for 2
- * minutes after a failure, and a page whose pulse calls partially failed is
- * refetched after 5 minutes instead (see partialUntil below).
+ * minutes after a failure, and a page whose Statsig calls partially failed is
+ * retried after 5 minutes instead of served for the full hour (see partialUntil
+ * below).
  */
 import { cache } from "react";
 
@@ -54,7 +55,7 @@ import { ttlCache } from "./ttl-cache";
 
 const PAGE_TTL_MS = 60 * 60 * 1000;
 const FAILURE_TTL_MS = 2 * 60 * 1000;
-/** A page with some failed pulse calls is refetched sooner than a clean one. */
+/** A page with some failed Statsig calls is retried sooner than a clean one. */
 const PARTIAL_TTL_MS = 5 * 60 * 1000;
 /** Dated pulse calls per detail, run at most this many at a time. */
 const DATED_PULSE_CONCURRENCY = 6;
@@ -116,12 +117,16 @@ export async function getExperimentDetail(
 }
 
 /**
- * A page with partial pulse data is refetched after PARTIAL_TTL_MS instead of
- * the full hour: until then the cache is skipped entirely (ttlCache has no
- * per-entry TTL), so each call loads fresh.
+ * A page built with some failed calls is retried after PARTIAL_TTL_MS instead
+ * of serving the hourly cache entry to its end (ttlCache has no per-entry TTL):
+ * while the window is in effect the cached page is served as usual, and once it
+ * has elapsed the entry is dropped so the next call loads fresh.
  */
 async function pageValue(apiKey: string, now: number): Promise<PageValue> {
-  if (now < partialUntil) return loadPage(apiKey, now);
+  if (partialUntil > 0 && now >= partialUntil) {
+    partialUntil = 0;
+    pageCache.clear();
+  }
   return pageCache.get({ apiKey, now }, now);
 }
 
@@ -135,7 +140,7 @@ async function loadPage(apiKey: string, now: number): Promise<PageValue> {
   );
 
   const pulses = await pulsesFor(dtos, apiKey, now);
-  const visitors7d = await visitors7dFor(dtos, apiKey);
+  const visitors7d = await visitors7dFor(dtos, apiKey, now);
   const milestone = await milestoneFor();
 
   const items = sortExperiments(dtos.map((dto) => toListItem(dto, pulses.get(dto.id), now)));
@@ -190,11 +195,13 @@ async function pulsesFor(
 /**
  * Visitors in test · 7d: per live experiment, cumulative exposures at the last
  * day minus the value exactly 7 days earlier (0 when that day is missing),
- * summed across experiments and arms. Any failed call makes the KPI null.
+ * summed across experiments and arms. Any failed call makes the KPI null and
+ * marks the page partial, like a failed pulse does.
  */
 async function visitors7dFor(
   dtos: ExternalExperimentDto[],
   apiKey: string,
+  now: number,
 ): Promise<{ control: number; test: number } | null> {
   let control = 0;
   let test = 0;
@@ -217,6 +224,7 @@ async function visitors7dFor(
       }
     }),
   );
+  if (failed) partialUntil = now + PARTIAL_TTL_MS;
   return failed ? null : { control, test };
 }
 
@@ -260,11 +268,15 @@ async function loadDetail(id: string, apiKey: string, now: number): Promise<Expe
   const byGroup = exposureSeries(groups);
   const controlSeries = byGroup.get(controlId) ?? [];
   const testSeries = byGroup.get(testId) ?? [];
-  const exposures = {
-    control: controlSeries.at(-1)?.value ?? 0,
-    test: testSeries.at(-1)?.value ?? 0,
-  };
-  const srmResult = srm([exposures.control, exposures.test], item.targetSplit);
+  // With one arm missing or still at 0 there is no usable pair: totals and SRM
+  // would be judged against a fabricated 0 and report a false mismatch.
+  const controlLast = controlSeries.at(-1);
+  const testLast = testSeries.at(-1);
+  const exposures =
+    controlLast && controlLast.value > 0 && testLast && testLast.value > 0
+      ? { control: controlLast.value, test: testLast.value }
+      : null;
+  const srmResult = exposures ? srm([exposures.control, exposures.test], item.targetSplit) : null;
 
   // Daily exposures come from the full cumulative series (so the first kept
   // day still has a correct delta); the dated pulses cover its last 28 days.
