@@ -1,12 +1,14 @@
 "use client";
 
-import { LayoutDashboard, LogOut, Menu, Sparkles } from "lucide-react";
+import { FlaskConical, LayoutDashboard, LogOut, Menu, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, use, useEffect, useState } from "react";
 
+import { ExperimentsSidebar } from "@/components/experiments/experiments-sidebar";
 import type { SidebarProject } from "@/lib/overview";
 import { initials, STATE_LABELS } from "@/lib/overview";
+import type { ExperimentsNav } from "@/lib/experiments-types";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
 
 /** Project key → its sidebar entry, each resolving on its own. */
@@ -15,6 +17,7 @@ export type SidebarProjects = Record<string, Promise<SidebarProject>>;
 type Props = {
   user: { name: string; email: string } | null;
   projects: SidebarProjects;
+  experimentsNav: Promise<ExperimentsNav | null>;
 };
 
 function ProjectLabel({
@@ -53,9 +56,36 @@ function ProjectLabelFallback({ projectKey }: { projectKey: string }) {
   );
 }
 
+/** The user/profile block at the bottom of either sidebar (hub or Experiments). */
+export function SidebarUser({ user }: { user: { name: string; email: string } | null }) {
+  if (!user) return null;
+  return (
+    <div className="sidebar-user">
+      <span className="sidebar-avatar" aria-hidden="true">
+        {initials(user.name)}
+      </span>
+      <span className="sidebar-user-text">
+        <span className="sidebar-user-name">{user.name}</span>
+        <span className="sidebar-user-team">AI team</span>
+      </span>
+      <form action="/api/auth/logout" method="post">
+        <button
+          type="submit"
+          className="sidebar-signout"
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <LogOut size={16} aria-hidden="true" />
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export default function AppShell({
   user,
   projects,
+  experimentsNav,
   children,
 }: Props & { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -87,13 +117,21 @@ export default function AppShell({
         <div className="sidebar-backdrop" aria-hidden="true" onClick={() => setOpen(false)} />
       )}
       <aside id="app-sidebar" className={`sidebar${open ? " sidebar-open" : ""}`}>
-        <div className="sidebar-top">
-          <Link href="/" className="sidebar-brand" onClick={() => setOpen(false)}>
-            <span className="sidebar-brand-mark">
-              <Sparkles size={20} aria-hidden="true" />
-            </span>
-            AI Hub
-          </Link>
+        {pathname.startsWith("/experiments") ? (
+          <ExperimentsSidebar
+            nav={experimentsNav}
+            user={user}
+            onNavigate={() => setOpen(false)}
+          />
+        ) : (
+          <>
+            <div className="sidebar-top">
+              <Link href="/" className="sidebar-brand" onClick={() => setOpen(false)}>
+                <span className="sidebar-brand-mark">
+                  <Sparkles size={20} aria-hidden="true" />
+                </span>
+                AI Hub
+              </Link>
 
           <nav className="sidebar-top" aria-label="Primary">
             <div className="sidebar-nav">
@@ -105,6 +143,15 @@ export default function AppShell({
               >
                 <LayoutDashboard size={18} aria-hidden="true" />
                 Overview
+              </Link>
+              <Link
+                href="/experiments"
+                className="sidebar-nav-item"
+                aria-current={pathname.startsWith("/experiments") ? "page" : undefined}
+                onClick={() => setOpen(false)}
+              >
+                <FlaskConical size={18} aria-hidden="true" />
+                A/B testing
               </Link>
             </div>
 
@@ -145,30 +192,12 @@ export default function AppShell({
                 </Link>
               ))}
             </div>
-          </nav>
-        </div>
+            </nav>
+            </div>
 
-        {user ? (
-          <div className="sidebar-user">
-            <span className="sidebar-avatar" aria-hidden="true">
-              {initials(user.name)}
-            </span>
-            <span className="sidebar-user-text">
-              <span className="sidebar-user-name">{user.name}</span>
-              <span className="sidebar-user-team">AI team</span>
-            </span>
-            <form action="/api/auth/logout" method="post">
-              <button
-                type="submit"
-                className="sidebar-signout"
-                aria-label="Sign out"
-                title="Sign out"
-              >
-                <LogOut size={16} aria-hidden="true" />
-              </button>
-            </form>
-          </div>
-        ) : null}
+            <SidebarUser user={user} />
+          </>
+        )}
       </aside>
 
       <main className="shell-content">{children}</main>

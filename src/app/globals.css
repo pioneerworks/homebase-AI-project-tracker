@@ -16,6 +16,12 @@
   --pr-page: #f0961b;
   --pr-page-text: #9e5706;
 
+  /* Experiments (A/B testing) tab */
+  --purple-chip: #f7ebff;
+  --status-teal: #16b8a6;
+  --exp-control: #9a82e6;
+  --exp-test: #b3262b;
+
   /* Semantic aliases used across every page */
   --bg: var(--white);
   --page-bg: var(--light-cream);
@@ -3785,4 +3791,269 @@ a.exp-name:hover {
   .chip-filters button {
     min-height: 44px;
   }
+}
+
+/* ===== Experiments (A/B testing) sidebar, shown on /experiments ===== */
+/* Values come from the design export (experiments.html): 248px deep-purple
+   sidebar, 36px brand chip, 10px 14px rows, pill count badges, mid-dark sync
+   box. The container (.sidebar) and user block styles are shared with the hub. */
+
+.exp-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.exp-side-brand-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.exp-side-title {
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.exp-side-sub {
+  color: var(--purple-rain);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-side-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #40137c;
+  border-radius: var(--radius-small);
+  color: var(--purple-rain);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.exp-side-back:hover {
+  background: var(--mid-dark-purple);
+}
+
+.exp-side-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exp-side-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  color: var(--purple-rain);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.exp-side-row-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.exp-side-row[aria-current="page"] {
+  background: var(--brand-purple);
+  color: var(--white);
+}
+
+.exp-side-row[aria-current="page"] .exp-side-row-label {
+  font-weight: 700;
+}
+
+.exp-side-row:not([aria-current="page"]):hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.exp-side-row-surface {
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+}
+
+.exp-side-count {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mid-dark-purple);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.exp-side-row[aria-current="page"] .exp-side-count {
+  background: rgb(255 254 254 / 0.2);
+}
+
+.exp-side-count-danger {
+  background: var(--danger);
+}
+
+.exp-side-surface-count {
+  flex: none;
+  color: var(--purple-rain);
+  opacity: 0.7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exp-side-row[aria-current="page"] .exp-side-surface-count {
+  color: var(--white);
+  opacity: 1;
+}
+
+.exp-side-live {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: var(--radius-small);
+  text-decoration: none;
+}
+
+.exp-side-live:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.exp-side-live-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--purple-rain);
+}
+
+.exp-side-live-dot-losing {
+  background: var(--danger);
+}
+
+.exp-side-live-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.exp-side-live-name {
+  overflow: hidden;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exp-side-live-meta {
+  color: var(--purple-rain);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.exp-side-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exp-side-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--mid-dark-purple);
+}
+
+.exp-side-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exp-side-sync-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-teal);
+}
+
+.exp-side-sync-dot-failed {
+  background: var(--warning);
+}
+
+.exp-side-sync-status {
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exp-side-sync-meta {
+  color: var(--purple-rain);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exp-side-sync-meta span {
+  display: block;
+}
+
+/* pending-nav skeletons reuse .skeleton-line; these only set size and dim it */
+.exp-side-skeleton-badge {
+  width: 26px;
+  height: 16px;
+  border-radius: 999px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-count {
+  width: 20px;
+  height: 14px;
+  border-radius: 999px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-name {
+  width: 120px;
+  height: 12px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-meta {
+  width: 80px;
+  height: 10px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-md {
+  width: 70%;
+  height: 12px;
+  opacity: 0.25;
+}
+
+.exp-side-skeleton-sm {
+  width: 45%;
+  height: 11px;
+  opacity: 0.25;
 }

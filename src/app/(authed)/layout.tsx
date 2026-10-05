@@ -1,6 +1,7 @@
 import AppShell from "@/components/app-shell";
 import { getSessionUser } from "@/lib/oidc-session";
 import type { SidebarProjects } from "@/components/app-shell";
+import { loadExperimentsNav } from "@/lib/experiments";
 import { getProjectOverview } from "@/lib/linear-projects";
 import { sidebarProject, type SidebarProject } from "@/lib/overview";
 import { DONE_PROJECTS, TRACKER_PROJECTS } from "@/lib/tracker-projects";
@@ -48,7 +49,12 @@ export default async function AuthedLayout({
     ...DONE_PROJECTS.map((p) => [p.key, sidebarEntry(p, true)]),
   ]);
   return (
-    <AppShell user={user} projects={projects}>
+    <AppShell
+      user={user}
+      projects={projects}
+      // counts for the Experiments sidebar, streaming in like the project labels
+      experimentsNav={loadExperimentsNav()}
+    >
       {children}
     </AppShell>
   );
