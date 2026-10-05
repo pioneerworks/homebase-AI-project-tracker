@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1 id="login-title">AI Hub</h1>
         <p>
           Sign in with your Homebase Okta account to view milestones, owners,
-          experiments, and signup impact for the AI team&apos;s projects.
+          experiments, and signup impact for the Homebase AI team&apos;s projects.
         </p>
 
         {error ? (
