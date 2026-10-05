@@ -13,7 +13,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "AI Hub · Homebase",
   description:
-    "Milestones, owners, experiments, and signup impact for the Homebase AI team's Linear projects.",
+    "Milestones, owners, experiments, and signup impact for the Homebase AI team's projects.",
   robots: {
     index: false,
     follow: false,
