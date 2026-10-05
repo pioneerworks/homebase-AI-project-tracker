@@ -3,7 +3,6 @@ import { test } from "node:test";
 
 import {
   armUrls,
-  buildCalendar,
   buildKpis,
   buildNav,
   dailyFromCumulative,
@@ -267,14 +266,6 @@ test("buildNav counts views and surfaces", () => {
   assert.deepEqual(nav.surfaces, { landing_page: 2, signup_flow: 0, tool_page: 1 });
   assert.equal(nav.live.length, 1);
   assert.equal(nav.live[0].losing, true);
-});
-
-test("buildCalendar spans six weeks and places bars", () => {
-  const cal = buildCalendar([{ ...base, id: "l", status: "live", startDate: "2026-09-25", endDate: "2026-10-23", lift: -3, verdict: "no-signal" }, { ...base, id: "d", status: "draft" }], "2026-10-05");
-  assert.equal(cal.start, "2026-09-21");
-  assert.equal(cal.weeks.length, 6);
-  assert.deepEqual([cal.rows[0].start, cal.rows[0].end, cal.rows[0].tone, cal.rows[0].barLabel], ["2026-09-25", "2026-10-23", "live", "−3.0% · not yet significant"]);
-  assert.deepEqual([cal.rows[1].start, cal.rows[1].tone], [null, "draft"]);
 });
 
 test("toCsv quotes fields and has one row per experiment", () => {

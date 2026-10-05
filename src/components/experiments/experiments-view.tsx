@@ -6,7 +6,6 @@ import { useState, type MouseEvent } from "react";
 
 import ExperimentTable from "@/components/experiments/experiment-table";
 import StopDialog, { type StopDialogExperiment } from "@/components/experiments/stop-dialog";
-import TestCalendar from "@/components/experiments/test-calendar";
 import {
   filterItems,
   parseFilters,
@@ -229,8 +228,6 @@ export default function ExperimentsView({
       {stopExperiment ? (
         <StopDialog experiment={stopExperiment} open={stopOpen} onClose={() => setStopOpen(false)} />
       ) : null}
-
-      {page ? <TestCalendar calendar={page.calendar} today={page.today} /> : null}
     </div>
   );
 }

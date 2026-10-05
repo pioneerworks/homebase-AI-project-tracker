@@ -69,16 +69,6 @@ export type Decision = {
   slackUrl: string;
 };
 
-export type CalendarRow = {
-  id: string;
-  label: string;
-  sub: string;
-  start: string | null;
-  end: string | null;
-  barLabel: string;
-  tone: "live" | "losing" | "queued" | "draft" | "concluded";
-};
-
 export type ExperimentsNav = {
   counts: Record<View, number>;
   surfaces: Record<Surface, number>;
@@ -100,11 +90,6 @@ export type ExperimentsPage = {
   experiments: ExperimentListItem[];
   kpis: Kpi[];
   decision: Decision | null;
-  calendar: {
-    start: string;
-    weeks: string[];
-    rows: CalendarRow[];
-  };
 };
 
 export type DailyPoint = {

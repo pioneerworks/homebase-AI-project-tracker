@@ -25,7 +25,6 @@ import "server-only";
 import { cache } from "react";
 
 import {
-  buildCalendar,
   buildKpis,
   buildNav,
   dailyFromCumulative,
@@ -154,7 +153,6 @@ async function loadPage(apiKey: string, now: number): Promise<PageValue> {
       experiments: items,
       kpis: buildKpis(items, { visitors7d, milestone, today }),
       decision: pickDecision(items),
-      calendar: buildCalendar(items, today),
     },
     dtos,
   };

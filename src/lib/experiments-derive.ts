@@ -9,7 +9,6 @@
 import { experimentDay, experimentTitle, verdictFromPrimary } from "./statsig-pure";
 import type { ExperimentPulseResultsDto, ExternalExperimentDto } from "./statsig-types";
 import type {
-  CalendarRow,
   Decision,
   ExperimentListItem,
   ExperimentsNav,
@@ -45,10 +44,6 @@ function isoDate(ms: number): string {
 
 function parseDay(date: string): number {
   return Date.parse(`${date}T00:00:00Z`);
-}
-
-function addDays(date: string, days: number): string {
-  return isoDate(parseDay(date) + days * DAY_MS);
 }
 
 /** "Fri, Sep 25" — the one date format the hub uses outside of ISO strings. */
@@ -251,7 +246,7 @@ export function toListItem(
 }
 
 // ---------------------------------------------------------------------------
-// Table, KPIs, decision banner, calendar, nav, filters, CSV
+// Table, KPIs, decision banner, nav, filters, CSV
 // ---------------------------------------------------------------------------
 
 function byStartDesc(a: string | null, b: string | null): number {
@@ -370,44 +365,6 @@ export function dailyFromCumulative(series: { date: string; value: number }[]): 
     previous = value;
     return { date, value: Math.max(0, delta) };
   });
-}
-
-const VERDICT_PHRASES: Record<ExperimentListItem["verdict"], string> = {
-  winning: "significant win",
-  losing: "significant loss",
-  "no-signal": "not yet significant",
-  "no-data": "no data yet",
-};
-
-function calendarBarLabel(item: ExperimentListItem): string {
-  if (item.startDate == null) {
-    if (item.status === "draft") {
-      return `Unscheduled · ${item.hypothesis ? "Hypothesis set" : "Hypothesis in review"}`;
-    }
-    return "Unscheduled";
-  }
-  if (item.status === "queued") return "Queued";
-  return `${formatLift(item.lift)} · ${VERDICT_PHRASES[item.verdict]}`;
-}
-
-/** Six-week window starting on the Monday on or before `today − 14d`, one row per experiment. */
-export function buildCalendar(items: ExperimentListItem[], today: string): ExperimentsPage["calendar"] {
-  const fourteenDaysAgo = addDays(today, -14);
-  const dayOfWeek = new Date(`${fourteenDaysAgo}T00:00:00Z`).getUTCDay();
-  const start = addDays(fourteenDaysAgo, -((dayOfWeek + 6) % 7));
-  const weeks = Array.from({ length: 6 }, (_, k) => addDays(start, k * 7));
-
-  const rows: CalendarRow[] = items.map((item) => ({
-    id: item.id,
-    label: item.name,
-    sub: item.hypothesis ?? "",
-    start: item.startDate,
-    end: item.endDate,
-    barLabel: calendarBarLabel(item),
-    tone: item.verdict === "losing" ? "losing" : item.status,
-  }));
-
-  return { start, weeks, rows };
 }
 
 export function parseFilters(params: { view?: string | null; surface?: string | null }): { view: View; surface: Surface | null } {

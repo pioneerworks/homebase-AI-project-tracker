@@ -79,7 +79,7 @@ Table order: live, then queued, then draft, then concluded. Within each group, n
   3. Visitors in test · 7d: the sum, over live experiments, of the cumulative-exposure increase over the last 7 days, with context "control · test".
   4. Owner signups in test: the sum of live primary-metric counts since start, with context "Control X · Test Y". This deviates from the handoff's 7-day window because the list view doesn't fetch daily pulses.
   5. M1 · First live experiments: `nextMilestone()` of the Linear `ab-testing` project (`linearSlugId d9f5d074ffc1`). The value is its `progress%`. Context is "Due {date}", turning danger with "· N days overdue" when the date has passed. Shows "—" when Linear is unavailable.
-- **Calendar:**
+- **Calendar — removed 2026-10-05 at Brian's request** after the first live build; the section doesn't ship in v1. The notes below are kept only as the record of what was designed, in case it returns.
   - Window: 6 weeks, starting on the Monday on or before `today − 14d`.
   - Live and concluded bars: `startTime` → `startTime + duration`.
   - Queued bars: `scheduledStartTime` → plus `duration`, or "Unscheduled" when there is none.
