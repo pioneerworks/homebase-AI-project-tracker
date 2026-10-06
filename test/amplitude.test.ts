@@ -9,7 +9,8 @@ import {
 import { mergeSignupSources } from "../src/lib/omni";
 import type { SignupDay } from "../src/lib/signup-data";
 
-const config = amplitudeConfig({ AMPLITUDE_API_KEY: "k", AMPLITUDE_SECRET: "s" })!;
+const env = { AMPLITUDE_API_KEY: "k", AMPLITUDE_SECRET: "s" };
+const config = amplitudeConfig(env)!;
 
 test("funnelQuery asks for the dashboard's daily Page Viewed → signup funnel", () => {
   const now = Date.UTC(2026, 9, 1, 15, 42); // Oct 1, mid-day
@@ -65,6 +66,34 @@ test("funnelToSignupDays gives a null rate on a zero-traffic day", () => {
 test("funnelToSignupDays rejects a response without daily funnel data", () => {
   assert.throws(() => funnelToSignupDays({ data: [] }), /no daily funnel data/);
   assert.throws(() => funnelToSignupDays({}), /no daily funnel data/);
+});
+
+test("funnelToSignupDays rejects a malformed series instead of inventing zero days", () => {
+  const shaped = (xValues: string[], series: unknown[]) =>
+    ({ data: [{ dayFunnels: { xValues, series } }] }) as Parameters<typeof funnelToSignupDays>[0];
+  // one row per day, not per step
+  assert.throws(
+    () => funnelToSignupDays(shaped(["2026-09-29", "2026-09-30"], [[20840, 250]])),
+    /malformed/,
+  );
+  assert.throws(() => funnelToSignupDays(shaped(["2026-09-29"], [[20840]])), /malformed/);
+  assert.throws(() => funnelToSignupDays(shaped(["2026-09-29"], [[20840, "250"]])), /malformed/);
+  assert.throws(() => funnelToSignupDays(shaped(["Sep 29"], [[20840, 250]])), /malformed/);
+});
+
+test("funnelQuery at the UTC day boundary with a custom window", () => {
+  const custom = amplitudeConfig({ ...env, AMPLITUDE_WINDOW_DAYS: "7" })!;
+  const { url, windowStart } = funnelQuery(custom, Date.UTC(2026, 9, 1, 0, 0));
+  const params = new URL(url).searchParams;
+  assert.equal(params.get("end"), "20260930");
+  assert.equal(params.get("start"), "20260924");
+  assert.equal(windowStart, "2026-09-24");
+});
+
+test("amplitudeConfig falls back to 30 days for an invalid window", () => {
+  for (const value of ["abc", "0", "-5", "2.5", "1000"]) {
+    assert.equal(amplitudeConfig({ ...env, AMPLITUDE_WINDOW_DAYS: value })?.windowDays, 30, value);
+  }
 });
 
 test("amplitudeConfig ignores masked or missing credentials", () => {

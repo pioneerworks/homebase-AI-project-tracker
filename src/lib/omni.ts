@@ -26,7 +26,7 @@ export type SignupSeries = {
 /**
  * Prefer live Amplitude funnel data when configured (covers its window, e.g.
  * the last N days); the captured Amplitude snapshot fills everything before it.
- * Falls back to Omni API (when OMNI_* is configured) or the export snapshot.
+ * Falls back to Omni API (when OMNI_* is configured) or the captured snapshot.
  */
 export function mergeSignupSources(
   captured: SignupDay[],
@@ -169,10 +169,9 @@ export async function getSignupSeries(
     if (!days.length) throw new Error("Omni query returned no usable rows");
     return { source: "omni", days };
   } catch (error) {
-    // Known-benign case: projects without legacy raw data files 404 here.
     // Log quietly — console.error trips the Next dev error overlay.
     console.log(
-      "[impact] Amplitude funnel unavailable, using captured export:",
+      "[impact] Omni signups query failed, using captured snapshot:",
       error instanceof Error ? error.message : error,
     );
     return { source: "export", days: capturedSignups() };

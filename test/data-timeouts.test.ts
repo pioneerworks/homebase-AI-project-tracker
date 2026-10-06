@@ -178,6 +178,45 @@ test("ttlCache skips a failing upstream for failureTtlMs, then retries", async (
   assert.equal(loads, 2);
 });
 
+test("getAmplitudeFunnel sends Basic auth to the funnels endpoint and maps the reply", async () => {
+  const seen: { url: string; auth: string | null }[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    seen.push({ url: String(input), auth: new Headers(init?.headers).get("authorization") });
+    return Response.json({
+      data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }],
+    });
+  }) as typeof fetch;
+
+  const funnel = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 12));
+  assert.equal(seen.length, 1);
+  assert.equal(new URL(seen[0].url).pathname, "/api/2/funnels");
+  assert.equal(seen[0].auth, `Basic ${Buffer.from("k:s").toString("base64")}`);
+  assert.deepEqual(funnel, {
+    windowStart: "2026-09-01",
+    days: [{ date: "2026-09-30", signups: 1, traffic: 10, rate: 0.1 }],
+  });
+});
+
+test("getAmplitudeFunnel refetches once the UTC day rolls over", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return Response.json({ data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }] });
+  }) as typeof fetch;
+
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23, 30));
+  assert.equal(calls, 1);
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30));
+  assert.equal(calls, 2);
+});
+
+test("getAmplitudeFunnel: an error status carries a short slice of the body", async () => {
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ error: { message: "Invalid API Key" } }), { status: 403 })) as typeof fetch;
+  await assert.rejects(getAmplitudeFunnel(env, 0), /failed: 403 .*Invalid API Key/);
+});
+
 test("getAmplitudeFunnel: a 404 is cached as a failure, then retried after the TTL", async () => {
   let calls = 0;
   globalThis.fetch = (async () => {

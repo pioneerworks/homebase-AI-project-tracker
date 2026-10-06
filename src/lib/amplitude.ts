@@ -12,7 +12,9 @@ import "server-only";
  *   rate    = signups / traffic
  *
  * Amplitude computes the funnel, so identity resolution and the 1-day window
- * match the chart. Days follow the project timezone (UTC for 677513).
+ * match the chart. Days follow the project timezone (UTC for 677513). With
+ * the 1-day conversion window, the last day's signups can still rise for up
+ * to a day as late conversions land.
  * Requires AMPLITUDE_API_KEY and AMPLITUDE_SECRET (project API key + secret
  * key) to be set and readable.
  */
@@ -47,8 +49,13 @@ export function amplitudeConfig(
     signupEvent: env.AMPLITUDE_SIGNUP_EVENT?.trim() || "Owner Account Created",
     pageviewEvent: env.AMPLITUDE_PAGEVIEW_EVENT?.trim() || "Page Viewed",
     productAreaPrefix: env.AMPLITUDE_PRODUCT_AREA_PREFIX?.trim() || "mw_",
-    windowDays: Number(env.AMPLITUDE_WINDOW_DAYS?.trim() || 30),
+    windowDays: windowDays(env.AMPLITUDE_WINDOW_DAYS),
   };
+}
+
+function windowDays(raw: string | undefined): number {
+  const days = Number(raw?.trim() || 30);
+  return Number.isInteger(days) && days > 0 && days <= 365 ? days : 30;
 }
 
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
@@ -106,8 +113,19 @@ export function funnelToSignupDays(body: FunnelsResponse): SignupDay[] {
   if (!day?.xValues?.length || !day.series?.length) {
     throw new Error(`${LABEL} returned no daily funnel data`);
   }
-  return day.xValues.map((date, i) => {
-    const [traffic = 0, signups = 0] = day.series![i] ?? [];
+  const { xValues, series } = day;
+  if (series.length !== xValues.length) {
+    throw new Error(`${LABEL} returned a malformed funnel: ${series.length} rows for ${xValues.length} days`);
+  }
+  return xValues.map((date, i) => {
+    const [traffic, signups] = series[i] ?? [];
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      !Number.isFinite(traffic) ||
+      !Number.isFinite(signups)
+    ) {
+      throw new Error(`${LABEL} returned a malformed funnel row for ${date}`);
+    }
     return { date, signups, traffic, rate: traffic > 0 ? signups / traffic : null };
   });
 }
@@ -135,7 +153,8 @@ const funnelCache = ttlCache(
   {
     ttlMs: CACHE_TTL_MS,
     failureTtlMs: AMPLITUDE_FAILURE_TTL_MS,
-    keyOf: ({ config }) => `${config.apiKey}:${config.windowDays}`,
+    // the UTC day is part of the key so the window moves forward at midnight
+    keyOf: ({ config, now }) => `${config.apiKey}:${config.windowDays}:${isoDay(now)}`,
   },
 );
 
@@ -162,7 +181,10 @@ async function fetchFunnel(config: AmplitudeConfig, now: number): Promise<Funnel
     LABEL,
   );
   if (!response.ok) {
-    throw new Error(`${LABEL} failed: ${response.status}`);
+    // Amplitude error bodies don't echo credentials; the slice tells a bad
+    // key apart from a rate limit in the logs.
+    const detail = (await response.text().catch(() => "")).slice(0, 200);
+    throw new Error(`${LABEL} failed: ${response.status} ${detail}`.trim());
   }
   const body = await readJson<FunnelsResponse>(response, amplitudeTimeout.ms, LABEL);
   return { days: funnelToSignupDays(body), windowStart };
