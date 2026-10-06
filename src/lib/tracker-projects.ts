@@ -43,6 +43,11 @@ export const TRACKER_PROJECTS: TrackerProject[] = [
     linearSlugId: "098422f41fd9",
     repos: ["marketing-site-payload"],
   },
+  {
+    key: "deprecate-webflow",
+    linearSlugId: "73bceaf851ee",
+    repos: ["marketing-site-payload"],
+  },
 ];
 
 export const DONE_PROJECTS: DoneProject[] = [
