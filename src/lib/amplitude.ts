@@ -155,6 +155,11 @@ const funnelCache = ttlCache(
     failureTtlMs: AMPLITUDE_FAILURE_TTL_MS,
     // the UTC day is part of the key so the window moves forward at midnight
     keyOf: ({ config, now }) => `${config.apiKey}:${config.windowDays}:${isoDay(now)}`,
+    onStaleServe: (error) =>
+      console.error(
+        `${LABEL} refresh failed, serving the cached funnel:`,
+        error instanceof Error ? error.message : error,
+      ),
   },
 );
 
@@ -185,7 +190,9 @@ export async function getAmplitudeFunnel(
       if (latest && isoDay(latest.now) !== isoDay(now)) {
         // drop earlier days' entries (and failures) from the cache
         funnelCache.clear({ config, now: latest.now });
-        funnelCache.clear({ config, now: now - DAY_MS });
+        if (isoDay(latest.now) !== isoDay(now - DAY_MS)) {
+          funnelCache.clear({ config, now: now - DAY_MS });
+        }
       }
       lastGood.set(id, { now, funnel });
     }
@@ -193,7 +200,7 @@ export async function getAmplitudeFunnel(
   } catch (error) {
     const latest = lastGood.get(id);
     // only yesterday's funnel is close enough; older than that, use the snapshot
-    if (latest && isoDay(latest.now) === isoDay(now - DAY_MS)) {
+    if (latest && isoDay(latest.now) >= isoDay(now - DAY_MS)) {
       console.error(
         `${LABEL} failed, serving yesterday's funnel:`,
         error instanceof Error ? error.message : error,

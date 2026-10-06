@@ -17,7 +17,13 @@ type Entry<T> = { at: number; value: T };
  */
 export function ttlCache<K, T>(
   load: (key: K) => Promise<T>,
-  options: { ttlMs: number; failureTtlMs: number; keyOf?: (key: K) => string },
+  options: {
+    ttlMs: number;
+    failureTtlMs: number;
+    keyOf?: (key: K) => string;
+    /** Called when a failed refresh is answered with the last good value. */
+    onStaleServe?: (error: unknown) => void;
+  },
 ) {
   const entries = new Map<string, Entry<T>>();
   const failures = new Map<string, { at: number; error: unknown }>();
@@ -50,7 +56,10 @@ export function ttlCache<K, T>(
       })
       .catch((error: unknown) => {
         if (current()) failures.set(id, { at: now, error });
-        if (hit) return hit.value;
+        if (hit) {
+          options.onStaleServe?.(error);
+          return hit.value;
+        }
         throw error;
       })
       .finally(() => {

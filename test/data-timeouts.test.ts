@@ -244,10 +244,13 @@ test("getAmplitudeFunnel serves yesterday's funnel, and logs, when the first fet
   assert.equal(calls, 2);
   assert.equal(logged.length, 1);
   assert.match(String(logged[0][1]), /failed: 429/);
+  // inside the failure backoff: no refetch, still yesterday's funnel
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 35)), good);
+  assert.equal(calls, 2);
 });
 
 test("getAmplitudeFunnel stops serving a funnel more than a day old", async (t) => {
-  captureErrors(t);
+  const logged = captureErrors(t);
   let fail = false;
   globalThis.fetch = (async () =>
     fail ? new Response("down", { status: 503 }) : oneDayFunnel("2026-09-30")) as typeof fetch;
@@ -255,6 +258,20 @@ test("getAmplitudeFunnel stops serving a funnel more than a day old", async (t) 
   await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 12));
   fail = true;
   await assert.rejects(getAmplitudeFunnel(env, Date.UTC(2026, 9, 3, 12)), /failed: 503/);
+  assert.equal(logged.length, 0);
+});
+
+test("getAmplitudeFunnel logs a failed same-day refresh that serves the cached funnel", async (t) => {
+  const logged = captureErrors(t);
+  let fail = false;
+  globalThis.fetch = (async () =>
+    fail ? new Response("rate limited", { status: 429 }) : oneDayFunnel("2026-09-30")) as typeof fetch;
+
+  const good = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 1));
+  fail = true;
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 8)), good);
+  assert.equal(logged.length, 1);
+  assert.match(String(logged[0][1]), /failed: 429/);
 });
 
 test("getAmplitudeFunnel: a slow load from before midnight can't replace a newer funnel", async (t) => {
