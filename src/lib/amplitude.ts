@@ -158,8 +158,16 @@ const funnelCache = ttlCache(
   },
 );
 
+/**
+ * The newest good funnel per config. The day-keyed cache starts empty at
+ * midnight, so without this a failure then would drop the page to the
+ * snapshot instead of the previous day's live funnel.
+ */
+const lastGood = new Map<string, { now: number; funnel: Funnel }>();
+
 export function resetAmplitudeCacheForTests(): void {
   funnelCache.clear();
+  lastGood.clear();
 }
 
 export async function getAmplitudeFunnel(
@@ -168,7 +176,20 @@ export async function getAmplitudeFunnel(
 ): Promise<Funnel | null> {
   const config = amplitudeConfig(env);
   if (!config) return null;
-  return funnelCache.get({ config, now }, now);
+  const id = `${config.apiKey}:${config.windowDays}`;
+  const previous = lastGood.get(id);
+  try {
+    const funnel = await funnelCache.get({ config, now }, now);
+    // drop the earlier day's entry so the cache holds one day per config
+    if (previous && isoDay(previous.now) !== isoDay(now)) {
+      funnelCache.clear({ config, now: previous.now });
+    }
+    lastGood.set(id, { now, funnel });
+    return funnel;
+  } catch (error) {
+    if (previous) return previous.funnel;
+    throw error;
+  }
 }
 
 async function fetchFunnel(config: AmplitudeConfig, now: number): Promise<Funnel> {
@@ -181,9 +202,11 @@ async function fetchFunnel(config: AmplitudeConfig, now: number): Promise<Funnel
     LABEL,
   );
   if (!response.ok) {
-    // Amplitude error bodies don't echo credentials; the slice tells a bad
-    // key apart from a rate limit in the logs.
-    const detail = (await response.text().catch(() => "")).slice(0, 200);
+    // A short one-line slice tells a bad key apart from a rate limit in the
+    // logs. Credentials travel only in the Authorization header.
+    const detail = (await response.text().catch(() => ""))
+      .replace(/\s+/g, " ")
+      .slice(0, 200);
     throw new Error(`${LABEL} failed: ${response.status} ${detail}`.trim());
   }
   const body = await readJson<FunnelsResponse>(response, amplitudeTimeout.ms, LABEL);

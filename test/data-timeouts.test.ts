@@ -197,24 +197,50 @@ test("getAmplitudeFunnel sends Basic auth to the funnels endpoint and maps the r
   });
 });
 
-test("getAmplitudeFunnel refetches once the UTC day rolls over", async () => {
-  let calls = 0;
-  globalThis.fetch = (async () => {
-    calls++;
+test("getAmplitudeFunnel moves the window forward once the UTC day rolls over", async () => {
+  const urls: URL[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    urls.push(new URL(String(input)));
     return Response.json({ data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }] });
   }) as typeof fetch;
 
   await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
   await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23, 30));
-  assert.equal(calls, 1);
+  assert.equal(urls.length, 1);
   await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30));
-  assert.equal(calls, 2);
+  assert.equal(urls.length, 2);
+  assert.equal(urls[0].searchParams.get("start"), "20260901");
+  assert.equal(urls[0].searchParams.get("end"), "20260930");
+  assert.equal(urls[1].searchParams.get("start"), "20260902");
+  assert.equal(urls[1].searchParams.get("end"), "20261001");
+});
+
+test("getAmplitudeFunnel keeps serving yesterday's funnel when the first fetch of a new day fails", async () => {
+  let fail = false;
+  globalThis.fetch = (async () =>
+    fail
+      ? new Response("rate limited", { status: 429 })
+      : Response.json({ data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }] })) as typeof fetch;
+
+  const good = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
+  fail = true;
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30)), good);
 });
 
 test("getAmplitudeFunnel: an error status carries a short slice of the body", async () => {
   globalThis.fetch = (async () =>
     new Response(JSON.stringify({ error: { message: "Invalid API Key" } }), { status: 403 })) as typeof fetch;
   await assert.rejects(getAmplitudeFunnel(env, 0), /failed: 403 .*Invalid API Key/);
+});
+
+test("getAmplitudeFunnel: an HTML error body is flattened to one short line", async () => {
+  globalThis.fetch = (async () =>
+    new Response(`<html>\n  <body>\n${"x".repeat(500)}</body></html>`, { status: 502 })) as typeof fetch;
+  await assert.rejects(getAmplitudeFunnel(env, 0), (error: Error) => {
+    assert.doesNotMatch(error.message, /\n/);
+    assert.ok(error.message.length < 260, error.message);
+    return true;
+  });
 });
 
 test("getAmplitudeFunnel: a 404 is cached as a failure, then retried after the TTL", async () => {

@@ -15,9 +15,10 @@ const config = amplitudeConfig(env)!;
 test("funnelQuery asks for the dashboard's daily Page Viewed → signup funnel", () => {
   const now = Date.UTC(2026, 9, 1, 15, 42); // Oct 1, mid-day
   const { url, windowStart } = funnelQuery(config, now);
-  const params = new URL(url).searchParams;
+  const parsed = new URL(url);
+  const params = parsed.searchParams;
 
-  assert.equal(new URL(url).origin + new URL(url).pathname, "https://amplitude.com/api/2/funnels");
+  assert.equal(parsed.origin + parsed.pathname, "https://amplitude.com/api/2/funnels");
   const [pageview, signup] = params.getAll("e").map((e) => JSON.parse(e));
   assert.deepEqual(pageview, {
     event_type: "Page Viewed",
