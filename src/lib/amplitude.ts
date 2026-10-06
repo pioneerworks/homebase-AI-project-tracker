@@ -177,17 +177,29 @@ export async function getAmplitudeFunnel(
   const config = amplitudeConfig(env);
   if (!config) return null;
   const id = `${config.apiKey}:${config.windowDays}`;
-  const previous = lastGood.get(id);
   try {
     const funnel = await funnelCache.get({ config, now }, now);
-    // drop the earlier day's entry so the cache holds one day per config
-    if (previous && isoDay(previous.now) !== isoDay(now)) {
-      funnelCache.clear({ config, now: previous.now });
+    const latest = lastGood.get(id);
+    // a slow load that started before a newer success must not overwrite it
+    if (!latest || now >= latest.now) {
+      if (latest && isoDay(latest.now) !== isoDay(now)) {
+        // drop earlier days' entries (and failures) from the cache
+        funnelCache.clear({ config, now: latest.now });
+        funnelCache.clear({ config, now: now - DAY_MS });
+      }
+      lastGood.set(id, { now, funnel });
     }
-    lastGood.set(id, { now, funnel });
     return funnel;
   } catch (error) {
-    if (previous) return previous.funnel;
+    const latest = lastGood.get(id);
+    // only yesterday's funnel is close enough; older than that, use the snapshot
+    if (latest && isoDay(latest.now) === isoDay(now - DAY_MS)) {
+      console.error(
+        `${LABEL} failed, serving yesterday's funnel:`,
+        error instanceof Error ? error.message : error,
+      );
+      return latest.funnel;
+    }
     throw error;
   }
 }

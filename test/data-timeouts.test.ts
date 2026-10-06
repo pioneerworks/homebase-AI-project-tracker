@@ -215,16 +215,69 @@ test("getAmplitudeFunnel moves the window forward once the UTC day rolls over", 
   assert.equal(urls[1].searchParams.get("end"), "20261001");
 });
 
-test("getAmplitudeFunnel keeps serving yesterday's funnel when the first fetch of a new day fails", async () => {
+const oneDayFunnel = (date: string) =>
+  Response.json({ data: [{ dayFunnels: { xValues: [date], series: [[10, 1]] } }] });
+
+/** Silence and record console.error for the duration of a test. */
+function captureErrors(t: { after: (fn: () => void) => void }): unknown[][] {
+  const logged: unknown[][] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => void logged.push(args);
+  t.after(() => {
+    console.error = original;
+  });
+  return logged;
+}
+
+test("getAmplitudeFunnel serves yesterday's funnel, and logs, when the first fetch of a new day fails", async (t) => {
+  const logged = captureErrors(t);
+  let calls = 0;
   let fail = false;
-  globalThis.fetch = (async () =>
-    fail
-      ? new Response("rate limited", { status: 429 })
-      : Response.json({ data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }] })) as typeof fetch;
+  globalThis.fetch = (async () => {
+    calls++;
+    return fail ? new Response("rate limited", { status: 429 }) : oneDayFunnel("2026-09-30");
+  }) as typeof fetch;
 
   const good = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
   fail = true;
   assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30)), good);
+  assert.equal(calls, 2);
+  assert.equal(logged.length, 1);
+  assert.match(String(logged[0][1]), /failed: 429/);
+});
+
+test("getAmplitudeFunnel stops serving a funnel more than a day old", async (t) => {
+  captureErrors(t);
+  let fail = false;
+  globalThis.fetch = (async () =>
+    fail ? new Response("down", { status: 503 }) : oneDayFunnel("2026-09-30")) as typeof fetch;
+
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 12));
+  fail = true;
+  await assert.rejects(getAmplitudeFunnel(env, Date.UTC(2026, 9, 3, 12)), /failed: 503/);
+});
+
+test("getAmplitudeFunnel: a slow load from before midnight can't replace a newer funnel", async (t) => {
+  captureErrors(t);
+  let releaseSlow!: () => void;
+  const slowGate = new Promise<void>((resolve) => (releaseSlow = resolve));
+  let call = 0;
+  globalThis.fetch = (async () => {
+    call++;
+    if (call === 1) {
+      await slowGate;
+      return oneDayFunnel("2026-09-29");
+    }
+    if (call === 2) return oneDayFunnel("2026-09-30");
+    return new Response("down", { status: 503 });
+  }) as typeof fetch;
+
+  const slow = getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23, 59));
+  const fresh = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 1));
+  releaseSlow();
+  await slow;
+  // the next day fails: it must fall back to the newer funnel, not the slow one
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 3, 0, 30)), fresh);
 });
 
 test("getAmplitudeFunnel: an error status carries a short slice of the body", async () => {
