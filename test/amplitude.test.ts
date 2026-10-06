@@ -2,73 +2,99 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
-  aggregateFromLines,
   amplitudeConfig,
-  toSignupDays,
+  funnelQuery,
+  funnelToSignupDays,
 } from "../src/lib/amplitude";
 import { mergeSignupSources } from "../src/lib/omni";
 import type { SignupDay } from "../src/lib/signup-data";
 
-const config = {
-  signupEvent: "Owner Account Created",
-  pageviewEvent: "Page Viewed",
-  productAreaPrefix: "mw_",
-};
+const env = { AMPLITUDE_API_KEY: "k", AMPLITUDE_SECRET: "s" };
+const config = amplitudeConfig(env)!;
 
-const ev = (over: Record<string, unknown>) =>
-  JSON.stringify({
-    event_time: "2026-09-01T12:00:00.000Z",
-    user_id: "u1",
-    device_id: "d1",
-    event_properties: { product_area: "mw_home", device_family: "Windows" },
-    ...over,
+test("funnelQuery asks for the dashboard's daily Page Viewed → signup funnel", () => {
+  const now = Date.UTC(2026, 9, 1, 15, 42); // Oct 1, mid-day
+  const { url, windowStart } = funnelQuery(config, now);
+  const parsed = new URL(url);
+  const params = parsed.searchParams;
+
+  assert.equal(parsed.origin + parsed.pathname, "https://amplitude.com/api/2/funnels");
+  const [pageview, signup] = params.getAll("e").map((e) => JSON.parse(e));
+  assert.deepEqual(pageview, {
+    event_type: "Page Viewed",
+    filters: [
+      { subprop_type: "event", subprop_key: "product_area", subprop_op: "contains", subprop_value: ["mw_"] },
+      { subprop_type: "user", subprop_key: "device", subprop_op: "is not", subprop_value: ["Linux"] },
+    ],
   });
-
-test("aggregateFromLines counts unique users per day with funnel filters", () => {
-  const lines = [
-    // qualifying pageview + signup for u1
-    ev({ event_type: "Page Viewed" }),
-    ev({ event_type: "Owner Account Created" }),
-    // same user again — must not double count
-    ev({ event_type: "Page Viewed", event_time: "2026-09-01T20:00:00Z" }),
-    // second user pageview only
-    ev({ user_id: "u2", event_type: "Page Viewed" }),
-    // Linux device excluded
-    ev({ user_id: "u3", event_properties: { product_area: "mw_home", device_family: "Linux" } }),
-    // non-mw product area excluded
-    ev({ user_id: "u4", event_properties: { product_area: "blog", device_family: "Mac" } }),
-    // signup without a pageview is not a funnel conversion
-    ev({ user_id: "u5", event_type: "Owner Account Created" }),
-    // next day pageview
-    ev({ user_id: "u2", event_time: "2026-09-02T10:00:00Z", event_type: "Page Viewed" }),
-    // other event types ignored
-    ev({ event_type: "Button Click" }),
-    // malformed line skipped
-    "not json",
-  ];
-
-  const byDay = aggregateFromLines(lines, config);
-  const days = toSignupDays(byDay);
-
-  assert.equal(days.length, 2);
-  const d1 = days.find((d) => d.date === "2026-09-01")!;
-  const d2 = days.find((d) => d.date === "2026-09-02")!;
-  // u1 viewed and signed up; u5 signed up without viewing; u1, u2 viewed
-  assert.equal(d1.signups, 1);
-  assert.equal(d1.traffic, 2);
-  assert.equal(d1.rate, 0.5);
-  assert.equal(d2.traffic, 1);
-  assert.equal(d2.signups, 0);
-  assert.equal(d2.rate, 0);
+  assert.deepEqual(signup, { event_type: "Owner Account Created", filters: [] });
+  assert.equal(params.get("mode"), "ordered");
+  assert.equal(params.get("i"), "1");
+  assert.equal(params.get("cs"), "86400");
+  // 30 complete days, ending yesterday; today's partial day is excluded
+  assert.equal(params.get("end"), "20260930");
+  assert.equal(params.get("start"), "20260901");
+  assert.equal(windowStart, "2026-09-01");
 });
 
-test("aggregateFromLines falls back to device_id when user_id is absent", () => {
-  const lines = [
-    ev({ user_id: null, device_id: "anon-1", event_type: "Page Viewed" }),
-    ev({ user_id: null, device_id: "anon-1", event_type: "Page Viewed" }),
-  ];
-  const days = toSignupDays(aggregateFromLines(lines, config));
-  assert.equal(days[0].traffic, 1);
+test("funnelToSignupDays maps daily step counts to traffic, signups and rate", () => {
+  const body = {
+    data: [
+      {
+        dayFunnels: {
+          xValues: ["2026-09-29", "2026-09-30"],
+          series: [
+            [20840, 250],
+            [20807, 252],
+          ],
+        },
+      },
+    ],
+  };
+  assert.deepEqual(funnelToSignupDays(body), [
+    { date: "2026-09-29", signups: 250, traffic: 20840, rate: 250 / 20840 },
+    { date: "2026-09-30", signups: 252, traffic: 20807, rate: 252 / 20807 },
+  ]);
+});
+
+test("funnelToSignupDays gives a null rate on a zero-traffic day", () => {
+  const body = { data: [{ dayFunnels: { xValues: ["2026-09-29"], series: [[0, 0]] } }] };
+  assert.deepEqual(funnelToSignupDays(body), [
+    { date: "2026-09-29", signups: 0, traffic: 0, rate: null },
+  ]);
+});
+
+test("funnelToSignupDays rejects a response without daily funnel data", () => {
+  assert.throws(() => funnelToSignupDays({ data: [] }), /no daily funnel data/);
+  assert.throws(() => funnelToSignupDays({}), /no daily funnel data/);
+});
+
+test("funnelToSignupDays rejects a malformed series instead of inventing zero days", () => {
+  const shaped = (xValues: string[], series: unknown[]) =>
+    ({ data: [{ dayFunnels: { xValues, series } }] }) as Parameters<typeof funnelToSignupDays>[0];
+  // one row per day, not per step
+  assert.throws(
+    () => funnelToSignupDays(shaped(["2026-09-29", "2026-09-30"], [[20840, 250]])),
+    /malformed/,
+  );
+  assert.throws(() => funnelToSignupDays(shaped(["2026-09-29"], [[20840]])), /malformed/);
+  assert.throws(() => funnelToSignupDays(shaped(["2026-09-29"], [[20840, "250"]])), /malformed/);
+  assert.throws(() => funnelToSignupDays(shaped(["Sep 29"], [[20840, 250]])), /malformed/);
+});
+
+test("funnelQuery at the UTC day boundary with a custom window", () => {
+  const custom = amplitudeConfig({ ...env, AMPLITUDE_WINDOW_DAYS: "7" })!;
+  const { url, windowStart } = funnelQuery(custom, Date.UTC(2026, 9, 1, 0, 0));
+  const params = new URL(url).searchParams;
+  assert.equal(params.get("end"), "20260930");
+  assert.equal(params.get("start"), "20260924");
+  assert.equal(windowStart, "2026-09-24");
+});
+
+test("amplitudeConfig falls back to 30 days for an invalid window", () => {
+  for (const value of ["abc", "0", "-5", "2.5", "1000"]) {
+    assert.equal(amplitudeConfig({ ...env, AMPLITUDE_WINDOW_DAYS: value })?.windowDays, 30, value);
+  }
 });
 
 test("amplitudeConfig ignores masked or missing credentials", () => {

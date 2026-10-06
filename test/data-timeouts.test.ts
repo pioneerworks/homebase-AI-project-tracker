@@ -178,6 +178,141 @@ test("ttlCache skips a failing upstream for failureTtlMs, then retries", async (
   assert.equal(loads, 2);
 });
 
+test("getAmplitudeFunnel sends Basic auth to the funnels endpoint and maps the reply", async () => {
+  const seen: { url: string; auth: string | null }[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    seen.push({ url: String(input), auth: new Headers(init?.headers).get("authorization") });
+    return Response.json({
+      data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }],
+    });
+  }) as typeof fetch;
+
+  const funnel = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 12));
+  assert.equal(seen.length, 1);
+  assert.equal(new URL(seen[0].url).pathname, "/api/2/funnels");
+  assert.equal(seen[0].auth, `Basic ${Buffer.from("k:s").toString("base64")}`);
+  assert.deepEqual(funnel, {
+    windowStart: "2026-09-01",
+    days: [{ date: "2026-09-30", signups: 1, traffic: 10, rate: 0.1 }],
+  });
+});
+
+test("getAmplitudeFunnel moves the window forward once the UTC day rolls over", async () => {
+  const urls: URL[] = [];
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    urls.push(new URL(String(input)));
+    return Response.json({ data: [{ dayFunnels: { xValues: ["2026-09-30"], series: [[10, 1]] } }] });
+  }) as typeof fetch;
+
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23, 30));
+  assert.equal(urls.length, 1);
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30));
+  assert.equal(urls.length, 2);
+  assert.equal(urls[0].searchParams.get("start"), "20260901");
+  assert.equal(urls[0].searchParams.get("end"), "20260930");
+  assert.equal(urls[1].searchParams.get("start"), "20260902");
+  assert.equal(urls[1].searchParams.get("end"), "20261001");
+});
+
+const oneDayFunnel = (date: string) =>
+  Response.json({ data: [{ dayFunnels: { xValues: [date], series: [[10, 1]] } }] });
+
+/** Silence and record console.error for the duration of a test. */
+function captureErrors(t: { after: (fn: () => void) => void }): unknown[][] {
+  const logged: unknown[][] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => void logged.push(args);
+  t.after(() => {
+    console.error = original;
+  });
+  return logged;
+}
+
+test("getAmplitudeFunnel serves yesterday's funnel, and logs, when the first fetch of a new day fails", async (t) => {
+  const logged = captureErrors(t);
+  let calls = 0;
+  let fail = false;
+  globalThis.fetch = (async () => {
+    calls++;
+    return fail ? new Response("rate limited", { status: 429 }) : oneDayFunnel("2026-09-30");
+  }) as typeof fetch;
+
+  const good = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23));
+  fail = true;
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 30)), good);
+  assert.equal(calls, 2);
+  assert.equal(logged.length, 1);
+  assert.match(String(logged[0][1]), /failed: 429/);
+  // inside the failure backoff: no refetch, still yesterday's funnel
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 35)), good);
+  assert.equal(calls, 2);
+});
+
+test("getAmplitudeFunnel stops serving a funnel more than a day old", async (t) => {
+  const logged = captureErrors(t);
+  let fail = false;
+  globalThis.fetch = (async () =>
+    fail ? new Response("down", { status: 503 }) : oneDayFunnel("2026-09-30")) as typeof fetch;
+
+  await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 12));
+  fail = true;
+  await assert.rejects(getAmplitudeFunnel(env, Date.UTC(2026, 9, 3, 12)), /failed: 503/);
+  assert.equal(logged.length, 0);
+});
+
+test("getAmplitudeFunnel logs a failed same-day refresh that serves the cached funnel", async (t) => {
+  const logged = captureErrors(t);
+  let fail = false;
+  globalThis.fetch = (async () =>
+    fail ? new Response("rate limited", { status: 429 }) : oneDayFunnel("2026-09-30")) as typeof fetch;
+
+  const good = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 1));
+  fail = true;
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 8)), good);
+  assert.equal(logged.length, 1);
+  assert.match(String(logged[0][1]), /failed: 429/);
+});
+
+test("getAmplitudeFunnel: a slow load from before midnight can't replace a newer funnel", async (t) => {
+  captureErrors(t);
+  let releaseSlow!: () => void;
+  const slowGate = new Promise<void>((resolve) => (releaseSlow = resolve));
+  let call = 0;
+  globalThis.fetch = (async () => {
+    call++;
+    if (call === 1) {
+      await slowGate;
+      return oneDayFunnel("2026-09-29");
+    }
+    if (call === 2) return oneDayFunnel("2026-09-30");
+    return new Response("down", { status: 503 });
+  }) as typeof fetch;
+
+  const slow = getAmplitudeFunnel(env, Date.UTC(2026, 9, 1, 23, 59));
+  const fresh = await getAmplitudeFunnel(env, Date.UTC(2026, 9, 2, 0, 1));
+  releaseSlow();
+  await slow;
+  // the next day fails: it must fall back to the newer funnel, not the slow one
+  assert.deepEqual(await getAmplitudeFunnel(env, Date.UTC(2026, 9, 3, 0, 30)), fresh);
+});
+
+test("getAmplitudeFunnel: an error status carries a short slice of the body", async () => {
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ error: { message: "Invalid API Key" } }), { status: 403 })) as typeof fetch;
+  await assert.rejects(getAmplitudeFunnel(env, 0), /failed: 403 .*Invalid API Key/);
+});
+
+test("getAmplitudeFunnel: an HTML error body is flattened to one short line", async () => {
+  globalThis.fetch = (async () =>
+    new Response(`<html>\n  <body>\n${"x".repeat(500)}</body></html>`, { status: 502 })) as typeof fetch;
+  await assert.rejects(getAmplitudeFunnel(env, 0), (error: Error) => {
+    assert.doesNotMatch(error.message, /\n/);
+    assert.ok(error.message.length < 260, error.message);
+    return true;
+  });
+});
+
 test("getAmplitudeFunnel: a 404 is cached as a failure, then retried after the TTL", async () => {
   let calls = 0;
   globalThis.fetch = (async () => {
@@ -193,20 +328,20 @@ test("getAmplitudeFunnel: a 404 is cached as a failure, then retried after the T
   assert.equal(calls, 2);
 });
 
-test("getAmplitudeFunnel: a stalled export times out and is cached as a failure", async () => {
+test("getAmplitudeFunnel: a stalled request times out and is cached as a failure", async () => {
   const counter = { calls: 0 };
   globalThis.fetch = stallBeforeHeaders(counter);
   await within(1_000, () =>
-    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Export API timed out after 50ms/),
+    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Dashboard API timed out after 50ms/),
   );
   await assert.rejects(getAmplitudeFunnel(env, 1_000), /timed out/);
   assert.equal(counter.calls, 1);
 });
 
-test("getAmplitudeFunnel: a stalled export body times out", async () => {
+test("getAmplitudeFunnel: a stalled response body times out", async () => {
   globalThis.fetch = stallMidBody();
   await within(1_000, () =>
-    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Export API timed out after 50ms/),
+    assert.rejects(getAmplitudeFunnel(env, 0), /Amplitude Dashboard API timed out after 50ms/),
   );
 });
 
