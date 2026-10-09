@@ -21,6 +21,8 @@ import {
   taglineOf,
   toCsv,
   toListItem,
+  sourceLabel,
+  trafficLabel,
   twoProportionPValue,
   withAmplitude,
 } from "../src/lib/experiments-derive";
@@ -117,6 +119,8 @@ const base: ExperimentListItem = {
   verdict: "no-data",
   controlN: null,
   testN: null,
+  statsigTestN: null,
+  alpha: null,
   day: null,
   totalDays: null,
   startDate: null,
@@ -445,4 +449,41 @@ test("toListItem marks Statsig as the results source", () => {
   const item = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
   assert.equal(item.resultsSource, "statsig");
   assert.ok(item.results.every((r) => r.source === "statsig"));
+});
+
+test("withAmplitude uses Statsig's adjusted alpha when the pulse has one", () => {
+  const statsig = { ...toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12)), alpha: 0.001 };
+  // p ≈ 0.0047: significant at 0.05, not at 0.001
+  assert.equal(withAmplitude(statsig, arms([10000, 200], [10000, 260])).verdict, "no-signal");
+});
+
+test("withAmplitude calls a win when control has no sign ups but test clearly does", () => {
+  const statsig = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  const item = withAmplitude(statsig, arms([5000, 0], [5000, 40]));
+  assert.equal(item.lift, null);
+  assert.equal(item.verdict, "winning");
+});
+
+test("pickDecision prices the daily cost on Statsig's full traffic, not Amplitude's consented visitors", () => {
+  const statsig = { ...toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12)), statsigTestN: 20000, day: 10 };
+  const losing = withAmplitude(statsig, arms([10000, 260], [10000, 200]));
+  // (2.6% − 2.0%) × 20,000 / 10 days = 12 a day (Amplitude's 10,000 would say 6)
+  assert.match(pickDecision([losing])!.body, /roughly 12 owner sign ups a day/);
+});
+
+test("buildKpis says where the sign-up numbers come from", () => {
+  const amp = { ...base, status: "live" as const, results: [{ label: "Sign ups", control: 1, test: 2, controlRate: 1, testRate: 2, lift: 100, source: "amplitude" as const }] };
+  const sig = { ...base, status: "live" as const, results: [{ label: "Sign ups", control: 3, test: 4, controlRate: 1, testRate: 2, lift: 100, source: "statsig" as const }] };
+  const opts = { visitors7d: null, milestone: null, today: "2026-10-09" };
+  const ctx = (items: ExperimentListItem[]) => buildKpis(items, opts).find((k) => k.id === "signups")!.context;
+  assert.equal(ctx([amp]), "Control 1 · Test 2 · Amplitude, live");
+  assert.equal(ctx([amp, sig]), "Control 4 · Test 6 · Amplitude + Statsig");
+  assert.equal(ctx([sig]), "Control 3 · Test 4");
+});
+
+test("trafficLabel and sourceLabel name the source", () => {
+  assert.equal(trafficLabel("amplitude"), "Visitors");
+  assert.equal(trafficLabel("statsig"), "Exposures");
+  assert.match(sourceLabel("amplitude"), /Amplitude, live/);
+  assert.match(sourceLabel("statsig"), /updated daily/);
 });

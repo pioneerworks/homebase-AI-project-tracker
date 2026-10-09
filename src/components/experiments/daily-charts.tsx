@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 import { formatRate } from "@/lib/experiments-derive";
-import type { DailyPoint } from "@/lib/experiments-types";
+import type { DailyPoint, ExperimentDetail } from "@/lib/experiments-types";
 
 /**
  * Block 04 charts: two side-by-side recharts bar charts (exposures and owner
@@ -166,17 +166,24 @@ function DailyBarChart({
   );
 }
 
-function RateTable({ daily }: { daily: DailyPoint[] }) {
+function RateTable({ daily, runTotals }: { daily: DailyPoint[]; runTotals?: ExperimentDetail["totals"] }) {
   const n = daily.length;
-  const totals = daily.reduce(
-    (acc, point) => ({
-      controlSignups: acc.controlSignups + point.signups.control,
-      testSignups: acc.testSignups + point.signups.test,
-      controlExposures: acc.controlExposures + point.exposures.control,
-      testExposures: acc.testExposures + point.exposures.test,
-    }),
-    { controlSignups: 0, testSignups: 0, controlExposures: 0, testExposures: 0 },
-  );
+  const totals = runTotals
+    ? {
+        controlSignups: runTotals.control.signups,
+        testSignups: runTotals.test.signups,
+        controlExposures: runTotals.control.visitors,
+        testExposures: runTotals.test.visitors,
+      }
+    : daily.reduce(
+        (acc, point) => ({
+          controlSignups: acc.controlSignups + point.signups.control,
+          testSignups: acc.testSignups + point.signups.test,
+          controlExposures: acc.controlExposures + point.exposures.control,
+          testExposures: acc.testExposures + point.exposures.test,
+        }),
+        { controlSignups: 0, testSignups: 0, controlExposures: 0, testExposures: 0 },
+      );
   const rate = (signups: number, exposures: number): string =>
     exposures > 0 ? formatRate((signups / exposures) * 100) : "—";
 
@@ -192,7 +199,7 @@ function RateTable({ daily }: { daily: DailyPoint[] }) {
               {dayLabel(point.date)}
             </th>
           ))}
-          <th scope="col">{n}-day</th>
+          <th scope="col">{runTotals ? "Whole run" : `${n}-day`}</th>
         </tr>
       </thead>
       <tbody>
@@ -230,9 +237,11 @@ function RateTable({ daily }: { daily: DailyPoint[] }) {
 export default function DailyCharts({
   daily,
   trafficLabel = "Exposures",
+  totals,
 }: {
   daily: DailyPoint[];
   trafficLabel?: string;
+  totals?: ExperimentDetail["totals"];
 }) {
   return (
     <div className="exp-d-daily">
@@ -240,7 +249,7 @@ export default function DailyCharts({
         <DailyBarChart title={`${trafficLabel} / day`} rows={toRows("exposures", daily)} daily={daily} showRate={false} />
         <DailyBarChart title="Owner sign ups / day" rows={toRows("signups", daily)} daily={daily} showRate={true} />
       </div>
-      <RateTable daily={daily} />
+      <RateTable daily={daily} runTotals={totals} />
     </div>
   );
 }

@@ -8,8 +8,8 @@ export type HubStatus = "live" | "queued" | "draft" | "concluded";
 /** Where an experiment's sign-up results come from. */
 export type ResultsSource = "amplitude" | "statsig";
 
-/** One arm's Amplitude funnel: unique visitors and those who signed up within the window. */
 export type ArmDay = { date: string; visitors: number; signups: number };
+/** One arm's Amplitude funnel: unique visitors over the range and those who signed up within the window. */
 export type ArmFunnel = { visitors: number; signups: number; daily: ArmDay[] };
 export type ArmResults = { control: ArmFunnel; test: ArmFunnel };
 export type Surface = "landing_page" | "signup_flow" | "tool_page";
@@ -49,6 +49,10 @@ export type ExperimentListItem = {
   verdict: Verdict;
   controlN: number | null;
   testN: number | null;
+  /** Statsig's test-arm units: all visitors, unlike Amplitude's consented-only count. */
+  statsigTestN: number | null;
+  /** Statsig's adjusted alpha for the primary metric, when the pulse has one. */
+  alpha: number | null;
   day: number | null;
   totalDays: number | null;
   startDate: string | null;
@@ -120,4 +124,9 @@ export type ExperimentDetail = {
   daily: DailyPoint[] | null;
   /** amplitude: daily visitors + sign ups from Amplitude; statsig: exposures + dated pulses. */
   dailySource: ResultsSource;
+  /**
+   * Amplitude only: unique visitors and sign ups over the whole run, for the
+   * rate table's total (summing daily uniques would count returning visitors twice).
+   */
+  totals?: { control: { visitors: number; signups: number }; test: { visitors: number; signups: number } };
 };

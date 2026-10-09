@@ -74,9 +74,10 @@ const DETAIL_DAYS = 28;
 /**
  * How long a page or detail load waits on Amplitude before showing Statsig's
  * numbers instead. The slow call keeps running and fills the cache for the
- * next load.
+ * next load. The sidebar nav, rendered on every tab, waits much less.
+ * Mutable for tests.
  */
-export const AMPLITUDE_BUDGET_MS = { ms: 10_000 };
+export const amplitudeBudget = { ms: 10_000, navMs: 1_500 };
 
 type PageKey = { apiKey: string; now: number };
 type DetailKey = { id: string; apiKey: string; now: number };
@@ -128,10 +129,15 @@ export function resetExperimentsCacheForTests(): void {
   partialUntil = 0;
 }
 
-/** The whole Experiments page, or null when no Console key is configured. */
+/**
+ * The whole Experiments page, or null when no Console key is configured.
+ * `budgetMs` caps the wait on Amplitude (the sidebar nav, shown on every tab,
+ * passes a short one).
+ */
 export async function getExperimentsPage(
   env: Record<string, string | undefined> = process.env,
   now: number = Date.now(),
+  budgetMs: number = amplitudeBudget.ms,
 ): Promise<ExperimentsPage | null> {
   const config = statsigConfig(env);
   if (!config) return null;
@@ -139,7 +145,7 @@ export async function getExperimentsPage(
 
   const items = await Promise.all(
     value.items.map(async (item) => {
-      const amp = await liveArmResults(item, env, now);
+      const amp = await liveArmResults(item, env, now, budgetMs);
       return amp ? withAmplitude(item, amp) : item;
     }),
   );
@@ -169,29 +175,50 @@ export async function getExperimentDetail(
   if (!config) return null;
   const { items } = await pageValue(config.apiKey, now);
   const item = items.find((candidate) => candidate.id === id);
-  const amp = item ? await liveArmResults(item, env, now) : null;
+  const amp = item ? await liveArmResults(item, env, now, amplitudeBudget.ms) : null;
   if (!amp) return detailCache.get({ id, apiKey: config.apiKey, now }, now);
 
-  const split = await splitCache.get({ id, apiKey: config.apiKey, now }, now);
+  const daily = amplitudeDaily(amp);
+  let split: Split | null;
+  try {
+    split = await splitCache.get({ id, apiKey: config.apiKey, now }, now);
+  } catch (error) {
+    // the Amplitude series still stands without Statsig's traffic split
+    console.log(
+      `[experiments] Statsig exposures for ${id} failed:`,
+      error instanceof Error ? error.message : error,
+    );
+    split = { exposures: null, srm: null };
+  }
   if (!split) return null;
-  return { id, ...split, daily: amplitudeDaily(amp), dailySource: "amplitude" };
+  const totals = {
+    control: { visitors: amp.control.visitors, signups: amp.control.signups },
+    test: { visitors: amp.test.visitors, signups: amp.test.signups },
+  };
+  return { id, ...split, daily, dailySource: "amplitude", totals };
 }
 
 /**
  * Live Amplitude funnels for a live experiment, from its start date through
- * today (UTC). Null when Amplitude isn't configured, the experiment isn't live
- * or has no start date, the call fails (logged), or it runs past the budget.
+ * today (UTC). Null (Statsig's numbers stay) when Amplitude isn't configured,
+ * the experiment isn't live or has no start date, the call fails or runs past
+ * the budget (both logged), or Amplitude saw no visitors in either arm — an
+ * experiment whose page doesn't stamp the arm property.
  */
 async function liveArmResults(
   item: ExperimentListItem,
   env: Record<string, string | undefined>,
   now: number,
+  budgetMs: number,
 ): Promise<ArmResults | null> {
   if (item.status !== "live" || !item.startDate) return null;
   const window = { id: item.id, start: item.startDate, end: new Date(now).toISOString().slice(0, 10) };
   let timer: ReturnType<typeof setTimeout> | undefined;
   const budget = new Promise<null>((resolve) => {
-    timer = setTimeout(() => resolve(null), AMPLITUDE_BUDGET_MS.ms);
+    timer = setTimeout(() => {
+      console.log(`[experiments] Amplitude results for ${item.id} took over ${budgetMs}ms, showing Statsig's`);
+      resolve(null);
+    }, budgetMs);
   });
   const results = getArmResults(window, env, now).catch((error: unknown) => {
     console.log(
@@ -201,7 +228,8 @@ async function liveArmResults(
     return null;
   });
   try {
-    return await Promise.race([results, budget]);
+    const amp = await Promise.race([results, budget]);
+    return amp && amp.control.visitors + amp.test.visitors > 0 ? amp : null;
   } finally {
     clearTimeout(timer);
   }
@@ -209,11 +237,13 @@ async function liveArmResults(
 
 /** The last DETAIL_DAYS days of both arms' Amplitude funnels, visitors in the exposures slot. */
 function amplitudeDaily(amp: ArmResults): DailyPoint[] {
+  const control = new Map(amp.control.daily.map((day) => [day.date, day]));
   const test = new Map(amp.test.daily.map((day) => [day.date, day]));
-  return amp.control.daily.slice(-DETAIL_DAYS).map((day) => ({
-    date: day.date,
-    exposures: { control: day.visitors, test: test.get(day.date)?.visitors ?? 0 },
-    signups: { control: day.signups, test: test.get(day.date)?.signups ?? 0 },
+  const dates = [...new Set([...control.keys(), ...test.keys()])].sort().slice(-DETAIL_DAYS);
+  return dates.map((date) => ({
+    date,
+    exposures: { control: control.get(date)?.visitors ?? 0, test: test.get(date)?.visitors ?? 0 },
+    signups: { control: control.get(date)?.signups ?? 0, test: test.get(date)?.signups ?? 0 },
   }));
 }
 
@@ -532,9 +562,21 @@ export const loadExperimentsPage = cache(
     }),
 );
 
-/** Sidebar counts, built from the same cached page; zeros when it can't load. */
+/**
+ * Sidebar counts, built from the same cached Statsig page and Amplitude
+ * results; zeros when it can't load. The sidebar renders on every tab, so it
+ * waits on Amplitude only briefly (the slow call still fills the cache).
+ */
 export async function loadExperimentsNav(): Promise<ExperimentsNav | null> {
-  const page = await loadExperimentsPage();
+  const page = await getExperimentsPage(process.env, Date.now(), amplitudeBudget.navMs).catch(
+    (error) => {
+      console.log(
+        "[experiments] Statsig fetch failed:",
+        error instanceof Error ? error.message : error,
+      );
+      return undefined;
+    },
+  );
   if (page === undefined) return buildNav([], { ok: false, at: null });
   if (page === null) return null;
   return buildNav(page.experiments, page.sync);

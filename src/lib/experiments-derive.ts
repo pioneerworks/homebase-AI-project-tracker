@@ -17,6 +17,7 @@ import type {
   HubStatus,
   Kpi,
   MetricResult,
+  ResultsSource,
   Surface,
   Tagline,
   View,
@@ -235,6 +236,8 @@ export function toListItem(
     verdict: verdict.verdict,
     controlN: primaryRow?.controlUnits ?? null,
     testN: primaryRow?.testUnits ?? null,
+    statsigTestN: primaryRow?.testUnits ?? null,
+    alpha: primaryRow?.adjustedAlpha ?? null,
     day,
     totalDays: e.duration ?? null,
     startDate: startMs != null ? isoDate(startMs) : null,
@@ -254,7 +257,7 @@ export function toListItem(
 // Amplitude overlay: live sign-up results replacing Statsig's daily sync
 // ---------------------------------------------------------------------------
 
-/** Significance threshold for Amplitude results (Statsig's default alpha). */
+/** Significance threshold for Amplitude results when Statsig gives no adjusted alpha. */
 export const AMPLITUDE_ALPHA = 0.05;
 
 /**
@@ -279,6 +282,7 @@ export function twoProportionPValue(
  * The Statsig list item with its sign-up results (rates, lift, significance,
  * verdict, samples, tagline) recomputed from live Amplitude funnels. The
  * experiment's metadata and Statsig's other metrics (1D1) are kept as they are.
+ * Significance uses Statsig's adjusted alpha for the experiment when known.
  */
 export function withAmplitude(item: ExperimentListItem, amp: ArmResults): ExperimentListItem {
   const { control, test } = amp;
@@ -302,8 +306,12 @@ export function withAmplitude(item: ExperimentListItem, amp: ArmResults): Experi
   const testRate = (test.signups / test.visitors) * 100;
   const lift = controlRate > 0 ? ((testRate - controlRate) / controlRate) * 100 : null;
   const pValue = twoProportionPValue(control.signups, control.visitors, test.signups, test.visitors);
-  const significant = pValue != null && pValue < AMPLITUDE_ALPHA && lift != null && lift !== 0;
-  const verdict: ExperimentListItem["verdict"] = significant ? (lift! > 0 ? "winning" : "losing") : "no-signal";
+  const significant = pValue != null && pValue < (item.alpha ?? AMPLITUDE_ALPHA) && testRate !== controlRate;
+  const verdict: ExperimentListItem["verdict"] = significant
+    ? testRate > controlRate
+      ? "winning"
+      : "losing"
+    : "no-signal";
 
   return {
     ...base,
@@ -358,8 +366,10 @@ export function pickDecision(items: ExperimentListItem[]): Decision | null {
   const head = heavy
     ? `Test arm converts at less than half of control (${rates}, p = ${p})`
     : `Test arm converts below control (${rates}, p = ${p})`;
-  const dailyCost = item.day != null && item.day > 0 && item.testN != null
-    ? Math.round(((item.controlRate! - item.testRate!) / 100) * item.testN / item.day)
+  // Statsig's units count every visitor; Amplitude's testN only the consented half.
+  const testTraffic = item.statsigTestN ?? item.testN;
+  const dailyCost = item.day != null && item.day > 0 && testTraffic != null
+    ? Math.round(((item.controlRate! - item.testRate!) / 100) * testTraffic / item.day)
     : null;
   const body = dailyCost != null
     ? `${head}. Keeping it live costs roughly ${dailyCost} owner sign ups a day.`
@@ -372,6 +382,16 @@ export function pickDecision(items: ExperimentListItem[]): Decision | null {
     statsigUrl: item.statsigUrl,
     slackUrl: SLACK_CHANNEL_URL,
   };
+}
+
+/** "Visitors" for Amplitude's consented visitors, "Exposures" for Statsig's. */
+export function trafficLabel(source: ResultsSource): "Visitors" | "Exposures" {
+  return source === "amplitude" ? "Visitors" : "Exposures";
+}
+
+/** Where a number comes from and how fresh it is. */
+export function sourceLabel(source: ResultsSource): string {
+  return source === "amplitude" ? "Amplitude, live (consented visitors only)" : "Statsig, updated daily";
 }
 
 export function formatLift(n: number | null): string {
@@ -573,19 +593,32 @@ export function toCsv(items: ExperimentListItem[]): string {
   return `${lines.join("\n")}\n`;
 }
 
-function sumSignups(items: ExperimentListItem[]): { control: number; test: number; any: boolean } {
+function sumSignups(items: ExperimentListItem[]): {
+  control: number;
+  test: number;
+  any: boolean;
+  sources: Set<MetricResult["source"]>;
+} {
   let control = 0;
   let test = 0;
   let any = false;
+  const sources = new Set<MetricResult["source"]>();
   for (const item of items) {
     for (const result of item.results) {
       if (result.label !== "Sign ups") continue;
       control += result.control;
       test += result.test;
       any = true;
+      sources.add(result.source);
     }
   }
-  return { control, test, any };
+  return { control, test, any, sources };
+}
+
+/** Where the sign-up KPI's numbers come from, so a mix of sources isn't hidden. */
+function signupsSourceNote(sources: Set<MetricResult["source"]>): string {
+  if (sources.size > 1) return " · Amplitude + Statsig";
+  return sources.has("amplitude") ? " · Amplitude, live" : "";
 }
 
 function milestoneKpi(milestone: { progress: number; targetDate: string | null }, today: string): Kpi {
@@ -644,7 +677,7 @@ export function buildKpis(
           id: "signups",
           label: "Owner sign ups in test",
           value: (signups.control + signups.test).toLocaleString("en-US"),
-          context: `Control ${signups.control.toLocaleString("en-US")} · Test ${signups.test.toLocaleString("en-US")}`,
+          context: `Control ${signups.control.toLocaleString("en-US")} · Test ${signups.test.toLocaleString("en-US")}${signupsSourceNote(signups.sources)}`,
         }
       : { id: "signups", label: "Owner sign ups in test", value: "—", context: "—" },
     opts.milestone

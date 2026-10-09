@@ -27,8 +27,12 @@ const LABEL = "Amplitude Dashboard API (experiments)";
 export const CONVERSION_WINDOW_SECONDS = 7 * 86_400;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const FAILURE_TTL_MS = 2 * 60 * 1000;
-/** Amplitude allows 5 concurrent REST requests per project; leave room for the Overview. */
-const MAX_CONCURRENT = 3;
+/**
+ * Amplitude allows 5 concurrent REST requests per project. This cap is per
+ * server instance, so it leaves room for the Overview funnel and a second warm
+ * instance; a 429 past it falls back to Statsig's numbers.
+ */
+const MAX_CONCURRENT = 2;
 
 export const experimentAmplitudeTimeout = { ms: 8_000 };
 
@@ -83,9 +87,12 @@ export function parseArmFunnel(body: FunnelsResponse): ArmFunnel {
   }
   const xValues = row?.dayFunnels?.xValues ?? [];
   const series = row?.dayFunnels?.series ?? [];
+  if (series.length !== xValues.length) {
+    throw new Error(`${LABEL} returned a malformed funnel: ${series.length} rows for ${xValues.length} days`);
+  }
   const daily = xValues.map((date, i) => {
-    const [dayVisitors, daySignups] = series[i] ?? [];
-    if (!Number.isFinite(dayVisitors) || !Number.isFinite(daySignups)) {
+    const [dayVisitors, daySignups] = series[i];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(dayVisitors) || !Number.isFinite(daySignups)) {
       throw new Error(`${LABEL} returned a malformed funnel row for ${date}`);
     }
     return { date, visitors: dayVisitors, signups: daySignups };
@@ -97,13 +104,16 @@ let active = 0;
 const waiting: (() => void)[] = [];
 
 async function limited<T>(fn: () => Promise<T>): Promise<T> {
+  // a released slot is handed straight to the next waiter, so a new caller
+  // can't slip in between the release and the waiter resuming
   if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
-  active += 1;
+  else active += 1;
   try {
     return await fn();
   } finally {
-    active -= 1;
-    waiting.shift()?.();
+    const next = waiting.shift();
+    if (next) next();
+    else active -= 1;
   }
 }
 
@@ -127,7 +137,10 @@ async function fetchArm(config: AmplitudeConfig, window: ArmWindow, arm: 0 | 1):
 
 type CacheKey = { config: AmplitudeConfig; window: ArmWindow };
 
+const keyOf = ({ config, window }: CacheKey) => `${config.apiKey}:${window.id}:${window.start}:${window.end}`;
 let cache = newCache();
+/** Per experiment, the key last read, so the previous day's entry is dropped when `end` moves on. */
+const latestKey = new Map<string, CacheKey>();
 
 function newCache() {
   return ttlCache<CacheKey, ArmResults>(
@@ -135,18 +148,13 @@ function newCache() {
       const [control, test] = await Promise.all([fetchArm(config, window, 0), fetchArm(config, window, 1)]);
       return { control, test };
     },
-    {
-      ttlMs: CACHE_TTL_MS,
-      failureTtlMs: FAILURE_TTL_MS,
-      keyOf: ({ window }) => `${window.id}:${window.start}:${window.end}`,
-    },
+    { ttlMs: CACHE_TTL_MS, failureTtlMs: FAILURE_TTL_MS, keyOf },
   );
 }
 
 export function resetArmResultsCacheForTests(): void {
   cache = newCache();
-  active = 0;
-  waiting.length = 0;
+  latestKey.clear();
 }
 
 /** Both arms' funnels, or null when the Amplitude keys aren't configured. Failures throw. */
@@ -157,5 +165,10 @@ export async function getArmResults(
 ): Promise<ArmResults | null> {
   const config = amplitudeConfig(env);
   if (!config) return null;
-  return cache.get({ config, window }, now);
+  const key = { config, window };
+  const id = `${config.apiKey}:${window.id}`;
+  const previous = latestKey.get(id);
+  if (previous && keyOf(previous) !== keyOf(key)) cache.clear(previous);
+  latestKey.set(id, key);
+  return cache.get(key, now);
 }

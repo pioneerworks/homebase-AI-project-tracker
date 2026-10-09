@@ -135,3 +135,59 @@ test("getArmResults throws when an arm fails", async () => {
     /429/,
   );
 });
+
+test("parseArmFunnel rejects malformed day rows", () => {
+  const shaped = (xValues: string[], series: number[][]) => ({
+    data: [{ cumulativeRaw: [10, 1], dayFunnels: { xValues, series } }],
+  });
+  assert.throws(() => parseArmFunnel(shaped(["2026-10-09"], [[1]])), /malformed funnel row/);
+  assert.throws(() => parseArmFunnel(shaped(["Oct 9"], [[1, 0]])), /malformed funnel row/);
+  assert.throws(() => parseArmFunnel(shaped(["2026-10-09"], [[1, 0], [2, 0]])), /malformed funnel/);
+});
+
+test("getArmResults refetches after 15 minutes, caches a failure for 2, and keys on the end day", async () => {
+  let calls = 0;
+  let fail = false;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return fail ? new Response("down", { status: 503 }) : Response.json(funnelBody(100, 2));
+  };
+  const window = { id: "exp_x", start: "2026-10-01", end: "2026-10-09" };
+  await getArmResults(window, ENV, NOW);
+  assert.equal(calls, 2);
+  await getArmResults(window, ENV, NOW + 14 * 60_000);
+  assert.equal(calls, 2);
+  await getArmResults(window, ENV, NOW + 15 * 60_000);
+  assert.equal(calls, 4);
+
+  // a new day is a new window, fetched fresh
+  await getArmResults({ ...window, end: "2026-10-10" }, ENV, NOW + 16 * 60_000);
+  assert.equal(calls, 6);
+
+  // a failure on a cold key is not retried for 2 minutes
+  fail = true;
+  const cold = { ...window, id: "exp_y" };
+  await assert.rejects(getArmResults(cold, ENV, NOW), /503/);
+  const afterFailure = calls;
+  await assert.rejects(getArmResults(cold, ENV, NOW + 60_000), /503/);
+  assert.equal(calls, afterFailure);
+  await assert.rejects(getArmResults(cold, ENV, NOW + 2 * 60_000 + 1_000), /503/);
+  assert.ok(calls > afterFailure);
+});
+
+test("getArmResults never has more than 2 Amplitude calls in flight", async () => {
+  let inFlight = 0;
+  let peak = 0;
+  globalThis.fetch = async () => {
+    inFlight += 1;
+    peak = Math.max(peak, inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    inFlight -= 1;
+    return Response.json(funnelBody(100, 2));
+  };
+  const windows = ["a", "b", "c", "d"].map((id) => ({ id: `exp_${id}`, start: "2026-10-01", end: "2026-10-09" }));
+  const results = await Promise.all(windows.map((w) => getArmResults(w, ENV, NOW)));
+  assert.equal(results.length, 4);
+  assert.ok(results.every((r) => r?.control.visitors === 100));
+  assert.equal(peak, 2);
+});
