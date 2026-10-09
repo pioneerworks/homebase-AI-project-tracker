@@ -16,8 +16,9 @@ import type { DailyPoint } from "@/lib/experiments-types";
 /**
  * Block 04 charts: two side-by-side recharts bar charts (exposures and owner
  * signups per day), two bars per day (control then test), plus the signup-rate
- * table underneath. Values come from the Statsig detail payload — nothing is
- * derived here beyond per-day rates and totals.
+ * table underneath. Values come from the detail payload (Amplitude visitors
+ * when live, otherwise Statsig exposures) — nothing is derived here beyond
+ * per-day rates and totals.
  */
 
 const ARM_COLORS: Record<"control" | "test", string> = {
@@ -226,11 +227,17 @@ function RateTable({ daily }: { daily: DailyPoint[] }) {
   );
 }
 
-export default function DailyCharts({ daily }: { daily: DailyPoint[] }) {
+export default function DailyCharts({
+  daily,
+  trafficLabel = "Exposures",
+}: {
+  daily: DailyPoint[];
+  trafficLabel?: string;
+}) {
   return (
     <div className="exp-d-daily">
       <div className="exp-d-charts">
-        <DailyBarChart title="Exposures / day" rows={toRows("exposures", daily)} daily={daily} showRate={false} />
+        <DailyBarChart title={`${trafficLabel} / day`} rows={toRows("exposures", daily)} daily={daily} showRate={false} />
         <DailyBarChart title="Owner sign ups / day" rows={toRows("signups", daily)} daily={daily} showRate={true} />
       </div>
       <RateTable daily={daily} />

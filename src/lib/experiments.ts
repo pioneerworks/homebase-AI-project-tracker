@@ -21,9 +21,17 @@ import "server-only";
  * minutes after a failure, and a page whose Statsig calls partially failed is
  * retried after 5 minutes instead of served for the full hour (see partialUntil
  * below).
+ *
+ * Statsig's results only refresh once a day (its Databricks sync), so live
+ * experiments take their sign-up results from Amplitude instead
+ * (experiment-amplitude.ts, cached 15 minutes): rates, lift, significance,
+ * the sign-up KPI and the detail panel's daily series. That overlay is applied
+ * on every read, on top of the hourly Statsig cache, and any experiment whose
+ * Amplitude call fails or runs past AMPLITUDE_BUDGET_MS keeps Statsig's numbers.
  */
 import { cache } from "react";
 
+import { getArmResults } from "./experiment-amplitude";
 import {
   buildKpis,
   buildNav,
@@ -33,10 +41,13 @@ import {
   srm,
   sortExperiments,
   toListItem,
+  withAmplitude,
 } from "./experiments-derive";
 import type {
+  ArmResults,
   DailyPoint,
   ExperimentDetail,
+  ExperimentListItem,
   ExperimentsNav,
   ExperimentsPage,
 } from "./experiments-types";
@@ -60,16 +71,34 @@ const PARTIAL_TTL_MS = 5 * 60 * 1000;
 const DATED_PULSE_CONCURRENCY = 6;
 /** Days of daily detail kept, like the design's 28-day series cap. */
 const DETAIL_DAYS = 28;
+/**
+ * How long a page or detail load waits on Amplitude before showing Statsig's
+ * numbers instead. The slow call keeps running and fills the cache for the
+ * next load.
+ */
+export const AMPLITUDE_BUDGET_MS = { ms: 10_000 };
 
 type PageKey = { apiKey: string; now: number };
 type DetailKey = { id: string; apiKey: string; now: number };
-/** The page cache also keeps the raw DTOs; the detail panel needs the group ids. */
-type PageValue = { page: ExperimentsPage; dtos: ExternalExperimentDto[] };
+/**
+ * The Statsig half of the page, cached for the hour: list items with Statsig's
+ * results, the inputs the KPIs need, and the raw DTOs (the detail panel needs
+ * the group ids). The Amplitude overlay is applied per read.
+ */
+type PageValue = {
+  items: ExperimentListItem[];
+  visitors7d: { control: number; test: number } | null;
+  milestone: { progress: number; targetDate: string | null } | null;
+  syncedAt: number;
+  dtos: ExternalExperimentDto[];
+};
+type Split = Pick<ExperimentDetail, "exposures" | "srm">;
 type Point = { date: string; value: number };
 
 let partialUntil = 0;
 let pageCache = newPageCache();
 let detailCache = newDetailCache();
+let splitCache = newSplitCache();
 
 function newPageCache() {
   return ttlCache<PageKey, PageValue>(
@@ -85,9 +114,17 @@ function newDetailCache() {
   );
 }
 
+function newSplitCache() {
+  return ttlCache<DetailKey, Split | null>(
+    ({ id, apiKey, now }) => loadSplit(id, apiKey, now),
+    { ttlMs: PAGE_TTL_MS, failureTtlMs: FAILURE_TTL_MS, keyOf: ({ id }) => id },
+  );
+}
+
 export function resetExperimentsCacheForTests(): void {
   pageCache = newPageCache();
   detailCache = newDetailCache();
+  splitCache = newSplitCache();
   partialUntil = 0;
 }
 
@@ -98,12 +135,30 @@ export async function getExperimentsPage(
 ): Promise<ExperimentsPage | null> {
   const config = statsigConfig(env);
   if (!config) return null;
-  return (await pageValue(config.apiKey, now)).page;
+  const value = await pageValue(config.apiKey, now);
+
+  const items = await Promise.all(
+    value.items.map(async (item) => {
+      const amp = await liveArmResults(item, env, now);
+      return amp ? withAmplitude(item, amp) : item;
+    }),
+  );
+  const today = torontoToday(new Date(now));
+  return {
+    today,
+    week: weekContaining(today),
+    sync: { ok: true, at: new Date(value.syncedAt).toISOString() },
+    experiments: items,
+    kpis: buildKpis(items, { visitors7d: value.visitors7d, milestone: value.milestone, today }),
+    decision: pickDecision(items),
+  };
 }
 
 /**
  * One experiment's daily detail. Queued and draft experiments use list data
- * only, so they return null here like unknown ids do.
+ * only, so they return null here like unknown ids do. With Amplitude
+ * available, the daily series is its live visitors and sign ups and only the
+ * traffic split comes from Statsig.
  */
 export async function getExperimentDetail(
   id: string,
@@ -112,7 +167,54 @@ export async function getExperimentDetail(
 ): Promise<ExperimentDetail | null> {
   const config = statsigConfig(env);
   if (!config) return null;
-  return detailCache.get({ id, apiKey: config.apiKey, now }, now);
+  const { items } = await pageValue(config.apiKey, now);
+  const item = items.find((candidate) => candidate.id === id);
+  const amp = item ? await liveArmResults(item, env, now) : null;
+  if (!amp) return detailCache.get({ id, apiKey: config.apiKey, now }, now);
+
+  const split = await splitCache.get({ id, apiKey: config.apiKey, now }, now);
+  if (!split) return null;
+  return { id, ...split, daily: amplitudeDaily(amp), dailySource: "amplitude" };
+}
+
+/**
+ * Live Amplitude funnels for a live experiment, from its start date through
+ * today (UTC). Null when Amplitude isn't configured, the experiment isn't live
+ * or has no start date, the call fails (logged), or it runs past the budget.
+ */
+async function liveArmResults(
+  item: ExperimentListItem,
+  env: Record<string, string | undefined>,
+  now: number,
+): Promise<ArmResults | null> {
+  if (item.status !== "live" || !item.startDate) return null;
+  const window = { id: item.id, start: item.startDate, end: new Date(now).toISOString().slice(0, 10) };
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const budget = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), AMPLITUDE_BUDGET_MS.ms);
+  });
+  const results = getArmResults(window, env, now).catch((error: unknown) => {
+    console.log(
+      `[experiments] Amplitude results for ${item.id} failed, showing Statsig's:`,
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
+  try {
+    return await Promise.race([results, budget]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** The last DETAIL_DAYS days of both arms' Amplitude funnels, visitors in the exposures slot. */
+function amplitudeDaily(amp: ArmResults): DailyPoint[] {
+  const test = new Map(amp.test.daily.map((day) => [day.date, day]));
+  return amp.control.daily.slice(-DETAIL_DAYS).map((day) => ({
+    date: day.date,
+    exposures: { control: day.visitors, test: test.get(day.date)?.visitors ?? 0 },
+    signups: { control: day.signups, test: test.get(day.date)?.signups ?? 0 },
+  }));
 }
 
 /**
@@ -143,19 +245,7 @@ async function loadPage(apiKey: string, now: number): Promise<PageValue> {
   const milestone = await milestoneFor();
 
   const items = sortExperiments(dtos.map((dto) => toListItem(dto, pulses.get(dto.id), now)));
-  const today = torontoToday(new Date(now));
-
-  return {
-    page: {
-      today,
-      week: weekContaining(today),
-      sync: { ok: true, at: new Date(now).toISOString() },
-      experiments: items,
-      kpis: buildKpis(items, { visitors7d, milestone, today }),
-      decision: pickDecision(items),
-    },
-    dtos,
-  };
+  return { items, visitors7d, milestone, syncedAt: now, dtos };
 }
 
 /** Pulse results for live and concluded experiments; one failure marks the page partial. */
@@ -249,16 +339,18 @@ function weekContaining(today: string): { start: string; end: string } {
 // Detail
 // ---------------------------------------------------------------------------
 
-async function loadDetail(id: string, apiKey: string, now: number): Promise<ExperimentDetail | null> {
-  const { page, dtos } = await pageValue(apiKey, now);
-  const item = page.experiments.find((candidate) => candidate.id === id);
+/** The experiment's list item and arm ids, or null for unknown, queued and draft ids. */
+async function detailTarget(id: string, apiKey: string, now: number) {
+  const { items, dtos } = await pageValue(apiKey, now);
+  const item = items.find((candidate) => candidate.id === id);
   if (!item || item.status === "queued" || item.status === "draft") return null;
   const dto = dtos.find((candidate) => candidate.id === id);
   if (!dto) return null;
+  return { item, ...pickArms(dto) };
+}
 
-  const { controlId, testId } = pickArms(dto);
-  if (!controlId || !testId) return { id, exposures: null, srm: null, daily: null };
-
+/** Exposure series per arm, and the totals + SRM derived from them. */
+async function exposuresFor(id: string, apiKey: string, item: ExperimentListItem, controlId: string, testId: string) {
   const groups = await consoleGet<CumulativeExposuresDto[]>(
     apiKey,
     `/experiments/${id}/cumulative_exposures`,
@@ -275,6 +367,32 @@ async function loadDetail(id: string, apiKey: string, now: number): Promise<Expe
       ? { control: controlLast.value, test: testLast.value }
       : null;
   const srmResult = exposures ? srm([exposures.control, exposures.test], item.targetSplit) : null;
+  return { controlSeries, testSeries, exposures, srm: srmResult };
+}
+
+/** Traffic split only (Statsig exposures + SRM), for details whose daily series is Amplitude's. */
+async function loadSplit(id: string, apiKey: string, now: number): Promise<Split | null> {
+  const target = await detailTarget(id, apiKey, now);
+  if (!target) return null;
+  const { item, controlId, testId } = target;
+  if (!controlId || !testId) return { exposures: null, srm: null };
+  const { exposures, srm: srmResult } = await exposuresFor(id, apiKey, item, controlId, testId);
+  return { exposures, srm: srmResult };
+}
+
+async function loadDetail(id: string, apiKey: string, now: number): Promise<ExperimentDetail | null> {
+  const target = await detailTarget(id, apiKey, now);
+  if (!target) return null;
+  const { item, controlId, testId } = target;
+  if (!controlId || !testId) return { id, exposures: null, srm: null, daily: null, dailySource: "statsig" };
+
+  const { controlSeries, testSeries, exposures, srm: srmResult } = await exposuresFor(
+    id,
+    apiKey,
+    item,
+    controlId,
+    testId,
+  );
 
   // Daily exposures come from the full cumulative series (so the first kept
   // day still has a correct delta). Dated pulses are cumulative too, so when
@@ -288,7 +406,7 @@ async function loadDetail(id: string, apiKey: string, now: number): Promise<Expe
     controlDaily.length > DETAIL_DAYS ? [shiftDate(dates[0], -1), ...dates] : dates;
 
   const signups = await signupsForDates(apiKey, id, controlId, testId, pulseDates);
-  if (!signups) return { id, exposures, srm: srmResult, daily: null };
+  if (!signups) return { id, exposures, srm: srmResult, daily: null, dailySource: "statsig" };
 
   // Drop the baseline day's pseudo-delta so the kept window starts at a real one.
   const skip = pulseDates.length - dates.length;
@@ -303,7 +421,7 @@ async function loadDetail(id: string, apiKey: string, now: number): Promise<Expe
       test: signups.test[index + skip],
     },
   }));
-  return { id, exposures, srm: srmResult, daily };
+  return { id, exposures, srm: srmResult, daily, dailySource: "statsig" };
 }
 
 /**

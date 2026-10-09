@@ -19,6 +19,7 @@ import type {
   ExperimentDetail,
   ExperimentListItem,
   MetricResult,
+  ResultsSource,
 } from "@/lib/experiments-types";
 
 /**
@@ -205,7 +206,10 @@ export default function ExperimentDetailPanel({ item }: { item: ExperimentListIt
       {state.kind === "ok" ? (
         <>
           <PagesBlock item={item} />
-          <DailyBlock daily={state.detail?.daily ?? null} />
+          <DailyBlock
+            daily={state.detail?.daily ?? null}
+            source={state.detail?.dailySource ?? "statsig"}
+          />
         </>
       ) : null}
     </div>
@@ -245,6 +249,14 @@ function HypothesisBlock({ item }: { item: ExperimentListItem }) {
             <ResultEntry key={result.label} result={result} />
           ))}
         </div>
+      ) : null}
+      {item.resultsSource === "amplitude" ? (
+        <p className="exp-d-muted">
+          Sign ups are live from Amplitude (Page Viewed on mw_ pages, Linux excluded → Owner Account
+          Created within 7 days). Amplitude only sees visitors who accept cookies, so its counts run
+          below Statsig&rsquo;s exposures; the rates are comparable.
+          {item.results.some((r) => r.source === "statsig") ? " 1D1s come from Statsig and are a day behind." : ""}
+        </p>
       ) : null}
     </section>
   );
@@ -421,18 +433,20 @@ function PageFrame({ url }: { url: string | null }) {
 
 /* --- 04 Daily exposures & signups --- */
 
-function DailyBlock({ daily }: { daily: DailyPoint[] | null }) {
+function DailyBlock({ daily, source }: { daily: DailyPoint[] | null; source: ResultsSource }) {
   const hasDaily = daily != null && daily.length > 0;
+  const traffic = source === "amplitude" ? "visitors" : "exposures";
   return (
     <section className="exp-d-block">
       <header className="exp-d-blockhead">
         <span className="exp-d-num" aria-hidden="true">
           04
         </span>
-        <h3 className="exp-d-blocktitle">Daily exposures &amp; sign ups</h3>
+        <h3 className="exp-d-blocktitle">Daily {traffic} &amp; sign ups</h3>
         {hasDaily ? (
           <span className="exp-d-blocksub">
-            {hubDate(daily![0].date)} – {hubDate(daily![daily!.length - 1].date)}
+            {hubDate(daily![0].date)} – {hubDate(daily![daily!.length - 1].date)} ·{" "}
+            {source === "amplitude" ? "Amplitude, live" : "Statsig, updated daily"}
           </span>
         ) : null}
         <span className="exp-d-legend">
@@ -447,7 +461,7 @@ function DailyBlock({ daily }: { daily: DailyPoint[] | null }) {
         </span>
       </header>
       {hasDaily ? (
-        <DailyCharts daily={daily!} />
+        <DailyCharts daily={daily!} trafficLabel={source === "amplitude" ? "Visitors" : "Exposures"} />
       ) : (
         <p className="exp-d-muted">Daily breakdown isn&rsquo;t available yet.</p>
       )}

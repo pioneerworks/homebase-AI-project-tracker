@@ -9,6 +9,7 @@
 import { experimentDay, experimentTitle, verdictFromPrimary } from "./statsig-pure";
 import type { ExperimentPulseResultsDto, ExternalExperimentDto } from "./statsig-types";
 import type {
+  ArmResults,
   Decision,
   ExperimentListItem,
   ExperimentsNav,
@@ -170,6 +171,7 @@ function metricResult(label: string, row: ExperimentPulseResultsDto["primaryMetr
     controlRate: row.controlMean * 100,
     testRate: row.testMean * 100,
     lift: row.percentChange ?? null,
+    source: "statsig",
   };
 }
 
@@ -242,8 +244,79 @@ export function toListItem(
     armUrls: armUrls(e, path),
     armNames: { control: controlGroup(e)?.name ?? "Control", test: testGroup(e)?.name ?? "Test" },
     results,
+    resultsSource: "statsig",
     tagline: taglineOf(status, verdict.verdict, primaryRow?.metricName ?? null, verdict.percentChange),
     progressLabel: progressLabelOf(status, e, day),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Amplitude overlay: live sign-up results replacing Statsig's daily sync
+// ---------------------------------------------------------------------------
+
+/** Significance threshold for Amplitude results (Statsig's default alpha). */
+export const AMPLITUDE_ALPHA = 0.05;
+
+/**
+ * Two-sided p-value of a two-proportion z-test with pooled variance, or null
+ * when either arm has no visitors or nobody converted in either arm.
+ */
+export function twoProportionPValue(
+  controlSignups: number,
+  controlVisitors: number,
+  testSignups: number,
+  testVisitors: number,
+): number | null {
+  if (controlVisitors <= 0 || testVisitors <= 0) return null;
+  const pooled = (controlSignups + testSignups) / (controlVisitors + testVisitors);
+  if (pooled <= 0 || pooled >= 1) return null;
+  const se = Math.sqrt(pooled * (1 - pooled) * (1 / controlVisitors + 1 / testVisitors));
+  const z = Math.abs(testSignups / testVisitors - controlSignups / controlVisitors) / se;
+  return Math.min(1, erfc(z / Math.SQRT2));
+}
+
+/**
+ * The Statsig list item with its sign-up results (rates, lift, significance,
+ * verdict, samples, tagline) recomputed from live Amplitude funnels. The
+ * experiment's metadata and Statsig's other metrics (1D1) are kept as they are.
+ */
+export function withAmplitude(item: ExperimentListItem, amp: ArmResults): ExperimentListItem {
+  const { control, test } = amp;
+  const others = item.results.filter((r) => r.label !== "Sign ups");
+  const base = { ...item, resultsSource: "amplitude" as const, controlN: control.visitors, testN: test.visitors };
+
+  if (control.visitors <= 0 || test.visitors <= 0) {
+    return {
+      ...base,
+      controlRate: null,
+      testRate: null,
+      lift: null,
+      pValue: null,
+      verdict: "no-data",
+      results: others,
+      tagline: taglineOf(item.status, "no-data", item.primaryMetric, null),
+    };
+  }
+
+  const controlRate = (control.signups / control.visitors) * 100;
+  const testRate = (test.signups / test.visitors) * 100;
+  const lift = controlRate > 0 ? ((testRate - controlRate) / controlRate) * 100 : null;
+  const pValue = twoProportionPValue(control.signups, control.visitors, test.signups, test.visitors);
+  const significant = pValue != null && pValue < AMPLITUDE_ALPHA && lift != null && lift !== 0;
+  const verdict: ExperimentListItem["verdict"] = significant ? (lift! > 0 ? "winning" : "losing") : "no-signal";
+
+  return {
+    ...base,
+    controlRate,
+    testRate,
+    lift,
+    pValue,
+    verdict,
+    results: [
+      { label: "Sign ups", control: control.signups, test: test.signups, controlRate, testRate, lift, source: "amplitude" },
+      ...others,
+    ],
+    tagline: taglineOf(item.status, verdict, item.primaryMetric, lift),
   };
 }
 

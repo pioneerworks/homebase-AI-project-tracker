@@ -212,7 +212,16 @@ function RowFragment({
           {formatLift(item.lift)}
         </td>
         <td className={`exp-td exp-td-sig${sig.tone ? ` exp-sig-${sig.tone}` : ""}`}>{sig.text}</td>
-        <td className="exp-td exp-td-samples">{samples}</td>
+        <td
+          className="exp-td exp-td-samples"
+          title={
+            item.resultsSource === "amplitude"
+              ? "Live from Amplitude (consented visitors only)"
+              : "From Statsig, updated daily"
+          }
+        >
+          {samples}
+        </td>
         <td className="exp-td exp-td-progress">
           {item.status === "live" && item.day != null && item.totalDays != null ? (
             <>

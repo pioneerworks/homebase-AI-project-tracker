@@ -5,6 +5,13 @@
  */
 
 export type HubStatus = "live" | "queued" | "draft" | "concluded";
+/** Where an experiment's sign-up results come from. */
+export type ResultsSource = "amplitude" | "statsig";
+
+/** One arm's Amplitude funnel: unique visitors and those who signed up within the window. */
+export type ArmDay = { date: string; visitors: number; signups: number };
+export type ArmFunnel = { visitors: number; signups: number; daily: ArmDay[] };
+export type ArmResults = { control: ArmFunnel; test: ArmFunnel };
 export type Surface = "landing_page" | "signup_flow" | "tool_page";
 export type View = "all" | "live" | "decision" | "queued" | "draft" | "concluded";
 export type Verdict = "winning" | "losing" | "no-signal" | "no-data";
@@ -16,6 +23,7 @@ export type MetricResult = {
   controlRate: number;
   testRate: number;
   lift: number | null;
+  source: ResultsSource;
 };
 
 export type TaglineState = "ahead" | "losing" | "too_early" | "not_started";
@@ -52,6 +60,8 @@ export type ExperimentListItem = {
   armNames: { control: string; test: string };
   /** [Sign ups, 1D1s] when present */
   results: MetricResult[];
+  /** Rates, lift, significance and sign ups: live Amplitude, or Statsig's daily sync. */
+  resultsSource: ResultsSource;
   /** One-line verdict under the name (handoff §6): ahead / losing / too early / not started. */
   tagline: Tagline;
   /** "Day 10 of 28" | "Starts Oct 20" | "Unscheduled" | "Ended Oct 1" */
@@ -108,4 +118,6 @@ export type ExperimentDetail = {
   exposures: { control: number; test: number } | null;
   srm: { ok: boolean; pValue: number } | null;
   daily: DailyPoint[] | null;
+  /** amplitude: daily visitors + sign ups from Amplitude; statsig: exposures + dated pulses. */
+  dailySource: ResultsSource;
 };

@@ -6,6 +6,7 @@ import {
   getExperimentsPage,
   resetExperimentsCacheForTests,
 } from "../src/lib/experiments";
+import { resetArmResultsCacheForTests } from "../src/lib/experiment-amplitude";
 import { handleDetail } from "../src/lib/experiments-route";
 import type { ExperimentDetail } from "../src/lib/experiments-types";
 import type {
@@ -27,6 +28,7 @@ afterEach(() => {
   if (originalLinearKey === undefined) delete process.env.LINEAR_API_KEY;
   else process.env.LINEAR_API_KEY = originalLinearKey;
   resetExperimentsCacheForTests();
+  resetArmResultsCacheForTests();
 });
 
 // ---------------------------------------------------------------------------
@@ -555,6 +557,7 @@ const DETAIL: ExperimentDetail = {
   exposures: { control: 1507, test: 1549 },
   srm: { ok: true, pValue: 0.8 },
   daily: [],
+  dailySource: "statsig",
 };
 
 /** getDetail stub that records the ids it was called with. */
@@ -621,4 +624,116 @@ test("detail route returns the detail JSON for a valid id", async () => {
   assert.deepEqual(await response.json(), DETAIL);
   assert.equal(response.headers.get("cache-control"), "private, no-store");
   assert.deepEqual(stub.calls, [SCHEDULING_ID]);
+});
+
+// ---------------------------------------------------------------------------
+// Live Amplitude results on top of the Statsig page
+// ---------------------------------------------------------------------------
+
+const AMP_ENV = { ...ENV, AMPLITUDE_API_KEY: "amp-key", AMPLITUDE_SECRET: "amp-secret" };
+
+type AmpCall = { experiment: string; arm: string; start: string; end: string; filters: unknown[] };
+
+/** Routes amplitude.com funnels to per-arm fixtures; everything else to the Statsig router. */
+function withAmplitudeRoute(
+  arms: Record<string, { visitors: number; signups: number; daily: [string, number, number][] }> | "fail",
+): AmpCall[] {
+  const calls: AmpCall[] = [];
+  const statsig = router;
+  router = (url) => {
+    if (url.origin !== "https://amplitude.com") return statsig(url);
+    const step = JSON.parse(url.searchParams.getAll("e")[0]) as {
+      filters: { subprop_key: string; subprop_value: string[] }[];
+    };
+    const armFilter = step.filters[2];
+    calls.push({
+      experiment: armFilter.subprop_key,
+      arm: armFilter.subprop_value[0],
+      start: url.searchParams.get("start")!,
+      end: url.searchParams.get("end")!,
+      filters: step.filters,
+    });
+    if (arms === "fail") return new Response("amplitude down", { status: 503 });
+    const arm = arms[armFilter.subprop_value[0]];
+    return Response.json({
+      data: [
+        {
+          cumulativeRaw: [arm.visitors, arm.signups],
+          dayFunnels: {
+            xValues: arm.daily.map((d) => d[0]),
+            series: arm.daily.map((d) => [d[1], d[2]]),
+          },
+        },
+      ],
+    });
+  };
+  return calls;
+}
+
+const AMP_ARMS = {
+  "0": { visitors: 10000, signups: 260, daily: [["2026-10-04", 600, 15], ["2026-10-05", 300, 6]] as [string, number, number][] },
+  "1": { visitors: 10000, signups: 200, daily: [["2026-10-04", 610, 11], ["2026-10-05", 310, 4]] as [string, number, number][] },
+};
+
+test("live experiments read sign-up results from Amplitude, from start through today", async () => {
+  installFetch();
+  standardRouter();
+  const calls = withAmplitudeRoute(AMP_ARMS);
+  const page = await getExperimentsPage(AMP_ENV, NOW);
+  assert.ok(page);
+
+  const live = page.experiments[0];
+  assert.equal(live.resultsSource, "amplitude");
+  assert.equal(live.controlRate, 2.6);
+  assert.equal(live.testRate, 2);
+  assert.equal(live.verdict, "losing");
+  // 1D1 still comes from Statsig
+  assert.deepEqual(
+    live.results.map((r) => [r.label, r.source]),
+    [
+      ["Sign ups", "amplitude"],
+      ["1D1s", "statsig"],
+    ],
+  );
+  // the drafted experiment is never sent to Amplitude
+  assert.equal(page.experiments[1].resultsSource, "statsig");
+
+  assert.deepEqual(
+    calls.map((c) => [c.experiment, c.arm, c.start, c.end]).sort(),
+    [
+      [SCHEDULING_ID, "0", "20260925", "20261005"],
+      [SCHEDULING_ID, "1", "20260925", "20261005"],
+    ],
+  );
+  // KPIs and the decision banner follow the live numbers
+  assert.equal(page.kpis[3].value, "460");
+  assert.equal(page.kpis[1].value, "1");
+  assert.equal(page.decision?.experimentId, SCHEDULING_ID);
+});
+
+test("an Amplitude failure falls back to Statsig's results", async () => {
+  installFetch();
+  standardRouter();
+  withAmplitudeRoute("fail");
+  const page = await getExperimentsPage(AMP_ENV, NOW);
+  assert.ok(page);
+  assert.equal(page.experiments[0].resultsSource, "statsig");
+  assert.equal(page.experiments[0].controlN, 6852);
+});
+
+test("the detail panel's daily series comes from Amplitude when it is available", async () => {
+  installFetch();
+  standardRouter({ cumulative: detailCumulative() });
+  withAmplitudeRoute(AMP_ARMS);
+  const detail = await getExperimentDetail(SCHEDULING_ID, AMP_ENV, NOW);
+  assert.ok(detail);
+  assert.equal(detail.dailySource, "amplitude");
+  assert.deepEqual(detail.daily, [
+    { date: "2026-10-04", exposures: { control: 600, test: 610 }, signups: { control: 15, test: 11 } },
+    { date: "2026-10-05", exposures: { control: 300, test: 310 }, signups: { control: 6, test: 4 } },
+  ]);
+  // traffic split and SRM still come from Statsig's exposures
+  assert.deepEqual(detail.exposures, { control: 1507, test: 1549 });
+  // no dated Statsig pulses are needed for the daily series
+  assert.equal(requests.filter((r) => new URL(r.url).searchParams.has("date")).length, 0);
 });

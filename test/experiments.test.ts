@@ -21,8 +21,10 @@ import {
   taglineOf,
   toCsv,
   toListItem,
+  twoProportionPValue,
+  withAmplitude,
 } from "../src/lib/experiments-derive";
-import type { ExperimentListItem } from "../src/lib/experiments-types";
+import type { ArmResults, ExperimentListItem } from "../src/lib/experiments-types";
 import type { ExperimentPulseResultsDto, ExternalExperimentDto } from "../src/lib/statsig-types";
 
 function exp(overrides: Partial<ExternalExperimentDto> = {}): ExternalExperimentDto {
@@ -124,6 +126,7 @@ const base: ExperimentListItem = {
   armUrls: { control: null, test: null },
   armNames: { control: "control", test: "test" },
   results: [],
+  resultsSource: "statsig",
   tagline: { state: "too_early", text: "Too early to tell" },
   progressLabel: "Unscheduled",
 };
@@ -269,8 +272,8 @@ test("pickDecision picks first losing live experiment", () => {
 
 test("buildKpis computes the five cells", () => {
   const items = [
-    { ...base, status: "live" as const, surface: "landing_page" as const, verdict: "losing" as const, results: [{ label: "Sign ups", control: 42, test: 20, controlRate: 2.5, testRate: 1.16, lift: -53.6 }] },
-    { ...base, status: "live" as const, surface: "landing_page" as const, verdict: "no-signal" as const, results: [{ label: "Sign ups", control: 33, test: 38, controlRate: 2.79, testRate: 3.0, lift: 7.3 }] },
+    { ...base, status: "live" as const, surface: "landing_page" as const, verdict: "losing" as const, results: [{ label: "Sign ups", control: 42, test: 20, controlRate: 2.5, testRate: 1.16, lift: -53.6, source: "statsig" as const }] },
+    { ...base, status: "live" as const, surface: "landing_page" as const, verdict: "no-signal" as const, results: [{ label: "Sign ups", control: 33, test: 38, controlRate: 2.79, testRate: 3.0, lift: 7.3, source: "statsig" as const }] },
     { ...base, status: "queued" as const },
   ];
   const kpis = buildKpis(items, { visitors7d: { control: 2864, test: 2987 }, milestone: { progress: 19, targetDate: "2026-09-25" }, today: "2026-09-28" });
@@ -378,4 +381,68 @@ test("armUrls falls back to the joinhomebase path", () => {
       test: "https://www.joinhomebase.com/free-time-clock-app-lp?arm=t",
     },
   );
+});
+
+// ---------------------------------------------------------------------------
+// Amplitude overlay (live results instead of Statsig's daily sync)
+// ---------------------------------------------------------------------------
+
+function arms(control: [number, number], test: [number, number]): ArmResults {
+  return {
+    control: { visitors: control[0], signups: control[1], daily: [] },
+    test: { visitors: test[0], signups: test[1], daily: [] },
+  };
+}
+
+test("twoProportionPValue matches a two-sided z-test with pooled variance", () => {
+  // 200/10000 vs 260/10000 → z ≈ 2.83, p ≈ 0.0047
+  assert.equal(twoProportionPValue(200, 10000, 260, 10000)!.toFixed(4), "0.0047");
+  // identical rates → p = 1
+  assert.ok(Math.abs(twoProportionPValue(20, 1000, 20, 1000)! - 1) < 1e-6);
+  // no traffic or no conversions anywhere → no test
+  assert.equal(twoProportionPValue(0, 0, 5, 100), null);
+  assert.equal(twoProportionPValue(0, 100, 0, 100), null);
+});
+
+test("withAmplitude replaces rates, lift, verdict and sign ups, keeps Statsig's 1D1", () => {
+  const statsig = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  const item = withAmplitude(statsig, arms([10000, 200], [10000, 260]));
+  assert.equal(item.resultsSource, "amplitude");
+  assert.equal(item.controlRate, 2);
+  assert.equal(item.testRate, 2.6);
+  assert.equal(item.lift!.toFixed(1), "30.0");
+  assert.equal(item.pValue!.toFixed(4), "0.0047");
+  assert.equal(item.verdict, "winning");
+  assert.equal(item.controlN, 10000);
+  assert.equal(item.testN, 10000);
+  assert.deepEqual(item.tagline, { state: "ahead", text: "Variant is ahead", reason: "+30% sign ups" });
+  assert.deepEqual(
+    item.results.map((r) => [r.label, r.control, r.test, r.source]),
+    [
+      ["Sign ups", 200, 260, "amplitude"],
+      ["1D1s", 16, 19, "statsig"],
+    ],
+  );
+});
+
+test("withAmplitude calls a significant drop a loss and a noisy gap no signal", () => {
+  const statsig = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  assert.equal(withAmplitude(statsig, arms([10000, 260], [10000, 200])).verdict, "losing");
+  assert.equal(withAmplitude(statsig, arms([1000, 20], [1000, 24])).verdict, "no-signal");
+});
+
+test("withAmplitude without any visitors keeps the item but shows no data", () => {
+  const statsig = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  const item = withAmplitude(statsig, arms([0, 0], [0, 0]));
+  assert.equal(item.resultsSource, "amplitude");
+  assert.equal(item.controlRate, null);
+  assert.equal(item.lift, null);
+  assert.equal(item.verdict, "no-data");
+  assert.deepEqual(item.results.map((r) => r.label), ["1D1s"]);
+});
+
+test("toListItem marks Statsig as the results source", () => {
+  const item = toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12));
+  assert.equal(item.resultsSource, "statsig");
+  assert.ok(item.results.every((r) => r.source === "statsig"));
 });
