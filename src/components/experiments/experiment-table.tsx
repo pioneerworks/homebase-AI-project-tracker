@@ -214,7 +214,7 @@ function RowFragment({
         <td className={`exp-td exp-td-sig${sig.tone ? ` exp-sig-${sig.tone}` : ""}`}>{sig.text}</td>
         <td
           className="exp-td exp-td-samples"
-          title={sourceLabel(item.resultsSource)}
+          title={samples === "—" ? undefined : sourceLabel(item.resultsSource)}
         >
           {samples}
         </td>

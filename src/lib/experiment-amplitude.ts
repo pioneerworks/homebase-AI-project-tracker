@@ -141,20 +141,47 @@ const keyOf = ({ config, window }: CacheKey) => `${config.apiKey}:${window.id}:$
 let cache = newCache();
 /** Per experiment, the key last read, so the previous day's entry is dropped when `end` moves on. */
 const latestKey = new Map<string, CacheKey>();
+/**
+ * Per experiment, the newest good result (any day), for a reader whose budget
+ * runs out while a refresh is still in flight. See lastArmResults.
+ */
+const lastGood = new Map<string, ArmResults>();
 
 function newCache() {
   return ttlCache<CacheKey, ArmResults>(
-    async ({ config, window }) => {
-      const [control, test] = await Promise.all([fetchArm(config, window, 0), fetchArm(config, window, 1)]);
-      return { control, test };
+    async (key) => {
+      const [control, test] = await Promise.all([
+        fetchArm(key.config, key.window, 0),
+        fetchArm(key.config, key.window, 1),
+      ]);
+      const results = { control, test };
+      lastGood.set(experimentKey(key), results);
+      return results;
     },
     { ttlMs: CACHE_TTL_MS, failureTtlMs: FAILURE_TTL_MS, keyOf },
   );
 }
 
+const experimentKey = ({ config, window }: CacheKey) => `${config.apiKey}:${window.id}`;
+
 export function resetArmResultsCacheForTests(): void {
   cache = newCache();
   latestKey.clear();
+  lastGood.clear();
+  active = 0;
+  waiting.length = 0;
+}
+
+/**
+ * The newest good result for this experiment, without fetching: what to show
+ * when a refresh is slower than the caller can wait. Null when none yet.
+ */
+export function lastArmResults(
+  window: ArmWindow,
+  env: Record<string, string | undefined> = process.env,
+): ArmResults | null {
+  const config = amplitudeConfig(env);
+  return config ? lastGood.get(experimentKey({ config, window })) ?? null : null;
 }
 
 /** Both arms' funnels, or null when the Amplitude keys aren't configured. Failures throw. */
@@ -166,7 +193,7 @@ export async function getArmResults(
   const config = amplitudeConfig(env);
   if (!config) return null;
   const key = { config, window };
-  const id = `${config.apiKey}:${window.id}`;
+  const id = experimentKey(key);
   const previous = latestKey.get(id);
   if (previous && keyOf(previous) !== keyOf(key)) cache.clear(previous);
   latestKey.set(id, key);

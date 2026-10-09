@@ -247,7 +247,13 @@ export default function DailyCharts({
     <div className="exp-d-daily">
       <div className="exp-d-charts">
         <DailyBarChart title={`${trafficLabel} / day`} rows={toRows("exposures", daily)} daily={daily} showRate={false} />
-        <DailyBarChart title="Owner sign ups / day" rows={toRows("signups", daily)} daily={daily} showRate={true} />
+        <DailyBarChart
+          // Amplitude counts a sign up on the day of the visit that led to it
+          title={totals ? "Owner sign ups by visit day" : "Owner sign ups / day"}
+          rows={toRows("signups", daily)}
+          daily={daily}
+          showRate={true}
+        />
       </div>
       <RateTable daily={daily} runTotals={totals} />
     </div>

@@ -314,7 +314,7 @@ test("buildNav counts views and surfaces", () => {
 test("toCsv quotes fields and has one row per experiment", () => {
   const csv = toCsv([{ ...base, name: 'Has "quotes", commas', status: "live", lift: -3 }]);
   const lines = csv.trim().split("\n");
-  assert.equal(lines[0], "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Progress,Owner");
+  assert.equal(lines[0], "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Results source,Progress,Owner");
   assert.equal(lines.length, 2);
   assert.match(lines[1], /^"Has ""quotes"", commas",/);
 });
@@ -486,4 +486,22 @@ test("trafficLabel and sourceLabel name the source", () => {
   assert.equal(trafficLabel("statsig"), "Exposures");
   assert.match(sourceLabel("amplitude"), /Amplitude, live/);
   assert.match(sourceLabel("statsig"), /updated daily/);
+});
+
+test("withAmplitude's tagline speaks of sign ups whatever Statsig's primary metric is", () => {
+  const statsig = { ...toListItem(scheduling, schedulingPulse, Date.UTC(2026, 9, 4, 12)), primaryMetric: "1D1" };
+  assert.equal(withAmplitude(statsig, arms([10000, 200], [10000, 260])).tagline.reason, "+30% sign ups");
+});
+
+test("pickDecision leaves the daily cost out when Amplitude has no Statsig traffic count", () => {
+  const statsig = { ...toListItem(scheduling, undefined, Date.UTC(2026, 9, 4, 12)), statsigTestN: null, day: 10 };
+  const losing = withAmplitude(statsig, arms([10000, 260], [10000, 200]));
+  assert.doesNotMatch(pickDecision([losing])!.body, /a day/);
+});
+
+test("toCsv says where each row's results come from", () => {
+  const csv = toCsv([{ ...base, resultsSource: "amplitude" }, base]);
+  assert.match(csv.split("\n")[0], /Test n,Results source,Progress/);
+  assert.match(csv.split("\n")[1], /"Amplitude \(consented visitors\)"/);
+  assert.match(csv.split("\n")[2], /"Statsig"/);
 });

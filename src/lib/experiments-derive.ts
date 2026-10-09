@@ -259,6 +259,8 @@ export function toListItem(
 
 /** Significance threshold for Amplitude results when Statsig gives no adjusted alpha. */
 export const AMPLITUDE_ALPHA = 0.05;
+/** The Amplitude overlay always measures owner sign ups, whatever Statsig's primary metric is. */
+const AMPLITUDE_METRIC = "Owner Signups";
 
 /**
  * Two-sided p-value of a two-proportion z-test with pooled variance, or null
@@ -298,7 +300,7 @@ export function withAmplitude(item: ExperimentListItem, amp: ArmResults): Experi
       pValue: null,
       verdict: "no-data",
       results: others,
-      tagline: taglineOf(item.status, "no-data", item.primaryMetric, null),
+      tagline: taglineOf(item.status, "no-data", AMPLITUDE_METRIC, null),
     };
   }
 
@@ -324,7 +326,7 @@ export function withAmplitude(item: ExperimentListItem, amp: ArmResults): Experi
       { label: "Sign ups", control: control.signups, test: test.signups, controlRate, testRate, lift, source: "amplitude" },
       ...others,
     ],
-    tagline: taglineOf(item.status, verdict, item.primaryMetric, lift),
+    tagline: taglineOf(item.status, verdict, AMPLITUDE_METRIC, lift),
   };
 }
 
@@ -366,8 +368,9 @@ export function pickDecision(items: ExperimentListItem[]): Decision | null {
   const head = heavy
     ? `Test arm converts at less than half of control (${rates}, p = ${p})`
     : `Test arm converts below control (${rates}, p = ${p})`;
-  // Statsig's units count every visitor; Amplitude's testN only the consented half.
-  const testTraffic = item.statsigTestN ?? item.testN;
+  // Statsig's units count every visitor; Amplitude's testN only the consented
+  // half, so with no Statsig count the cost is left out rather than halved.
+  const testTraffic = item.resultsSource === "amplitude" ? item.statsigTestN : item.testN;
   const dailyCost = item.day != null && item.day > 0 && testTraffic != null
     ? Math.round(((item.controlRate! - item.testRate!) / 100) * testTraffic / item.day)
     : null;
@@ -557,7 +560,7 @@ export function buildNav(items: ExperimentListItem[], sync: { ok: boolean; at: s
 }
 
 const CSV_HEADER
-  = "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Progress,Owner";
+  = "Experiment,Path,Status,Primary metric,Control rate,Test rate,Lift,Significance,Control n,Test n,Results source,Progress,Owner";
 
 function csvField(value: string | number | null): string {
   const text = String(value ?? "");
@@ -583,6 +586,7 @@ export function toCsv(items: ExperimentListItem[]): string {
         significanceLabel(item).text,
         item.controlN ?? "",
         item.testN ?? "",
+        item.resultsSource === "amplitude" ? "Amplitude (consented visitors)" : "Statsig",
         item.progressLabel,
         item.owner ?? "Unassigned",
       ]

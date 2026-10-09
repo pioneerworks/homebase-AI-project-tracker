@@ -160,8 +160,12 @@ experiment's start through today. Rates, lift, a two-proportion z-test
 the experiment list, schedule, traffic split (exposures and SRM) and 1D1 stay
 on Statsig. Amplitude only sees visitors who accept cookies (about half of
 Statsig's), equally in both arms, so its rates are comparable and its visitor
-counts are not Statsig's exposures. If Amplitude fails or takes longer than
-10 seconds, that experiment shows Statsig's numbers.
+counts are not Statsig's exposures. Amplitude results are cached for 15
+minutes. An experiment shows Statsig's numbers when Amplitude fails, when it
+takes longer than 10 seconds with nothing cached yet (1.5 seconds for the
+sidebar counts on other tabs), or when Amplitude sees no visitors in one of
+its arms (a page that doesn't stamp the arm property). The daily sign-up chart
+counts each sign up on the day of the visit that led to it.
 
 Both dashboard tabs open with a stakeholder recap generated from the same Linear
 snapshot as the detailed tracker. Page Migration only uses the five page-pillar

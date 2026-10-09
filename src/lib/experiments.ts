@@ -26,12 +26,14 @@ import "server-only";
  * experiments take their sign-up results from Amplitude instead
  * (experiment-amplitude.ts, cached 15 minutes): rates, lift, significance,
  * the sign-up KPI and the detail panel's daily series. That overlay is applied
- * on every read, on top of the hourly Statsig cache, and any experiment whose
- * Amplitude call fails or runs past AMPLITUDE_BUDGET_MS keeps Statsig's numbers.
+ * on every read, on top of the hourly Statsig cache. An experiment keeps
+ * Statsig's numbers when its Amplitude call fails, when it runs past
+ * amplitudeBudget with no earlier result cached, or when Amplitude saw no
+ * visitors in one of its arms.
  */
 import { cache } from "react";
 
-import { getArmResults } from "./experiment-amplitude";
+import { getArmResults, lastArmResults } from "./experiment-amplitude";
 import {
   buildKpis,
   buildNav,
@@ -200,10 +202,12 @@ export async function getExperimentDetail(
 
 /**
  * Live Amplitude funnels for a live experiment, from its start date through
- * today (UTC). Null (Statsig's numbers stay) when Amplitude isn't configured,
- * the experiment isn't live or has no start date, the call fails or runs past
- * the budget (both logged), or Amplitude saw no visitors in either arm — an
- * experiment whose page doesn't stamp the arm property.
+ * today (UTC). If the call is still running when the budget is up (a cold
+ * cache, or a slow 15-minute refresh), the experiment's last good result is
+ * used. Null (Statsig's numbers stay) when Amplitude isn't configured, the
+ * experiment isn't live or has no start date, the call fails (logged), the
+ * budget runs out with nothing cached, or Amplitude saw no visitors in an arm
+ * (a page that doesn't stamp the arm property).
  */
 async function liveArmResults(
   item: ExperimentListItem,
@@ -213,12 +217,10 @@ async function liveArmResults(
 ): Promise<ArmResults | null> {
   if (item.status !== "live" || !item.startDate) return null;
   const window = { id: item.id, start: item.startDate, end: new Date(now).toISOString().slice(0, 10) };
+  const timedOut = Symbol("timed out");
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const budget = new Promise<null>((resolve) => {
-    timer = setTimeout(() => {
-      console.log(`[experiments] Amplitude results for ${item.id} took over ${budgetMs}ms, showing Statsig's`);
-      resolve(null);
-    }, budgetMs);
+  const budget = new Promise<typeof timedOut>((resolve) => {
+    timer = setTimeout(() => resolve(timedOut), budgetMs);
   });
   const results = getArmResults(window, env, now).catch((error: unknown) => {
     console.log(
@@ -228,8 +230,14 @@ async function liveArmResults(
     return null;
   });
   try {
-    const amp = await Promise.race([results, budget]);
-    return amp && amp.control.visitors + amp.test.visitors > 0 ? amp : null;
+    const raced = await Promise.race([results, budget]);
+    const amp = raced === timedOut ? lastArmResults(window, env) : raced;
+    // a slow refresh with a cached result is routine (the nav waits 1.5s); only
+    // say so when Statsig's numbers are shown because of it
+    if (raced === timedOut && !amp && budgetMs > 0) {
+      console.log(`[experiments] Amplitude results for ${item.id} took over ${budgetMs}ms, showing Statsig's`);
+    }
+    return amp && amp.control.visitors > 0 && amp.test.visitors > 0 ? amp : null;
   } finally {
     clearTimeout(timer);
   }
@@ -563,21 +571,36 @@ export const loadExperimentsPage = cache(
 );
 
 /**
- * Sidebar counts, built from the same cached Statsig page and Amplitude
- * results; zeros when it can't load. The sidebar renders on every tab, so it
- * waits on Amplitude only briefly (the slow call still fills the cache).
+ * Sidebar counts, built from the same page the tab renders; zeros when it
+ * can't load. The sidebar renders on every tab, so it waits on Amplitude only
+ * briefly: past amplitudeBudget.navMs it builds the page again with that short
+ * budget (cached results and Statsig only), while the slow call still fills
+ * the cache.
  */
 export async function loadExperimentsNav(): Promise<ExperimentsNav | null> {
-  const page = await getExperimentsPage(process.env, Date.now(), amplitudeBudget.navMs).catch(
-    (error) => {
-      console.log(
-        "[experiments] Statsig fetch failed:",
-        error instanceof Error ? error.message : error,
-      );
-      return undefined;
-    },
-  );
+  const page = await navPage();
   if (page === undefined) return buildNav([], { ok: false, at: null });
   if (page === null) return null;
   return buildNav(page.experiments, page.sync);
+}
+
+async function navPage(): Promise<ExperimentsPage | null | undefined> {
+  const full = loadExperimentsPage();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<"late">((resolve) => {
+    timer = setTimeout(() => resolve("late"), amplitudeBudget.navMs);
+  });
+  try {
+    const first = await Promise.race([full, late]);
+    if (first !== "late") return first;
+  } finally {
+    clearTimeout(timer);
+  }
+  return getExperimentsPage(process.env, Date.now(), 0).catch((error) => {
+    console.log(
+      "[experiments] Statsig fetch failed:",
+      error instanceof Error ? error.message : error,
+    );
+    return undefined;
+  });
 }

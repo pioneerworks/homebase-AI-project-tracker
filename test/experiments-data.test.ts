@@ -7,7 +7,7 @@ import {
   getExperimentsPage,
   resetExperimentsCacheForTests,
 } from "../src/lib/experiments";
-import { experimentAmplitudeTimeout, resetArmResultsCacheForTests } from "../src/lib/experiment-amplitude";
+import { resetArmResultsCacheForTests } from "../src/lib/experiment-amplitude";
 import { handleDetail } from "../src/lib/experiments-route";
 import type { ExperimentDetail } from "../src/lib/experiments-types";
 import type {
@@ -752,36 +752,95 @@ async function statsigOnlyPage() {
   return page;
 }
 
+/**
+ * Holds every Amplitude call until release() answers them all with AMP_ARMS.
+ * The Statsig fetch keeps its normal routing.
+ */
+function holdAmplitude() {
+  const statsigFetch = globalThis.fetch;
+  const held: (() => void)[] = [];
+  let calls = 0;
+  globalThis.fetch = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.origin !== "https://amplitude.com") return statsigFetch(input, init);
+    calls += 1;
+    const arm = JSON.parse(url.searchParams.getAll("e")[0]).filters[2].subprop_value[0] as "0" | "1";
+    const fixture = AMP_ARMS[arm];
+    return new Promise<Response>((resolve) =>
+      held.push(() =>
+        resolve(
+          Response.json({
+            data: [
+              {
+                cumulativeRaw: [fixture.visitors, fixture.signups],
+                dayFunnels: {
+                  xValues: fixture.daily.map((d) => d[0]),
+                  series: fixture.daily.map((d) => [d[1], d[2]]),
+                },
+              },
+            ],
+          }),
+        ),
+      ),
+    );
+  };
+  return {
+    calls: () => calls,
+    release: async () => {
+      // answers calls queued behind the concurrency cap as they start
+      for (let i = 0; i < 50 && (held.length > 0 || calls < 2); i++) {
+        held.splice(0).forEach((answer) => answer());
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+    },
+  };
+}
+
 test("Amplitude slower than the budget falls back to Statsig without holding the page", async () => {
   installFetch();
   standardRouter();
-  const statsigFetch = globalThis.fetch;
-  // Amplitude hangs until the request deadline aborts it, so its slots free up
-  let pending = 0;
-  globalThis.fetch = async (input, init) => {
-    if (new URL(String(input)).origin !== "https://amplitude.com") return statsigFetch(input, init);
-    pending += 1;
-    return new Promise<Response>((_, reject) =>
-      init?.signal?.addEventListener("abort", () => {
-        pending -= 1;
-        reject(init.signal!.reason);
-      }),
-    );
-  };
+  const amplitude = holdAmplitude();
   const savedBudget = amplitudeBudget.ms;
-  const savedTimeout = experimentAmplitudeTimeout.ms;
   amplitudeBudget.ms = 20;
-  experimentAmplitudeTimeout.ms = 60;
   try {
-    const started = Date.now();
+    // the held call never answers on its own, so only the budget can end the wait
     const page = await getExperimentsPage(AMP_ENV, NOW);
-    assert.ok(Date.now() - started < 1_000);
+    assert.ok(amplitude.calls() > 0);
     assert.equal(page?.experiments[0].resultsSource, "statsig");
-    while (pending > 0) await new Promise((resolve) => setTimeout(resolve, 10));
   } finally {
     amplitudeBudget.ms = savedBudget;
-    experimentAmplitudeTimeout.ms = savedTimeout;
+    await amplitude.release();
   }
+});
+
+test("a refresh slower than the budget shows the last good Amplitude result", async () => {
+  installFetch();
+  standardRouter();
+  withAmplitudeRoute(AMP_ARMS);
+  const warm = await getExperimentsPage(AMP_ENV, NOW);
+  assert.equal(warm?.experiments[0].resultsSource, "amplitude");
+
+  // 16 minutes on the cache is stale; the refresh hangs past the budget
+  const amplitude = holdAmplitude();
+  const savedBudget = amplitudeBudget.ms;
+  amplitudeBudget.ms = 20;
+  try {
+    const page = await getExperimentsPage(AMP_ENV, NOW + 16 * 60_000);
+    assert.ok(amplitude.calls() > 0);
+    assert.equal(page?.experiments[0].resultsSource, "amplitude");
+    assert.equal(page?.experiments[0].controlRate, 2.6);
+  } finally {
+    amplitudeBudget.ms = savedBudget;
+    await amplitude.release();
+  }
+});
+
+test("an arm with no Amplitude visitors keeps Statsig's results", async () => {
+  installFetch();
+  standardRouter();
+  withAmplitudeRoute({ "0": AMP_ARMS["0"], "1": { visitors: 0, signups: 0, daily: [] } });
+  const page = await getExperimentsPage(AMP_ENV, NOW);
+  assert.equal(page?.experiments[0].resultsSource, "statsig");
 });
 
 test("an experiment Amplitude has no visitors for keeps Statsig's results", async () => {
